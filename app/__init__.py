@@ -9,7 +9,7 @@ from flask import Flask
 
 from config import config_by_name
 
-from .extensions import bcrypt, cors, db, jwt, ma
+from .extensions import bcrypt, cors, db, jwt, ma, migrate
 
 # Import extensions
 # Import config
@@ -37,6 +37,7 @@ def create_app(config_name):
 def register_extensions(app):
     # Registers flask extensions
     db.init_app(app)
+    migrate.init_app(app, db)
     ma.init_app(app)
     jwt.init_app(app)
     bcrypt.init_app(app)

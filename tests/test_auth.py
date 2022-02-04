@@ -1,15 +1,25 @@
 import json
-import os
 
 
-def test_login(client):
-    """Start with a blank database."""
-    email = os.getenv("EMAIL")
-    password = os.getenv("PASSWORD")
+def test_register_and_login(client):
+    """Test Auth API registration and login"""
+    # Test registration
+    data = dict(
+        email="test@user.com",
+        username="test.User",
+        name="Test User",
+        password="test1234",
+    )
 
-    rv = client.post(
+    r = client.post(
+        "/auth/register", data=json.dumps(data), content_type="application/json"
+    )
+
+    assert 201 == r.status_code
+
+    r = client.post(
         "/auth/login",
-        data=json.dumps(dict(email=email, password=password)),
+        data=json.dumps(dict(email=data["email"], password=data["password"])),
         content_type="application/json",
     )
-    assert b"Successfully logged in." in rv.data
+    assert b"Successfully logged in." in r.data
