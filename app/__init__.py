@@ -5,14 +5,11 @@ This module:
 - Contains create_app()
 - Registers extensions
 """
-from config import config_by_name
 from flask import Flask
 
-from .extensions import bcrypt
-from .extensions import cors
-from .extensions import db
-from .extensions import jwt
-from .extensions import ma
+from config import config_by_name
+
+from .extensions import bcrypt, cors, db, jwt, ma
 
 # Import extensions
 # Import config
@@ -33,7 +30,6 @@ def create_app(config_name):
     from .api import api_bp
 
     app.register_blueprint(api_bp, url_prefix="/api")
-    
 
     return app
 

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from app import bcrypt
 from app import db
 
 # Alias common DB names
@@ -9,7 +8,7 @@ Model = db.Model
 relationship = db.relationship
 
 
-class DBCamera(Model):
+class Camera(Model):
     __tablename__ = "camera"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)

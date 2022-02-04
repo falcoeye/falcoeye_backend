@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from app import bcrypt
-from app import db
+from app import bcrypt, db
 
 # Alias common DB names
 Column = db.Column
@@ -9,7 +8,7 @@ Model = db.Model
 relationship = db.relationship
 
 
-class DBPermission:
+class Permission:
     FOLLOW = 1
     COMMENT = 2
     WRITE = 4
@@ -17,7 +16,7 @@ class DBPermission:
     ADMIN = 16
 
 
-class DBRole(Model):
+class Role(Model):
     __tablename__ = "roles"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)
@@ -25,7 +24,7 @@ class DBRole(Model):
     permissions = Column(db.Integer)
     description = Column(db.String(50))
 
-    users = db.relationship("DBUser", backref="role", lazy="dynamic")
+    users = db.relationship("User", backref="role", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(Role, self).__init__(**kwargs)
@@ -75,7 +74,7 @@ class DBRole(Model):
         self.permissions = 0
 
 
-class DBUser(Model):
+class User(Model):
     """User model for storing user related data"""
 
     __tablename__ = "user"
@@ -89,7 +88,7 @@ class DBUser(Model):
     role_id = Column(db.Integer, db.ForeignKey("roles.id"))
 
     def __init__(self, **kwargs):
-        super(DBUser, self).__init__(**kwargs)
+        super(User, self).__init__(**kwargs)
 
     @property
     def password(self):

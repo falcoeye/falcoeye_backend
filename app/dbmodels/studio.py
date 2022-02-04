@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from app import bcrypt
-from app import db
+from app import bcrypt, db
 
 # Alias common DB names
 Column = db.Column
@@ -9,7 +8,7 @@ Model = db.Model
 relationship = db.relationship
 
 
-class DBVideo(Model):
+class Video(Model):
     __tablename__ = "video"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)
@@ -22,7 +21,7 @@ class DBVideo(Model):
     duration = Column(db.Integer)
 
 
-class DBImage(Model):
+class Image(Model):
     __tablename__ = "image"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)

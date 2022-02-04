@@ -1,11 +1,11 @@
-from app.utils import validation_error
 from flask import request
 from flask_restx import Resource
 
+from app.utils import validation_error
+
 from .dto import AuthDto
 from .service import AuthService
-from .utils import LoginSchema
-from .utils import RegisterSchema
+from .utils import LoginSchema, RegisterSchema
 
 # Auth modules
 

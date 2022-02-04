@@ -1,8 +1,6 @@
 # Validations with Marshmallow
-from marshmallow import fields
-from marshmallow import Schema
-from marshmallow.validate import Length
-from marshmallow.validate import Regexp
+from marshmallow import Schema, fields
+from marshmallow.validate import Length, Regexp
 
 
 class LoginSchema(Schema):

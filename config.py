@@ -11,12 +11,15 @@ class Config:
 
     # JWT Extended config
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", os.urandom(24))
-    
+
     JWT_HEADER_NAME = os.environ.get("JWT_HEADER_NAME", "X-API-KEY")
     JWT_HEADER_TYPE = os.environ.get("JWT_HEADER_TYPE")
 
-    ## Set the token to expire every week
+    # Set the token to expire every week
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
+
+    # flask restx settings
+    SWAGGER_UI_DOC_EXPANSION = "list"
 
 
 class DevelopmentConfig(Config):

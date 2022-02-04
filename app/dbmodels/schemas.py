@@ -1,7 +1,7 @@
 # Model Schemas
 from app import ma
 
-from .user import DBUser as User
+from .user import User
 
 
 class UserSchema(ma.Schema):
