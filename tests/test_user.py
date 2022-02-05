@@ -1,12 +1,12 @@
 
-from .test_flasker import client 
+from .conftest import client 
 import os
 import json
 
 def test_user_details(client):
     """Start with a blank database."""
-    email = os.getenv("EMAIL")
-    password = os.getenv("PASSWORD")
+    email = "test@user.com"
+    password = "test1234"
 
 
     rv = client.post('/auth/login', 
@@ -24,7 +24,7 @@ def test_user_details(client):
     rv = client.get("/api/user/profile",headers=headers)
     data = json.loads(rv.data.decode("utf-8"))
     print(data)
-    assert data["user"]["username"] == "jalalirs"
-    assert data["user"]["email"] == "jalalirsh@gmail.com"
+    assert data["user"]["username"] == "test.User"
+    assert data["user"]["email"] == "test@user.com"
 
 

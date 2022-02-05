@@ -1,9 +1,9 @@
 # Model Schemas
 from app import ma
 
-from .user import DBUser as User
-from .studio import DBVideo as Video
-from .studio import DBImage as Image
+from .user import User as User
+from .studio import Video as Video
+from .studio import Image as Image
 
 class UserSchema(ma.Schema):
     class Meta:

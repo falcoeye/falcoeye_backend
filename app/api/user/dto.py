@@ -1,14 +1,9 @@
-from flask_restx import fields
-from flask_restx import Namespace
+from flask_restx import Namespace, fields
 
 
 class UserDto:
-    
 
-    api = Namespace(
-        "user",
-        description="User related operations."
-    )
+    api = Namespace("user", description="User related operations.")
     user = api.model(
         "User object",
         {
@@ -16,8 +11,8 @@ class UserDto:
             "name": fields.String,
             "username": fields.String,
             "joined_date": fields.DateTime,
-            "role_id": fields.Integer
-        }
+            "role_id": fields.Integer,
+        },
     )
 
     data_resp = api.model(
@@ -25,6 +20,6 @@ class UserDto:
         {
             "status": fields.Boolean,
             "message": fields.String,
-            "user": fields.Nested(user)
-        }
+            "user": fields.Nested(user),
+        },
     )

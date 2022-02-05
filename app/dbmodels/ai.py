@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from app import bcrypt
 from app import db
 
 # Alias common DB names
@@ -9,7 +8,7 @@ Model = db.Model
 relationship = db.relationship
 
 
-class DBDataset(Model):
+class Dataset(Model):
     __tablename__ = "dataset"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)
@@ -20,7 +19,7 @@ class DBDataset(Model):
     size_type = Column(db.String)  # Unified or Mixed
 
 
-class DBAIModel(Model):
+class AIModel(Model):
     __tablename__ = "ai_model"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)
@@ -33,7 +32,7 @@ class DBAIModel(Model):
     speed = Column(db.Integer)  # benchmarking speed
 
 
-class DBWorkflow(Model):
+class Workflow(Model):
     __tablename__ = "workflow"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)
@@ -48,7 +47,7 @@ class DBWorkflow(Model):
     thumpnail_url = Column(db.String)
 
 
-class DBAnalysis(Model):
+class Analysis(Model):
     __tablename__ = "analysis"
     id = Column(db.Integer, primary_key=True)
     name = Column(db.String(64), unique=True)

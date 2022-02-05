@@ -1,8 +1,8 @@
-from app.dbmodels.user import DBUser as User
-from app.utils import err_resp
-from app.utils import internal_err_resp
-from app.utils import message
 from flask import current_app
+
+from app import db
+from app.dbmodels.user import User as User
+from app.utils import err_resp, internal_err_resp, message
 
 
 class UserService:
@@ -19,6 +19,23 @@ class UserService:
 
             resp = message(True, "User data sent")
             resp["user"] = user_data
+            return resp, 200
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def delete_user(username):
+        """Delete user from DB by username"""
+        if not (user := User.query.filter_by(username=username).first()):
+            return err_resp("User not found!", "user_404", 404)
+
+        try:
+            db.session.delete(user)
+            db.session.commit()
+
+            resp = message(True, "User deleted")
             return resp, 200
 
         except Exception as error:

@@ -1,5 +1,5 @@
-from app.dbmodels.studio import DBVideo as Video
-from app.dbmodels.studio import DBImage as Image
+from app.dbmodels.studio import Video as Video
+from app.dbmodels.studio import Image as Image
 from app.dbmodels.schemas import ImageSchema
 from app import db
 from app.utils import err_resp
@@ -64,7 +64,6 @@ class StudioService:
 		
 		if (img := Image.query.filter_by(user=userid,name=name).first()) is None:
 			return err_resp("Image doesn't exist", "image_not_exist", 403)
-		print(img)
 		try:
 			img_info = image_schema.dump(img)
 			resp = message(True, "Image has been deleted.")
@@ -74,7 +73,6 @@ class StudioService:
 			
 			db.session.flush()
 			db.session.commit()
-			print(resp)
 			return resp, 201
 		except Exception as error:
 			raise

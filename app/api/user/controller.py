@@ -16,7 +16,7 @@ class UserGet(Resource):
             200: ("User data successfully sent", data_resp),
             404: "User not found!",
         },
-        security="apikey"
+        security="apikey",
     )
     @jwt_required()
     def get(self):

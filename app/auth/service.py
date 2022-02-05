@@ -1,13 +1,12 @@
 from datetime import datetime
 
-from app import db
-from app.dbmodels.schemas import UserSchema
-from app.dbmodels.user import DBUser as User
-from app.utils import err_resp
-from app.utils import internal_err_resp
-from app.utils import message
 from flask import current_app
 from flask_jwt_extended import create_access_token
+
+from app import db
+from app.dbmodels.schemas import UserSchema
+from app.dbmodels.user import User as User
+from app.utils import err_resp, internal_err_resp, message
 
 user_schema = UserSchema()
 
