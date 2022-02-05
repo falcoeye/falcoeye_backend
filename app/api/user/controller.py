@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required,get_jwt_identity
 from flask_restx import Resource
 
 from .dto import UserDto
@@ -8,7 +8,7 @@ api = UserDto.api
 data_resp = UserDto.data_resp
 
 
-@api.route("/<string:username>")
+@api.route("/profile")
 class UserGet(Resource):
     @api.doc(
         "Get a specific user",
@@ -19,8 +19,9 @@ class UserGet(Resource):
         security="apikey"
     )
     @jwt_required()
-    def get(self, username):
+    def get(self):
         """Get a specific user's data by their username"""
-        return UserService.get_user_data(username)
+        current_user_id = get_jwt_identity()
+        return UserService.get_user_data(current_user_id)
     
 

@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restx import Api
 
 from .user.controller import api as user_ns
+from .studio.controller import api as studio_ns
 
 authorizations = {
     "apikey": {"type": "apiKey", "in": "header", "name": "X-API-KEY"}
@@ -14,3 +15,4 @@ api = Api(api_bp, title="API", description="Main routes.",authorizations=authori
 
 # API namespaces
 api.add_namespace(user_ns)
+api.add_namespace(studio_ns)
