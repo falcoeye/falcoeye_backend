@@ -1,5 +1,3 @@
-
-
 def load_video_short_data(video_db_obj):
     """Load short video's data
 
@@ -13,6 +11,7 @@ def load_video_short_data(video_db_obj):
     data = video_schema.dump(video_db_obj)
 
     return data
+
 
 def load_image_short_data(image_db_obj):
     """Load short video's data

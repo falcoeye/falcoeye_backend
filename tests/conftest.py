@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import flask_migrate
 import pytest
-from datetime import datetime
-from app import create_app
+
+from app import create_app, db
 from app.dbmodels.user import User
-from app import db
+
 
 @pytest.fixture
 def client():
@@ -19,10 +21,8 @@ def client():
                 joined_date=datetime.utcnow(),
             )
             db.session.add(new_user)
-            db.session.flush()   
+            db.session.flush()
             # Commit changes to DB
             db.session.commit()
 
             yield client
-
-        

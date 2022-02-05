@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask_restx import Api
 
-from .user.controller import api as user_ns
 from .studio.controller import api as studio_ns
+from .user.controller import api as user_ns
 
 authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": "X-API-KEY"}}
 

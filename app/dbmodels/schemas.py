@@ -1,9 +1,10 @@
 # Model Schemas
 from app import ma
 
-from .user import User as User
-from .studio import Video as Video
 from .studio import Image as Image
+from .studio import Video as Video
+from .user import User as User
+
 
 class UserSchema(ma.Schema):
     class Meta:
@@ -14,20 +15,39 @@ class UserSchema(ma.Schema):
 class VideoSchema(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("camera", "name", "user", "note", "tags","duration","workflow","creation_datetime")
-    
+        fields = (
+            "camera",
+            "name",
+            "user",
+            "note",
+            "tags",
+            "duration",
+            "workflow",
+            "creation_datetime",
+        )
+
+
 class VideoSchemaShort(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("name", "duration","creation_datetime")
+        fields = ("name", "duration", "creation_datetime")
 
 
 class ImageSchema(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("camera", "name", "user", "note", "tags","workflow","creation_datetime")
-    
+        fields = (
+            "camera",
+            "name",
+            "user",
+            "note",
+            "tags",
+            "workflow",
+            "creation_datetime",
+        )
+
+
 class ImageSchemaShort(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("name","creation_datetime")
+        fields = ("name", "creation_datetime")
