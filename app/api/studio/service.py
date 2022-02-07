@@ -8,21 +8,19 @@ from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
 from app.utils import err_resp, internal_err_resp, message
 
-image_schema = ImageSchema()
+from .utils import load_image_data, load_video_data
 
 
 class StudioService:
     @staticmethod
-    def get_user_media(userid):
+    def get_user_media(user_id):
         """Get user data by username"""
-        videos = Video.query.filter_by(user=userid)
-        images = Image.query.filter_by(user=userid)
-
-        from .utils import load_image_short_data, load_video_short_data
+        videos = Video.query.filter_by(user=user_id)
+        images = Image.query.filter_by(user=user_id)
 
         try:
-            video_data = [load_video_short_data(v) for v in videos]
-            image_data = [load_image_short_data(i) for i in images]
+            video_data = [load_video_data(v, "short") for v in videos]
+            image_data = [load_image_data(i, "short") for i in images]
             media_data = videos + image_data
 
             resp = message(True, "User data sent")
@@ -34,25 +32,34 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
-    def add_image(userid, name, camera, note, tags, workflow):
-        # Check if the email is taken
-        if Image.query.filter_by(user=userid, name=name).first() is not None:
-            return err_resp("Name is already being used.", "name_taken", 403)
+    def get_image(user_id, media_id):
+        try:
+            image = Image.query.filter_by(user=user_id, id=media_id).first()
+            image_data = load_image_data(image, "short")
+            resp = message(True, "Image successfully retrieved.")
+            resp["image"] = image_data
+            return resp, 200
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def add_image(user_id, camera, note, tags, workflow):
         try:
             new_image = Image(
-                user=userid,
-                name=name,
+                user=user_id,
                 camera=camera,
                 tags=tags,
                 note=note,
                 workflow=workflow,
                 creation_datetime=datetime.utcnow(),
             )
+
             db.session.add(new_image)
             db.session.flush()
             db.session.commit()
 
-            img_info = image_schema.dump(new_image)
+            img_info = load_image_data(new_image, "full")
             resp = message(True, "Image has been added.")
             resp["image"] = img_info
             return resp, 201
@@ -61,13 +68,13 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
-    def delete_image(userid, name):
+    def delete_image(user_id, media_id):
         # Check if the email is taken
 
-        if (img := Image.query.filter_by(user=userid, name=name).first()) is None:
+        if (img := Image.query.filter_by(user=user_id, id=media_id).first()) is None:
             return err_resp("Image doesn't exist", "image_not_exist", 403)
         try:
-            img_info = image_schema.dump(img)
+            img_info = load_image_data(img)
             resp = message(True, "Image has been deleted.")
             resp["image"] = img_info
 
@@ -77,6 +84,5 @@ class StudioService:
             db.session.commit()
             return resp, 201
         except Exception as error:
-            raise
             current_app.logger.error(error)
             return internal_err_resp()

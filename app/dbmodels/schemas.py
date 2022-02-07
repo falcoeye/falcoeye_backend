@@ -16,8 +16,8 @@ class VideoSchema(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
         fields = (
+            "id",
             "camera",
-            "name",
             "user",
             "note",
             "tags",
@@ -30,15 +30,15 @@ class VideoSchema(ma.Schema):
 class VideoSchemaShort(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("name", "duration", "creation_datetime")
+        fields = ("id", "duration", "creation_datetime")
 
 
 class ImageSchema(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
         fields = (
+            "id",
             "camera",
-            "name",
             "user",
             "note",
             "tags",
@@ -50,4 +50,4 @@ class ImageSchema(ma.Schema):
 class ImageSchemaShort(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
-        fields = ("name", "creation_datetime")
+        fields = ("id", "camera", "creation_datetime")

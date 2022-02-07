@@ -7,7 +7,6 @@ class MediaDto:
         "Vidoe object",
         {
             "camera": fields.Integer,
-            "name": fields.String,
             "user": fields.Integer,
             "note": fields.String,
             "tags": fields.String,
@@ -28,7 +27,6 @@ class MediaDto:
         "Image object",
         {
             "camera": fields.Integer,
-            "name": fields.String,
             "user": fields.Integer,
             "note": fields.String,
             "tags": fields.String,
