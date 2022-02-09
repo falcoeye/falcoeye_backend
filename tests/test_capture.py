@@ -5,17 +5,34 @@ from .conftest import client
 from .test_auth import login
 
 
-def test_add_image(client):
+def test_capture_image(client):
 
     token = login(client)
     headers = {"X-API-KEY": token}
+
+    data = {"capture_type": "image", "camera_id": 1}
+    rv = client.post("/api/capture", data=json.dumps(data), headers=headers)
+    data = json.loads(rv.data.decode("utf-8"))
+
+    assert (
+        data["message"] == "Image has been captured."
+        or data["message"] == "Couldn't capture image. No stream found"
+    )
+    if data["message"] == "Couldn't capture image. No stream found":
+        return
+
+    tid = data["temprary_id"]
+    image = data["image"]
+    print(image)
+
     data = {
-        "temprary_id": "testid",
+        "temprary_id": tid,
         "camera": 1,
         "notes": "test_notes",
         "tags": "test_tags",
         "workflow": 1,
     }
+
     rv = client.post("/api/media/image", headers=headers, data=json.dumps(data))
     data = json.loads(rv.data.decode("utf-8"))
     assert data["message"] == "Image has been added."

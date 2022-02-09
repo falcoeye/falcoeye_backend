@@ -50,7 +50,7 @@ class StudioImageGet(Resource):
 
 @api.route("/image")
 class StudioImagePost(Resource):
-    required_fields = [("camera", int)]
+    required_fields = [("temprary_id", str), ("camera", int)]
     optional_fields = [("note", str, None), ("tags", str, None), ("workflow", int, -1)]
 
     @jwt_required()

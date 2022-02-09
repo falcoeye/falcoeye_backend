@@ -44,7 +44,7 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
-    def add_image(user_id, camera, note, tags, workflow):
+    def add_image(temprary_id, user_id, camera, note, tags, workflow):
         try:
             new_image = Image(
                 user=user_id,

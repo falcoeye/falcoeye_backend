@@ -1,6 +1,7 @@
 from flask import Blueprint
 from flask_restx import Api
 
+from .capture.controller import api as capture_ns
 from .studio.controller import api as studio_ns
 from .user.controller import api as user_ns
 
@@ -16,3 +17,4 @@ api = Api(
 # API namespaces
 api.add_namespace(user_ns)
 api.add_namespace(studio_ns)
+api.add_namespace(capture_ns)
