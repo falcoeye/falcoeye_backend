@@ -1,3 +1,6 @@
+import os
+
+
 def load_video_data(video_db_obj, level="full"):
     """Load short video's data
 
@@ -36,3 +39,9 @@ def load_image_data(video_db_obj, level="full"):
 
     data = image_schema.dump(video_db_obj)
     return data
+
+
+def mkdir(path):
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)

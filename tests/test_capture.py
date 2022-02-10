@@ -22,9 +22,6 @@ def test_capture_image(client):
         return
 
     tid = data["temprary_id"]
-    image = data["image"]
-    print(image)
-
     data = {
         "temprary_id": tid,
         "camera": 1,
