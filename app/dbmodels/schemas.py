@@ -51,3 +51,24 @@ class ImageSchemaShort(ma.Schema):
     class Meta:
         # Fields to expose, add more if needed.
         fields = ("name", "creation_datetime")
+
+
+class CameraSchema(ma.Schema):
+    fields = (
+        "id",
+        "name",
+        "utm_x",
+        "utm_y",
+        "owner_id",
+        "resolution_x",
+        "resolution_y",
+        "url",
+        "connection_date",
+        "status",
+        "created_at",
+        "updated_at",
+    )
+
+
+class CameraManufacturerSchema(ma.Schema):
+    fields = ("id", "name", "created_at", "updated_at")
