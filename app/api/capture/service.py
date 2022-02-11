@@ -9,6 +9,8 @@ from app import db
 from app.dbmodels.camera import Camera as Camera
 from app.utils import err_resp, internal_err_resp, message
 
+from .registry import Registry
+from .streamer import Streamer
 from .utils import mkdir
 
 
@@ -26,31 +28,62 @@ class CaptureService:
             # for now
             # camera = Camera()
             # url = camera.url
-            # streamProvider = camera.streamProvider
-            streamProvider = "youtube"
-            url = "https://www.youtube.com/watch?v=tk-qJJbdOh4"
+            # stream_provider = camera.streamProvider
 
-            image = source.capture_image(url, streamProvider)
-            if image is None:
-                resp = message(False, "Couldn't capture image. No stream found")
-                return resp
+            key = Registry.create_key(user_id, camera_id)
+            stream_provider = "youtube"
+            url = "https://www.youtube.com/watch?v=tk-qJJbdOh4"
 
             user_image_data = (
                 f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/images'
             )
-
             mkdir(user_image_data)
+            output_path = f"{user_image_data}/{key}.jpg"
 
-            temprary_id = 1
-            Image.fromarray(image).save(f"{user_image_data}/{temprary_id}.jpg")
+            resp = Streamer.capture_image(
+                key, url, stream_provider, "1080p", output_path
+            )
+            if resp.status_code != 200:
+                # TOKNOW: 2
+                return internal_err_resp()
 
-            resp = message(True, "Image has been captured.")
-            resp["temprary_id"] = temprary_id
-            # order='c' to skip ndarray is not C-contiguous error
-            resp["image"] = base64.b64encode(image.copy(order="c")).decode("utf-8")
+            Registry.register_capture(key)
+
+            resp = message(True, "Capture image request been submitted.")
+            resp["registry_key"] = key
 
             return resp, 200
         except Exception as error:
             raise
             current_app.logger.error(error)
             return internal_err_resp()
+
+    @staticmethod
+    def get_capture_request_status(key):
+        status = Registry.check_status(key)
+        resp = message(True, "Status message")
+        if not status:
+            resp["status"] = "unknown"
+        else:
+            resp["status"] = status
+        return resp, 200
+
+    @staticmethod
+    def capture_video(user_id, camera_id, start, end, length):
+
+        # camera = Camera.query.filter_by(owner=user_id, id=camera_id).first()
+        # for now
+        # camera = Camera()
+        # url = camera.url
+        # streamProvider = camera.streamProvider
+        streamProvider = "angelcam"
+        url = "https://v.angelcam.com/iframe?v=16lb6045r4"
+
+        key = Registry.register_record(user_id, camera_id)
+        if not key:
+            return internal_err_resp()
+
+        resp = message(True, "Recording has started.")
+        resp["registry_key"] = key
+
+        return resp, 200

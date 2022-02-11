@@ -28,7 +28,9 @@ class Capture(Resource):
     def post(self):
         """Initiate a caputre request"""
         data = json.loads(request.data.decode("utf-8"))
+        print(data)
         parsed_data = {}
+
         for field, ftype in Capture.required_fields:
             if field not in data:
                 return internal_err_resp()
@@ -42,5 +44,35 @@ class Capture(Resource):
 
         current_user_id = get_jwt_identity()
         parsed_data["user_id"] = current_user_id
-        print(parsed_data)
+
         return CaptureService.capture(**parsed_data)
+
+
+@api.route("/status")
+class Status(Resource):
+    required_fields = [("key", str)]
+
+    @api.doc(
+        "Get a user media",
+        responses={
+            200: ("User media successfully sent"),
+            404: "User not found!",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def post(self):
+        """Initiate a caputre request"""
+        data = json.loads(request.data.decode("utf-8"))
+        parsed_data = {}
+        for field, ftype in Capture.required_fields:
+            if field not in data:
+                return internal_err_resp()
+            parsed_data[field] = ftype(data[field])
+
+        current_user_id = get_jwt_identity()
+        # checking if allowed
+        if current_user_id != parsed_data["key"].split("_")[0]:
+            return internal_err_resp()
+
+        return CaptureService.get_capture_request_status(**parsed_data)
