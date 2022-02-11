@@ -1,28 +1,42 @@
-from datetime import datetime
-
-import flask_migrate
+"""Global pytest fixtures."""
 import pytest
 
-from app import create_app, db
+from app import create_app
+from app import db as database
 from app.dbmodels.user import User
+
+from .utils import EMAIL, PASSWORD, USERNAME
 
 
 @pytest.fixture
-def client():
+def app():
     app = create_app("testing")
+    return app
+
+
+@pytest.fixture
+def client(app):
     with app.app_context():
         with app.test_client() as client:
-            flask_migrate.upgrade()
-            new_user = User(
-                email="test@user.com",
-                username="test.User",
-                name="Test User",
-                password="test1234",
-                joined_date=datetime.utcnow(),
-            )
-            db.session.add(new_user)
-            db.session.flush()
-            # Commit changes to DB
-            db.session.commit()
-
             yield client
+
+
+@pytest.fixture
+def db(app, client, request):
+    database.drop_all()
+    database.create_all()
+    database.session.commit()
+
+    def fin():
+        database.session.remove()
+
+    request.addfinalizer(fin)
+    return database
+
+
+@pytest.fixture
+def user(db):
+    user = User(email=EMAIL, password=PASSWORD, username=USERNAME)
+    db.session.add(user)
+    db.session.commit()
+    return user
