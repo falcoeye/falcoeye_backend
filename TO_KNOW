@@ -1,0 +1,5 @@
+
+1. What happen when deleting from register? Should it be atomic?
+2. What to return when stream server doesn't correctly handle capture request
+3. Should we really use static methods and static objects
+4. How to communicate securly between different services
