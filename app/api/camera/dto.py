@@ -7,7 +7,6 @@ class CameraDto:
     camera = api.model(
         "Camera Object",
         {
-            "id": fields.String,
             "name": fields.String,
             "utm_x": fields.Float,
             "utm_y": fields.Float,
@@ -17,7 +16,7 @@ class CameraDto:
             "resolution_y": fields.Integer,
             "url": fields.Url,
             "connection_date": fields.DateTime,
-            "status": fields.Integer,
+            "status": fields.String,
             "created_at": fields.DateTime,
             "updated_at": fields.DateTime,
         },
@@ -32,10 +31,15 @@ class CameraDto:
         },
     )
 
+
+class CameraManufacturerDto:
+
+    api = Namespace(
+        "manufacturer", description="Camera manufacturer related operations."
+    )
     camera_manufacturer = api.model(
         "Camera Manufacturer Object",
         {
-            "id": fields.String,
             "name": fields.String,
         },
     )

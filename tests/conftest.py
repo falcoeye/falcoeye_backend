@@ -3,6 +3,7 @@ import pytest
 
 from app import create_app
 from app import db as database
+from app.dbmodels.camera import Camera, CameraManufacturer
 from app.dbmodels.user import User
 
 from .utils import EMAIL, PASSWORD, USERNAME
@@ -40,3 +41,25 @@ def user(db):
     db.session.add(user)
     db.session.commit()
     return user
+
+
+@pytest.fixture
+def manufacturer(db):
+    manufacturer = CameraManufacturer(name="DummyMaker")
+    db.session.add(manufacturer)
+    db.session.commit()
+    return manufacturer
+
+
+@pytest.fixture
+def camera(db, user, manufacturer):
+    camera = Camera(
+        name="DummyCamera",
+        status="RUNNING",
+        manufacturer_id=manufacturer.id,
+        owner_id=user.id,
+        url="https://test.test.com",
+    )
+    db.session.add(camera)
+    db.session.commit()
+    return camera

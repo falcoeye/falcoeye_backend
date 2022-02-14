@@ -1,10 +1,6 @@
 # Model Schemas
 from app import ma
 
-from .studio import Image as Image
-from .studio import Video as Video
-from .user import User as User
-
 
 class UserSchema(ma.Schema):
     class Meta:
@@ -54,21 +50,24 @@ class ImageSchemaShort(ma.Schema):
 
 
 class CameraSchema(ma.Schema):
-    fields = (
-        "id",
-        "name",
-        "utm_x",
-        "utm_y",
-        "owner_id",
-        "resolution_x",
-        "resolution_y",
-        "url",
-        "connection_date",
-        "status",
-        "created_at",
-        "updated_at",
-    )
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "utm_x",
+            "utm_y",
+            "manufacturer_id",
+            "owner_id",
+            "resolution_x",
+            "resolution_y",
+            "url",
+            "connection_date",
+            "status",
+            "created_at",
+            "updated_at",
+        )
 
 
 class CameraManufacturerSchema(ma.Schema):
-    fields = ("id", "name", "created_at", "updated_at")
+    class Meta:
+        fields = ("id", "name", "created_at", "updated_at")

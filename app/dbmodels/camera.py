@@ -9,7 +9,7 @@ Column = db.Column
 relationship = db.relationship
 
 
-class CameraStatus(enum.Enum):
+class CameraStatus(str, enum.Enum):
     RUNNING = 1
     DISCONNECTED = 2
     UNDER_MAINTENANCE = 3
@@ -22,6 +22,9 @@ class CameraManufacturer(Base):
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
     camera = relationship("Camera", back_populates="manufacturer", lazy="dynamic")
+
+    def __init__(self, **kwargs):
+        super(CameraManufacturer, self).__init__(**kwargs)
 
     def __repr__(self):
         return f"<CameraManufacturer {self.name}>"
