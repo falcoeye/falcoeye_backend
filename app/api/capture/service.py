@@ -20,6 +20,10 @@ class CaptureService:
         """Capture media"""
         if capture_type == "image":
             return CaptureService.capture_image(user_id, camera_id)
+        elif capture_type == "video":
+            return CaptureService.record_video(
+                user_id, camera_id, start=start, end=end, length=length
+            )
 
     @staticmethod
     def capture_image(user_id, camera_id):
@@ -73,27 +77,35 @@ class CaptureService:
 
     @staticmethod
     def what_after(registry_key, capture_status):
-        if capture_status == "CAPTURED":
+        if capture_status == "CAPTURED" or capture_status == "RECORDED":
             Registry.register_ready_to_submit(registry_key)
         elif capture_status == "FAILEDTOCAPTURE":
             pass
 
     @staticmethod
-    def capture_video(user_id, camera_id, start, end, length):
+    def record_video(user_id, camera_id, start, end, length):
 
         # camera = Camera.query.filter_by(owner=user_id, id=camera_id).first()
         # for now
         # camera = Camera()
         # url = camera.url
         # streamProvider = camera.streamProvider
-        streamProvider = "angelcam"
-        url = "https://v.angelcam.com/iframe?v=16lb6045r4"
+        registry_key = Registry.create_key(user_id, camera_id)
+        stream_provider = "youtube"
+        url = "https://www.youtube.com/watch?v=tk-qJJbdOh4"
 
-        registry_key = Registry.register_record(user_id, camera_id)
-        if not registry_key:
+        user_video_data = f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/videos'
+        mkdir(user_video_data)
+        output_path = f"{user_video_data}/{registry_key}.mp4"
+        resp = Streamer.record_video(
+            registry_key, url, stream_provider, "1080p", start, end, length, output_path
+        )
+        if resp.status_code != 200:
+            # TOKNOW: 2
             return internal_err_resp()
+        Registry.register_recording(registry_key)
 
-        resp = message(True, "Recording has started.")
+        resp = message(True, "Recording video request been submitted.")
         resp["registry_key"] = registry_key
 
         return resp, 200

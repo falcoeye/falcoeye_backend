@@ -36,7 +36,6 @@ def test_capture_image():
 
     token = login()
     headers = {"X-API-KEY": token}
-    print(token)
     data = {"capture_type": "image", "camera_id": 1}
     rv = requests.post(f"{link}/api/capture", data=json.dumps(data), headers=headers)
 
@@ -59,7 +58,45 @@ def test_capture_image():
     data = json.loads(rv.content.decode("utf-8"))
     status = data["capture_status"]
     elapsed = 0
-    while status != 6:
+    while status != 7:
+        time.sleep(3)
+        if elapsed > 60:
+            break
+        rv = requests.get(
+            f"{link}/api/capture/status", data=json.dumps(regdata), headers=headers
+        )
+        data = json.loads(rv.content.decode("utf-8"))
+        status = data["capture_status"]
+        elapsed += 3
+
+
+def test_record_video():
+
+    token = login()
+    headers = {"X-API-KEY": token}
+    data = {"capture_type": "video", "camera_id": 1, "length": 10}
+    rv = requests.post(f"{link}/api/capture", data=json.dumps(data), headers=headers)
+
+    data = json.loads(rv.content.decode("utf-8"))
+
+    assert (
+        data["message"] == "Recording video request been submitted."
+        or data["message"] == "Couldn't record video. No stream found"
+    )
+    if data["message"] == "Couldn't record video. No stream found":
+        return
+    rg_key = data["registry_key"]
+    regdata = {"registry_key": rg_key}
+
+    time.sleep(3)
+
+    rv = requests.get(
+        f"{link}/api/capture/status", data=json.dumps(regdata), headers=headers
+    )
+    data = json.loads(rv.content.decode("utf-8"))
+    status = data["capture_status"]
+    elapsed = 0
+    while status != 7:
         time.sleep(3)
         if elapsed > 60:
             break
@@ -72,4 +109,5 @@ def test_capture_image():
         elapsed += 3
 
 
-test_capture_image()
+# test_capture_image()
+test_record_video()

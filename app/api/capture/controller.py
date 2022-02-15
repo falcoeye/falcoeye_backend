@@ -14,7 +14,7 @@ api = Namespace("capture", description="Capture related operations.")
 @api.route("")
 class Capture(Resource):
     required_fields = [("capture_type", str), ("camera_id", int)]
-    optional_fields = [("start", int, None), ("end", int, None), ("length", int, -1)]
+    optional_fields = [("start", int, -1), ("end", int, -1), ("length", int, -1)]
 
     @api.doc(
         "Get a user media",

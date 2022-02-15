@@ -25,6 +25,5 @@ def test_user_details(client):
     headers = {"X-API-KEY": token}
     rv = client.get("/api/user/profile", headers=headers)
     data = json.loads(rv.data.decode("utf-8"))
-    print(data)
     assert data["user"]["username"] == "test.User"
     assert data["user"]["email"] == "test@user.com"

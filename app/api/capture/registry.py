@@ -11,14 +11,16 @@ RS = lambda: "".join(
 
 
 class RegistryStatus(Enum):
-    RECORDING = 0
-    STOPPED = 1
-    CAPTURING = 2
-    CAPTURED = 3
-    PROCESSING = 4
-    DELETING = 5
-    READYTOSUBMIT = 6
-    SUBMITTED = 7
+    RECORDING = 1
+    RECORDED = 2
+    CAPTURING = 3
+    CAPTURED = 4
+    PROCESSING = 5
+    DELETING = 6
+    READYTOSUBMIT = 7
+    SUBMITTED = 8
+    FAILEDTOCAPTURE = 9
+    FAILEDTORECORD = 10
 
 
 class Registry:
@@ -49,6 +51,13 @@ class Registry:
     def register_captured(key):
         if key in Registry.Registry:
             Registry.Registry[key] = RegistryStatus.CAPTURED
+        else:
+            return None
+
+    @staticmethod
+    def register_recorded(key):
+        if key in Registry.Registry:
+            Registry.Registry[key] = RegistryStatus.RECORDED
         else:
             return None
 
