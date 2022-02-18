@@ -1,38 +1,27 @@
-def load_video_data(video_db_obj, level="full"):
+def load_video_data(video_db_obj, many=False):
     """Load short video's data
 
     Parameters:
     - Video db object
-    - level: short | full
+    - many:
     """
-    if level == "short":
-        from app.dbmodels.schemas import VideoSchemaShort
+    from app.dbmodels.schemas import VideoSchema
 
-        video_schema = VideoSchemaShort()
-    elif level == "full":
-        from app.dbmodels.schemas import VideoSchema
-
-        video_schema = VideoSchema()
-
+    video_schema = VideoSchema(many=many)
     data = video_schema.dump(video_db_obj)
     return data
 
 
-def load_image_data(video_db_obj, level="full"):
+def load_image_data(video_db_obj, many=False):
     """Load short video's data
 
     Parameters:
     - Video db object
-    - level: short | full
+    - many:
     """
-    if level == "short":
-        from app.dbmodels.schemas import ImageSchemaShort
 
-        image_schema = ImageSchemaShort()
-    elif level == "full":
-        from app.dbmodels.schemas import ImageSchema
+    from app.dbmodels.schemas import ImageSchema
 
-        image_schema = ImageSchema()
-
+    image_schema = ImageSchema(many=many)
     data = image_schema.dump(video_db_obj)
     return data

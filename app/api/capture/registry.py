@@ -75,6 +75,18 @@ class Registry:
             return None
 
     @staticmethod
+    def register_failed_to_capture(key):
+        for k in RegistryStatus:
+            if key == k.name:
+                Registry.Registry[key] = RegistryStatus.FAILEDTOCAPTURE
+
+    @staticmethod
+    def register_failed_to_record(key):
+        for k in RegistryStatus:
+            if key == k.name:
+                Registry.Registry[key] = RegistryStatus.FAILEDTORECORD
+
+    @staticmethod
     def register_stop(key):
         if (
             key in Registry.Registry

@@ -13,80 +13,39 @@ api = Namespace("capture", description="Capture related operations.")
 
 @api.route("")
 class Capture(Resource):
-    required_fields = [("capture_type", str), ("camera_id", int)]
-    optional_fields = [("start", int, -1), ("end", int, -1), ("length", int, -1)]
-
     @api.doc(
-        "Get a user media",
-        responses={
-            200: ("User media successfully sent"),
-            404: "User not found!",
-        },
+        "Capture media",
+        # TODO: Check the other errors
+        responses={200: ("Capture request succeeded")},
         security="apikey",
     )
     @jwt_required()
     def post(self):
         """Initiate a caputre request"""
-        data = json.loads(request.data.decode("utf-8"))
-        parsed_data = {}
-
-        for field, ftype in Capture.required_fields:
-            if field not in data:
-                return internal_err_resp()
-            parsed_data[field] = ftype(data[field])
-
-        for field, ftype, fdefault in Capture.optional_fields:
-            if field not in data:
-                parsed_data[field] = fdefault
-            else:
-                parsed_data[field] = ftype(data[field])
-
-        current_user_id = get_jwt_identity()
-        parsed_data["user_id"] = current_user_id
-
-        return CaptureService.capture(**parsed_data)
+        data = request.get_json()
+        user_id = get_jwt_identity()
+        return CaptureService.capture(user_id, data)
 
 
-@api.route("/status")
+@api.route("/status/<registry_key>")
+@api.param("registry_key", "Registry key received from capture request")
 class Status(Resource):
-    required_fields = [("registry_key", str)]
-
     @api.doc(
         "Get a user media",
         responses={
-            200: ("User media successfully sent"),
-            404: "User not found!",
+            200: ("Capture status sent"),
+            403: ("Access to this capture status is forbidden"),
         },
         security="apikey",
     )
     @jwt_required()
-    def get(self):
+    def get(self, registry_key):
         """Initiate a caputre status request"""
-        data = json.loads(request.data.decode("utf-8"))
-        parsed_data = {}
-        for field, ftype in Status.required_fields:
-            if field not in data:
-                return internal_err_resp()
-            parsed_data[field] = ftype(data[field])
-
         current_user_id = get_jwt_identity()
-        capture_user = int(parsed_data["registry_key"].split("_")[0])
-        # checking if allowed
-        if current_user_id != capture_user:
-            return internal_err_resp()
+        return CaptureService.get_capture_request_status(current_user_id, registry_key)
 
-        return CaptureService.get_capture_request_status(**parsed_data)
-
-    def post(self):
-        required_fields = Status.required_fields + [("capture_status", str)]
-        data = json.loads(request.data.decode("utf-8"))
-        parsed_data = {}
-        for field, ftype in required_fields:
-            if field not in data:
-                return internal_err_resp()
-            parsed_data[field] = ftype(data[field])
-        CaptureService.set_capture_request_status(**parsed_data)
-        # checking if allowed (only from other services)
-        CaptureService.what_after(**parsed_data)
-
-        return message(True, "Change status has been handled"), 200
+    @jwt_required()
+    def post(self, registry_key):
+        server_id = get_jwt_identity()
+        data = request.get_json()
+        return CaptureService.set_capture_request_status(server_id, registry_key, data)

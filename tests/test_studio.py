@@ -3,60 +3,34 @@ import os
 
 from .conftest import client
 from .test_auth import login
+from .utils import login_user
 
 
-def test_add_image(client):
+def test_add_image(client, user, harbourcamera):
+    resp = login_user(client)
+    assert "access_token" in resp.json
 
-    token = login(client)
-    headers = {"X-API-KEY": token}
+    access_token = resp.json.get("access_token")
+    headers = {"X-API-KEY": access_token}
     data = {
-        "temprary_id": "testid",
-        "camera": 1,
-        "notes": "test_notes",
+        "camera_id": str(harbourcamera.id),
+        "note": "test_notes",
         "tags": "test_tags",
-        "workflow": 1,
     }
-    rv = client.post("/api/media/image", headers=headers, data=json.dumps(data))
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Image has been added."
-    media_id = data["image"]["id"]
 
-    rv = client.get(f"/api/media/image/{media_id}", headers=headers)
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Image successfully retrieved."
-    media_id = data["image"]["id"]
-
-    rv = client.delete(
-        "/api/media/image", headers=headers, data=json.dumps({"image_id": media_id})
+    resp = client.post(
+        "/api/media/image",
+        headers=headers,
+        data=json.dumps(data),
+        content_type="application/json",
     )
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Image has been deleted."
 
+    assert resp.status_code == 201
+    assert resp.json.get("message") == "Image has been added"
 
-def test_add_video(client):
+    resp = client.get("/api/media/", headers=headers)
+    assert resp.json.get("media")[0].get("camera_id") == str(harbourcamera.id)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "User data sent"
 
-    token = login(client)
-    headers = {"X-API-KEY": token}
-    data = {
-        "temprary_id": "testid",
-        "camera": 1,
-        "notes": "test_notes",
-        "tags": "test_tags",
-        "duration": 10,
-        "workflow": 1,
-    }
-    rv = client.post("/api/media/video", headers=headers, data=json.dumps(data))
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Video has been added."
-    media_id = data["video"]["id"]
-
-    rv = client.get(f"/api/media/video/{media_id}", headers=headers)
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Video successfully retrieved."
-    media_id = data["video"]["id"]
-
-    rv = client.delete(
-        "/api/media/video", headers=headers, data=json.dumps({"video_id": media_id})
-    )
-    data = json.loads(rv.data.decode("utf-8"))
-    assert data["message"] == "Video has been deleted."
+    # print(resp.json.get("image")[0])

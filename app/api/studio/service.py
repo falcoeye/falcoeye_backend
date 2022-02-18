@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import current_app
 
 from app import db
+from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
@@ -15,12 +16,14 @@ class StudioService:
     @staticmethod
     def get_user_media(user_id):
         """Get user data by username"""
-        videos = Video.query.filter_by(user=user_id)
-        images = Image.query.filter_by(user=user_id)
+        videos = Video.query.filter_by(user=user_id).all()
+        images = Image.query.filter_by(user=user_id).all()
+        if not videos and not images:
+            return err_resp("No media found!", "media_204", 204)
 
         try:
-            video_data = [load_video_data(v, "short") for v in videos]
-            image_data = [load_image_data(i, "short") for i in images]
+            video_data = load_video_data(videos, many=True)
+            image_data = load_image_data(images, many=True)
             media_data = videos + image_data
 
             resp = message(True, "User data sent")
@@ -28,15 +31,18 @@ class StudioService:
             return resp, 200
 
         except Exception as error:
+            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
     @staticmethod
     def get_image(user_id, media_id):
+
+        if not (image := Image.query.filter_by(user=user_id, id=media_id).first()):
+            return err_resp("Image not found!", "image_404", 404)
         try:
-            image = Image.query.filter_by(user=user_id, id=media_id).first()
-            image_data = load_image_data(image, "short")
-            resp = message(True, "Image successfully retrieved.")
+            image_data = load_image_data(image)
+            resp = message(True, "Image data sent")
             resp["image"] = image_data
             return resp, 200
         except Exception as error:
@@ -44,55 +50,59 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
-    def add_image(temprary_id, user_id, camera, note, tags, workflow):
+    def create_image(user_id, data):
+        camera_id = data["camera_id"]
+        note = data.get("note", "")
+        tags = data.get("tags", "")
+        workflow = data.get("workflow", None)
+        if not (camera := Camera.query.filter_by(id=camera_id).first()):
+            return err_resp("Camera is not registered", "invalid_manufacturer", 403)
+
         try:
             new_image = Image(
                 user=user_id,
-                camera=camera,
+                camera_id=camera.id,
                 tags=tags,
                 note=note,
                 workflow=workflow,
-                creation_datetime=datetime.utcnow(),
             )
-
             db.session.add(new_image)
             db.session.flush()
             db.session.commit()
 
-            img_info = load_image_data(new_image, "full")
-            resp = message(True, "Image has been added.")
+            img_info = load_image_data(new_image)
+            resp = message(True, "Image has been added")
             resp["image"] = img_info
             return resp, 201
         except Exception as error:
+            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
     @staticmethod
     def delete_image(user_id, media_id):
-        # Check if the email is taken
 
         if (img := Image.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Image doesn't exist", "image_not_exist", 403)
+            return err_resp("Image not found", "image_404", 404)
         try:
-            img_info = load_image_data(img)
-            resp = message(True, "Image has been deleted.")
-            resp["image"] = img_info
-
             db.session.delete(img)
-
             db.session.flush()
             db.session.commit()
-            return resp, 201
+
+            resp = message(True, "Image deleted")
+
+            return resp, 200
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()
 
     @staticmethod
     def get_video(user_id, media_id):
+        if not (video := Video.query.filter_by(user=user_id, id=media_id).first()):
+            return err_resp("Image not found!", "image_404", 404)
         try:
-            video = Video.query.filter_by(user=user_id, id=media_id).first()
-            video_data = load_video_data(video, "short")
-            resp = message(True, "Video successfully retrieved.")
+            video_data = load_video_data(video)
+            resp = message(True, "Video data sent")
             resp["video"] = video_data
             return resp, 200
         except Exception as error:
@@ -100,25 +110,24 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
-    def add_video(temprary_id, user_id, camera, note, tags, duration, workflow):
-        try:
-            video = Video(
-                user=user_id,
-                camera=camera,
-                tags=tags,
-                note=note,
-                workflow=workflow,
-                creation_datetime=datetime.utcnow(),
-                duration=duration,
-            )
+    def create_video(user_id, data):
+        camera = data["camera"]
+        note = data.get("note", "")
+        tags = data.get("tags", "")
+        workflow = data.get("workflow", None)
+        duration = data["duration"]
 
-            db.session.add(video)
+        try:
+            new_video = Video(
+                user=user_id, camera=camera, tags=tags, note=note, workflow=workflow
+            )
+            db.session.add(new_video)
             db.session.flush()
             db.session.commit()
 
-            vid_infor = load_image_data(video, "full")
-            resp = message(True, "Video has been added.")
-            resp["video"] = vid_infor
+            video_info = load_video_data(new_video)
+            resp = message(True, "Video added")
+            resp["video"] = video_info
             return resp, 201
         except Exception as error:
             current_app.logger.error(error)
@@ -126,20 +135,16 @@ class StudioService:
 
     @staticmethod
     def delete_video(user_id, media_id):
-        # Check if the email is taken
-
-        if (vid := Video.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Video doesn't exist", "video_not_exist", 403)
+        if (video := Video.query.filter_by(user=user_id, id=media_id).first()) is None:
+            return err_resp("Video not found", "video_404", 404)
         try:
-            vid_info = load_video_data(vid)
-            resp = message(True, "Video has been deleted.")
-            resp["video"] = vid_info
-
-            db.session.delete(vid)
-
+            db.session.delete(video)
             db.session.flush()
             db.session.commit()
-            return resp, 201
+
+            resp = message(True, "Video deleted")
+
+            return resp, 200
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

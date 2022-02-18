@@ -4,7 +4,8 @@ from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
-from app.utils import internal_err_resp
+from app.dbmodels.schemas import ImageSchema, VideoSchema
+from app.utils import internal_err_resp, validation_error
 
 from .dto import MediaDto
 from .service import StudioService
@@ -13,125 +14,95 @@ api = MediaDto.api
 vid_resp = MediaDto.video_resp
 img_resp = MediaDto.image_resp
 
+image_schema = ImageSchema()
+video_schema = VideoSchema()
+
 
 @api.route("/")
-class StudioGetAllMedia(Resource):
+class StudioList(Resource):
     @api.doc(
         "Get a user media",
         responses={
             200: ("User media successfully sent"),
-            404: "User not found!",
+            404: "No medias found!",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self):
-        """Get a specific user's media by their username"""
+        """Get user's media"""
         current_user_id = get_jwt_identity()
-        return StudioService.get_media(current_user_id)
+        return StudioService.get_user_media(current_user_id)
 
 
-@api.route("/image/<string:media_id>")
+@api.route("/image/<media_id>")
+@api.param("media_id", "Image ID")
 class StudioImageGet(Resource):
     @api.doc(
         "Get a user media",
         responses={
-            200: ("Image successfully retrieved", img_resp),
-            404: "User not found!",
+            200: ("Image successfully sent", img_resp),
+            404: "Image not found!",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, media_id):
-        """Get a specific user's image by their username"""
+        """Get user's image"""
         current_user_id = get_jwt_identity()
         return StudioService.get_image(current_user_id, media_id)
+
+    @jwt_required()
+    def delete(self, media_id):
+        """Delete user's image"""
+        current_user_id = get_jwt_identity()
+        return StudioService.delete_image(current_user_id, media_id)
 
 
 @api.route("/image")
 class StudioImagePost(Resource):
-    required_fields = [("temprary_id", str), ("camera", int)]
-    optional_fields = [("note", str, None), ("tags", str, None), ("workflow", int, -1)]
-
+    @api.expect(MediaDto.image, validate=False)
     @jwt_required()
     def post(self):
         """Add a user's image"""
-        data = json.loads(request.data.decode("utf-8"))
-        parsed_data = {}
-        for field, ftype in StudioImagePost.required_fields:
-            if field not in data:
-                return internal_err_resp()
-            parsed_data[field] = ftype(data[field])
-
-        for field, ftype, fdefault in StudioImagePost.optional_fields:
-            if field not in data:
-                parsed_data[field] = fdefault
-            else:
-                parsed_data[field] = ftype(data[field])
-
-        current_user_id = get_jwt_identity()
-        parsed_data["user_id"] = current_user_id
-        return StudioService.add_image(**parsed_data)
-
-    @jwt_required()
-    def delete(self):
-        """Delete a specific user's image by its image_id"""
-        data = json.loads(request.data.decode("utf-8"))
-        if "image_id" not in data:
-            return internal_err_resp()
-        image_id = data["image_id"]
-        current_user_id = get_jwt_identity()
-        return StudioService.delete_image(current_user_id, image_id)
+        image_data = request.get_json()
+        if errors := image_schema.validate(image_data):
+            return validation_error(False, errors), 400
+        user_id = get_jwt_identity()
+        return StudioService.create_image(user_id=user_id, data=image_data)
 
 
 @api.route("/video/<string:media_id>")
+@api.param("media_id", "Video ID")
 class StudioVideoGet(Resource):
     @api.doc(
-        "Get a user media",
+        "Get user's video",
         responses={
-            200: ("Video successfully retrieved", img_resp),
-            404: "User not found!",
+            200: ("Video successfully sent", img_resp),
+            404: "Video not found!",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, media_id):
-        """Get a specific user's video by their username"""
+        """Get user's video"""
         current_user_id = get_jwt_identity()
         return StudioService.get_video(current_user_id, media_id)
+
+    @jwt_required()
+    def delete(self, media_id):
+        """Delete user's image"""
+        current_user_id = get_jwt_identity()
+        return StudioService.delete_video(current_user_id, media_id)
 
 
 @api.route("/video")
 class StudioVideoPost(Resource):
-    required_fields = [("temprary_id", str), ("camera", int), ("duration", int)]
-    optional_fields = [("note", str, None), ("tags", str, None), ("workflow", int, -1)]
-
     @jwt_required()
     def post(self):
         """Add a user's video"""
-        data = json.loads(request.data.decode("utf-8"))
-        parsed_data = {}
-        for field, ftype in StudioVideoPost.required_fields:
-            if field not in data:
-                return internal_err_resp()
-            parsed_data[field] = ftype(data[field])
-
-        for field, ftype, fdefault in StudioVideoPost.optional_fields:
-            if field not in data:
-                parsed_data[field] = fdefault
-            else:
-                parsed_data[field] = ftype(data[field])
-
-        current_user_id = get_jwt_identity()
-        parsed_data["user_id"] = current_user_id
-        return StudioService.add_video(**parsed_data)
-
-    @jwt_required()
-    def delete(self):
-        """Delete a specific user's video by its video_id"""
-        data = json.loads(request.data.decode("utf-8"))
-        if "video_id" not in data:
-            return internal_err_resp()
-        video_id = data["video_id"]
-        current_user_id = get_jwt_identity()
-        return StudioService.delete_video(current_user_id, video_id)
+        video_data = request.get_json()
+        if errors := video_schema.validate(video_data):
+            return validation_error(False, errors), 400
+        user_id = get_jwt_identity()
+        return StudioService.create_video(user_id=user_id, data=video_data)
