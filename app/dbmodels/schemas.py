@@ -4,8 +4,6 @@ import uuid
 import marshmallow as ma
 from marshmallow_sqlalchemy.convert import ModelConverter
 
-from app import ma
-
 from .base import GUID
 from .studio import Image as Image
 from .studio import Video as Video
@@ -36,8 +34,8 @@ class UserSchema(ma.Schema):
 
 class VideoSchema(ma.Schema):
     # id = GUIDSerializationField(attribute="guid",required=True)
-    camera = GUIDSerializationField(attribute="camera", required=True)
-    user = GUIDSerializationField(attribute="user", required=True)
+    camera_id = GUIDSerializationField(attribute="camera_id", required=True)
+    # user = GUIDSerializationField(attribute="user", required=True)
     notes = ma.fields.Str(required=False)
     tags = ma.fields.Str(required=False)
     duration = ma.fields.Int(required=True)
@@ -46,7 +44,7 @@ class VideoSchema(ma.Schema):
     class Meta:
         model_converter = GUIDConverter
         fields = (
-            "camera",
+            "camera_id",
             "user",
             "note",
             "tags",

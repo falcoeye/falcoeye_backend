@@ -4,6 +4,7 @@ import pytest
 from app import create_app
 from app import db as database
 from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
+from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import User
 
 from .utils import EMAIL, PASSWORD, USERNAME
@@ -87,3 +88,29 @@ def harbourcamera(db, user, manufacturer, streamer):
     db.session.add(harbourcamera)
     db.session.commit()
     return harbourcamera
+
+
+@pytest.fixture
+def image(db, user, harbourcamera):
+
+    image = Image(
+        user=user.id, camera_id=harbourcamera.id, tags="DummyTags", note="DummyNote"
+    )
+    db.session.add(image)
+    db.session.commit()
+    return image
+
+
+@pytest.fixture
+def video(db, user, harbourcamera):
+
+    video = Video(
+        user=user.id,
+        camera_id=harbourcamera.id,
+        tags="DummyTags",
+        note="DummyNote",
+        duration=10,
+    )
+    db.session.add(video)
+    db.session.commit()
+    return video

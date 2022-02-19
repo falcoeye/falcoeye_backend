@@ -19,14 +19,15 @@ class StudioService:
         videos = Video.query.filter_by(user=user_id).all()
         images = Image.query.filter_by(user=user_id).all()
         if not videos and not images:
-            return err_resp("No media found!", "media_204", 204)
+            resp = message(True, "No media found!")
+            return resp, 204
 
         try:
             video_data = load_video_data(videos, many=True)
             image_data = load_image_data(images, many=True)
-            media_data = videos + image_data
+            media_data = video_data + image_data
 
-            resp = message(True, "User data sent")
+            resp = message(True, "User media sent")
             resp["media"] = media_data
             return resp, 200
 
@@ -83,7 +84,7 @@ class StudioService:
     def delete_image(user_id, media_id):
 
         if (img := Image.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Image not found", "image_404", 404)
+            return err_resp("Image not found!", "image_404", 404)
         try:
             db.session.delete(img)
             db.session.flush()
@@ -99,7 +100,7 @@ class StudioService:
     @staticmethod
     def get_video(user_id, media_id):
         if not (video := Video.query.filter_by(user=user_id, id=media_id).first()):
-            return err_resp("Image not found!", "image_404", 404)
+            return err_resp("Video not found!", "video_404", 404)
         try:
             video_data = load_video_data(video)
             resp = message(True, "Video data sent")
@@ -111,7 +112,7 @@ class StudioService:
 
     @staticmethod
     def create_video(user_id, data):
-        camera = data["camera"]
+        camera_id = data["camera_id"]
         note = data.get("note", "")
         tags = data.get("tags", "")
         workflow = data.get("workflow", None)
@@ -119,14 +120,18 @@ class StudioService:
 
         try:
             new_video = Video(
-                user=user_id, camera=camera, tags=tags, note=note, workflow=workflow
+                user=user_id,
+                camera_id=camera_id,
+                tags=tags,
+                note=note,
+                workflow=workflow,
             )
             db.session.add(new_video)
             db.session.flush()
             db.session.commit()
 
             video_info = load_video_data(new_video)
-            resp = message(True, "Video added")
+            resp = message(True, "Video has been added")
             resp["video"] = video_info
             return resp, 201
         except Exception as error:
@@ -136,7 +141,7 @@ class StudioService:
     @staticmethod
     def delete_video(user_id, media_id):
         if (video := Video.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Video not found", "video_404", 404)
+            return err_resp("Video not found!", "video_404", 404)
         try:
             db.session.delete(video)
             db.session.flush()
