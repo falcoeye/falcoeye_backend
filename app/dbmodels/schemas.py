@@ -71,3 +71,19 @@ class CameraSchema(ma.Schema):
 class CameraManufacturerSchema(ma.Schema):
     class Meta:
         fields = ("id", "name", "created_at", "updated_at")
+
+
+class WorkflowSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "name",
+            "creator",
+            "publish_date",
+            "aimodel",
+            "usedfor",
+            "consideration",
+            "assumption",
+            "accepted_media",
+            "results_type",
+            "thumbnail_url",
+        )

@@ -6,6 +6,7 @@ from .camera.controller import api_camera as camera_ns
 from .camera.controller import api_manufacturer as manufacturer_ns
 from .studio.controller import api as studio_ns
 from .user.controller import api as user_ns
+from .workflow.controller import api_workflow as workflow_ns
 
 authorizations = {"apikey": {"type": "apiKey", "in": "header", "name": "X-API-KEY"}}
 
@@ -21,6 +22,7 @@ api.add_namespace(user_ns)
 api.add_namespace(studio_ns)
 api.add_namespace(camera_ns)
 api.add_namespace(manufacturer_ns)
+api.add_namespace(workflow_ns)
 
 
 @api.errorhandler(NoAuthorizationError)

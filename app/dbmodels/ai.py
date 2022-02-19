@@ -44,7 +44,7 @@ class Workflow(Model):
     assumption = Column(db.String)
     accepted_media = Column(db.String)  # stream | videos | images
     results_type = Column(db.String)  # csv    | videos | images
-    thumpnail_url = Column(db.String)
+    thumbnail_url = Column(db.String)
 
 
 class Analysis(Model):
