@@ -2,7 +2,7 @@ import json
 import os
 import time
 
-from .utils import initialize_dev_environment, login_user, register_user
+from . import utils as utils
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 import signal
@@ -14,7 +14,12 @@ from config import DevelopmentConfig
 
 def test_capture_image():
     backend_host = DevelopmentConfig.SERVER_NAME
-    access_token, man_id, str_id, cam_id = initialize_dev_environment(backend_host)
+
+    utils.register_user(backend_host)
+    access_token = utils.login_user(backend_host)
+    man_id = utils.create_manufacturer(backend_host, access_token)
+    str_id = utils.create_streamer(backend_host, access_token)
+    cam_id = utils.create_camera(backend_host, access_token, man_id, str_id)
 
     request_data = {"capture_type": "image", "camera_id": cam_id}
     headers = {
