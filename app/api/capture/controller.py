@@ -44,8 +44,10 @@ class Status(Resource):
         current_user_id = get_jwt_identity()
         return CaptureService.get_capture_request_status(current_user_id, registry_key)
 
-    @jwt_required()
+    # @jwt_required()
     def post(self, registry_key):
-        server_id = get_jwt_identity()
+        # server_id = get_jwt_identity()
+        server_id = "test"
         data = request.get_json()
+        print("DATA")
         return CaptureService.set_capture_request_status(server_id, registry_key, data)

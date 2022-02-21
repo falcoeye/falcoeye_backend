@@ -33,12 +33,11 @@ class AuthLogin(Resource):
             404: "Email does not match any account.",
         },
     )
-    @api.expect(auth_login, validate=True)
+    @api.expect(auth_login, validate=False)
     def post(self):
         """Login using email and password"""
         # Grab the json data
         login_data = request.get_json()
-
         # Validate data
         if errors := login_schema.validate(login_data):
             return validation_error(False, errors), 400
@@ -61,11 +60,12 @@ class AuthRegister(Resource):
             400: "Malformed data or validations failed.",
         },
     )
-    @api.expect(auth_register, validate=True)
+    @api.expect(auth_register, validate=False)
     def post(self):
         """User registration"""
         # Grab the json data
         register_data = request.get_json()
+        print(register_data)
         # Validate data
         if errors := register_schema.validate(register_data):
             return validation_error(False, errors), 400

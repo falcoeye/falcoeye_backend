@@ -30,6 +30,9 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPRARY_DATA_PATH = f"{basedir}/data/"
     # Add logger
+    # HOST ="http://localhost"
+    # PORT = '8000'
+    SERVER_NAME = "127.0.0.1:8000"
 
 
 class TestingConfig(Config):

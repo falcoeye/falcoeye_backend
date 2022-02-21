@@ -75,7 +75,13 @@ class ImageSchema(ma.Schema):
 
 
 class CameraSchema(ma.Schema):
-    id = GUIDSerializationField(attribute="guid", required=True)
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
+    manufacturer_id_id = GUIDSerializationField(
+        attribute="manufacturer_id", required=True
+    )
+    streamer_id = GUIDSerializationField(attribute="streamer_id", required=True)
+    url = ma.fields.Str(required=False)
 
     class Meta:
         fields = (
@@ -84,6 +90,7 @@ class CameraSchema(ma.Schema):
             "utm_x",
             "utm_y",
             "manufacturer_id",
+            "streamer_id",
             "owner_id",
             "resolution_x",
             "resolution_y",
@@ -96,7 +103,16 @@ class CameraSchema(ma.Schema):
 
 
 class CameraManufacturerSchema(ma.Schema):
-    id = GUIDSerializationField(attribute="guid", required=True)
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
+
+    class Meta:
+        fields = ("id", "name", "created_at", "updated_at")
+
+
+class StreamerSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
 
     class Meta:
         fields = ("id", "name", "created_at", "updated_at")

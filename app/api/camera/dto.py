@@ -52,3 +52,23 @@ class CameraManufacturerDto:
             "manufacturer": fields.Nested(camera_manufacturer),
         },
     )
+
+
+class StreamerDto:
+
+    api = Namespace("streamer", description="Camera streamer related operations.")
+    camera_streamer = api.model(
+        "Camera Streamer Object",
+        {
+            "name": fields.String,
+        },
+    )
+
+    streamer_resp = api.model(
+        "Camera Streamer Response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "streamer": fields.Nested(camera_streamer),
+        },
+    )

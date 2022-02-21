@@ -16,7 +16,6 @@ class Streamer:
             "output_path": output_path,
         }
         rv = requests.post(f"{Streamer.Host}/api/capture", data=json.dumps(data))
-
         return rv, 200
 
     @staticmethod

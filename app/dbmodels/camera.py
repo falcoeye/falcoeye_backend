@@ -1,8 +1,10 @@
 import enum
 import uuid
 
+import app
 from app import db
-from app.dbmodels.base import GUID, Base
+
+from .base import GUID, Base
 
 # Alias common DB names
 Column = db.Column
@@ -31,7 +33,7 @@ class CameraManufacturer(Base):
 
 
 class Streamer(Base):
-    """Manufacturer model for storing stream providers data"""
+    """Streamer model for storing stream providers data"""
 
     __tablename__ = "streamer"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))

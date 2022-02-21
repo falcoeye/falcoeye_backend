@@ -7,6 +7,7 @@ from PIL import Image
 
 from app import db
 from app.dbmodels.camera import Camera as Camera
+from app.dbmodels.camera import Streamer as DBStreamer
 from app.dbmodels.user import Role, User
 from app.utils import err_resp, internal_err_resp, message
 
@@ -38,7 +39,6 @@ class CaptureService:
 
     @staticmethod
     def capture_image(user_id, camera_id):
-
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
@@ -47,8 +47,9 @@ class CaptureService:
         try:
             # accessing camera information
             url = camera.url
-            stream_provider = camera.streamProvider
-            resolution = camera.resolution
+            streamer_id = camera.streamer_id
+            streamer = DBStreamer.query.filter_by(id=streamer_id).first()
+            resolution = "1080px"  # camera.resolution
 
             # creating a new registry key
             registry_key = Registry.create_key(user_id, camera_id)
@@ -65,9 +66,9 @@ class CaptureService:
 
             # Create capturing request
             resp, status_code = Streamer.capture_image(
-                registry_key, url, stream_provider, resolution, output_path
+                registry_key, url, streamer.name, resolution, output_path
             )
-            if registry_key == 200:
+            if status_code == 200:
                 resp = message(True, "Capture image request successfully submitted")
                 resp["registry_key"] = registry_key
                 return resp, 200
@@ -77,6 +78,7 @@ class CaptureService:
                 return resp, status_code
 
         except Exception as error:
+            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
@@ -85,7 +87,7 @@ class CaptureService:
 
         capture_user = registry_key.split("_")[0]
         # checking if allowed
-        if user_id != capture_user:
+        if str(user_id) != capture_user:
             return err_resp(
                 "Access to this capture status is forbidden", "capture_status_403", 403
             )
@@ -99,18 +101,17 @@ class CaptureService:
         return resp, 200
 
     @staticmethod
-    def set_capture_request_status(server_id, registry_key, capture_status, data):
+    def set_capture_request_status(server_id, registry_key, data):
+        # role = Role.query.filter_by(
+        #     id=User.query.filter_by(user_id=server_id).first().role_id
+        # ).first()
+        # if not role.has_permission(16):
+        #     return err_resp(
+        #         "Access to this capture status is forbidden", "capture_status_403", 403
+        #     )
 
-        role = Role.query.filter_by(
-            id=User.query.filter_by(user_id=server_id).first().role_id
-        ).first()
-        if not role.has_permission(16):
-            return err_resp(
-                "Access to this capture status is forbidden", "capture_status_403", 403
-            )
-
-        new_status = data.get("status")
-        Registry.set_capture_request_status(registry_key, capture_status)
+        new_status = data.get("capture_status")
+        Registry.set_capture_request_status(registry_key, new_status)
         CaptureService.what_after(registry_key, new_status)
 
         return message(True, "Change status has been handled"), 200

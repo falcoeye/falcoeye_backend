@@ -2,44 +2,58 @@ import json
 import os
 import time
 
-from .conftest import client
-from .test_auth import login
+from .utils import initialize_dev_environment, login_user, register_user
+
+DIR = os.path.dirname(os.path.realpath(__file__))
+import signal
+
+import requests
+
+from config import DevelopmentConfig
 
 
-def test_capture_image(client):
+def test_capture_image():
+    backend_host = DevelopmentConfig.SERVER_NAME
+    access_token, man_id, str_id, cam_id = initialize_dev_environment(backend_host)
 
-    token = login(client)
-    headers = {"X-API-KEY": token}
-
-    data = {"capture_type": "image", "camera_id": 1}
-    rv = client.post("/api/capture", data=json.dumps(data), headers=headers)
-    data = json.loads(rv.data.decode("utf-8"))
-
-    assert (
-        data["message"] == "Capture image request been submitted."
-        or data["message"] == "Couldn't capture image. No stream found"
+    request_data = {"capture_type": "image", "camera_id": cam_id}
+    headers = {
+        "Content-type": "application/json",
+        "Host": backend_host,
+        "X-API-KEY": access_token,
+    }
+    resp = requests.post(
+        f"http://{backend_host}/api/capture",
+        data=json.dumps(request_data),
+        headers=headers,
     )
-    if data["message"] == "Couldn't capture image. No stream found":
-        return
-    rg_key = data["registry_key"]
+
+    response_data = json.loads(resp.content.decode("utf-8"))
+    assert "registry_key" in response_data
+
+    rg_key = response_data["registry_key"]
     regdata = {"registry_key": rg_key}
 
     time.sleep(3)
 
-    rv = client.get("/api/capture/status", data=json.dumps(regdata), headers=headers)
-    data = json.loads(rv.data.decode("utf-8"))
-    status = data["capture_status"]
+    resp = requests.get(
+        f"http://{backend_host}/api/capture/status/{rg_key}", headers=headers
+    )
+
+    response_data = json.loads(resp.content.decode("utf-8"))
+    status = response_data["capture_status"]
     elapsed = 0
-    while status != 6:
+    while status != 7:
         time.sleep(3)
-        if elapsed > 60:
+        if elapsed > 500:
             break
-        rv = client.get(
-            "/api/capture/status", data=json.dumps(regdata), headers=headers
+
+        resp = requests.get(
+            f"http://{backend_host}/api/capture/status/{rg_key}", headers=headers
         )
-        data = json.loads(rv.data.decode("utf-8"))
-        status = data["capture_status"]
+        response_data = json.loads(resp.content.decode("utf-8"))
+        status = response_data["capture_status"]
         print("Status is:", status)
         elapsed += 3
 
-    assert status == 6
+    assert status == 7
