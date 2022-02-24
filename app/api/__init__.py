@@ -1,4 +1,5 @@
-from flask import Blueprint
+from flask import Blueprint, current_app
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_restx import Api
 
 from .camera.controller import api_camera as camera_ns
@@ -24,3 +25,10 @@ api.add_namespace(camera_ns)
 api.add_namespace(streamer_ns)
 api.add_namespace(manufacturer_ns)
 api.add_namespace(capture_ns)
+api.add_namespace(manufacturer_ns)
+
+
+@api.errorhandler(NoAuthorizationError)
+def handle_not_authorized_exception(error):
+    current_app.logger.error(error)
+    return {"message": "not authorized"}, 401

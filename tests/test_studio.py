@@ -6,6 +6,11 @@ from .conftest import client
 from .utils import login_user
 
 
+def test_add_image(client, db, user):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+
+
 def test_add_image(client, user, harbourcamera):
     resp = login_user(client)
     assert "access_token" in resp.json

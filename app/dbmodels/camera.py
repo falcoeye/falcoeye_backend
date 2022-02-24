@@ -3,6 +3,7 @@ import uuid
 
 import app
 from app import db
+from app.dbmodels.base import GUID, Base
 
 from .base import GUID, Base
 

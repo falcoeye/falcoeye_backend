@@ -18,15 +18,8 @@ def app():
 
 
 @pytest.fixture
-def streamer_server():
-    import sys
-
-    sys.path.insert(0, "../../falcoeye_streaming/")
-
-
-@pytest.fixture
 def client(app):
-    with app.app_context() as f:
+    with app.app_context():
         with app.test_client() as client:
             yield client
 
@@ -45,15 +38,6 @@ def db(app, client, request):
 
 
 @pytest.fixture
-def admin_role(db):
-    Role.insert_roles()
-    role = Role.query.filter_by(name="Admin").first()
-    db.session.add(role)
-    db.session.commit()
-    return role
-
-
-@pytest.fixture
 def user(db):
     user = User(email=EMAIL, password=PASSWORD, username=USERNAME)
     db.session.add(user)
@@ -62,22 +46,8 @@ def user(db):
 
 
 @pytest.fixture
-def streamer_account(db, admin_role):
-    streamer = User(
-        email="admin-streamer@falcoeye.io",
-        password="streamer",
-        username="admin-streamer",
-        role_id=admin_role.id,
-    )
-
-    db.session.add(streamer)
-    db.session.commit()
-    return streamer
-
-
-@pytest.fixture
 def manufacturer(db):
-    manufacturer = CameraManufacturer(name="ViewIntoTheBlue")
+    manufacturer = CameraManufacturer(name="DummyMaker")
     db.session.add(manufacturer)
     db.session.commit()
     return manufacturer
