@@ -13,6 +13,7 @@ flask-marshmallow==0.14.0
 Flask-Migrate==3.1.0
 flask-restx==0.5.1
 Flask-SQLAlchemy==2.5.1
+git+https://github.com/falcoeye/falcoeye_core#egg=falcoeye_core
 greenlet==1.1.2
 iniconfig==1.1.1
 itsdangerous==2.0.1
