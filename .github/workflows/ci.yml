@@ -29,7 +29,6 @@ jobs:
       - name: Install dependencies
         shell: bash -l {0}
         run: |
-          git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github".insteadOf https://github
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
