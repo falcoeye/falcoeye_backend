@@ -4,7 +4,7 @@ import uuid
 from .utils import login_user
 
 
-def test_add_camera(client, user, manufacturer):
+def test_add_camera(client, user, manufacturer, streamer):
     resp = login_user(client)
     assert "access_token" in resp.json
 
@@ -14,6 +14,7 @@ def test_add_camera(client, user, manufacturer):
     data = {
         "name": "dummy camera",
         "manufacturer_id": str(manufacturer.id),
+        "streamer_id": str(streamer.id),
         "url": "https://test.test.com",
         "owner_id": user.id,
         "status": "RUNNING",

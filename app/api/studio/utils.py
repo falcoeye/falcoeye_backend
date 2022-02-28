@@ -1,28 +1,27 @@
-def load_video_short_data(video_db_obj):
+def load_video_data(video_db_obj, many=False):
     """Load short video's data
 
     Parameters:
     - Video db object
+    - many:
     """
-    from app.dbmodels.schemas import VideoSchemaShort
+    from app.dbmodels.schemas import VideoSchema
 
-    video_schema = VideoSchemaShort()
-
+    video_schema = VideoSchema(many=many)
     data = video_schema.dump(video_db_obj)
-
     return data
 
 
-def load_image_short_data(image_db_obj):
+def load_image_data(video_db_obj, many=False):
     """Load short video's data
 
     Parameters:
-    - Image db object
+    - Video db object
+    - many:
     """
-    from app.dbmodels.schemas import ImageSchemaShort
 
-    image_schema = ImageSchemaShort()
+    from app.dbmodels.schemas import ImageSchema
 
-    data = image_schema.dump(image_db_obj)
-
+    image_schema = ImageSchema(many=many)
+    data = image_schema.dump(video_db_obj)
     return data

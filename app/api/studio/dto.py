@@ -7,13 +7,11 @@ class MediaDto:
         "Vidoe object",
         {
             "camera": fields.Integer,
-            "name": fields.String,
             "user": fields.Integer,
             "note": fields.String,
             "tags": fields.String,
             "duration": fields.Integer,
             "workflow": fields.String,
-            "creation_datetime": fields.DateTime,
         },
     )
     video_resp = api.model(
@@ -28,12 +26,10 @@ class MediaDto:
         "Image object",
         {
             "camera": fields.Integer,
-            "name": fields.String,
             "user": fields.Integer,
             "note": fields.String,
             "tags": fields.String,
             "workflow": fields.String,
-            "creation_datetime": fields.DateTime,
         },
     )
 

@@ -4,6 +4,8 @@ from flask_restx import Api
 
 from .camera.controller import api_camera as camera_ns
 from .camera.controller import api_manufacturer as manufacturer_ns
+from .camera.controller import api_streamer as streamer_ns
+from .capture.controller import api as capture_ns
 from .studio.controller import api as studio_ns
 from .user.controller import api as user_ns
 from .workflow.controller import api as workflow_ns
@@ -21,6 +23,9 @@ api = Api(
 api.add_namespace(user_ns)
 api.add_namespace(studio_ns)
 api.add_namespace(camera_ns)
+api.add_namespace(streamer_ns)
+api.add_namespace(manufacturer_ns)
+api.add_namespace(capture_ns)
 api.add_namespace(manufacturer_ns)
 api.add_namespace(workflow_ns)
 

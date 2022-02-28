@@ -1,55 +1,88 @@
 # Model Schemas
-from app import ma
+import uuid
+
+import marshmallow as ma
+from marshmallow_sqlalchemy.convert import ModelConverter
+
+from .base import GUID
+from .studio import Image as Image
+from .studio import Video as Video
+from .user import User as User
+
+
+class GUIDConverter(ModelConverter):
+    SQLA_TYPE_MAPPING = dict(
+        list(ModelConverter.SQLA_TYPE_MAPPING.items()) + [(GUID, ma.fields.Str)]
+    )
+
+
+class GUIDSerializationField(ma.fields.Field):
+    def _serialize(self, value, attr, obj):
+        if value is None:
+            return value
+        else:
+            if isinstance(value, uuid.UUID):
+                return str(value)
+            else:
+                return None
 
 
 class UserSchema(ma.Schema):
     class Meta:
-        # Fields to expose, add more if needed.
         fields = ("email", "name", "username", "joined_date", "role_id")
 
 
 class VideoSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid",required=True)
+    camera_id = GUIDSerializationField(attribute="camera_id", required=True)
+    # user = GUIDSerializationField(attribute="user", required=True)
+    notes = ma.fields.Str(required=False)
+    tags = ma.fields.Str(required=False)
+    duration = ma.fields.Int(required=True)
+    workflow = GUIDSerializationField(attribute="workflow", required=False)
+
     class Meta:
-        # Fields to expose, add more if needed.
+        model_converter = GUIDConverter
         fields = (
-            "camera",
-            "name",
+            "camera_id",
             "user",
             "note",
             "tags",
             "duration",
             "workflow",
-            "creation_datetime",
+            "created_at",
         )
 
 
-class VideoSchemaShort(ma.Schema):
-    class Meta:
-        # Fields to expose, add more if needed.
-        fields = ("name", "duration", "creation_datetime")
-
-
 class ImageSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid",required=True)
+    camera_id = GUIDSerializationField(attribute="camera_id", required=True)
+    # user = GUIDSerializationField(attribute="user",required=True)
+    note = ma.fields.Str(required=False)
+    tags = ma.fields.Str(required=False)
+    workflow = GUIDSerializationField(attribute="workflow", required=False)
+
     class Meta:
-        # Fields to expose, add more if needed.
+        model_converter = GUIDConverter
         fields = (
-            "camera",
-            "name",
+            "camera_id",
             "user",
             "note",
             "tags",
             "workflow",
-            "creation_datetime",
+            "created_at",
         )
 
 
-class ImageSchemaShort(ma.Schema):
-    class Meta:
-        # Fields to expose, add more if needed.
-        fields = ("name", "creation_datetime")
-
-
 class CameraSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
+    manufacturer_id_id = GUIDSerializationField(
+        attribute="manufacturer_id", required=True
+    )
+    streamer_id = GUIDSerializationField(attribute="streamer_id", required=True)
+    url = ma.fields.Str(required=False)
+
     class Meta:
         fields = (
             "id",
@@ -57,6 +90,7 @@ class CameraSchema(ma.Schema):
             "utm_x",
             "utm_y",
             "manufacturer_id",
+            "streamer_id",
             "owner_id",
             "resolution_x",
             "resolution_y",
@@ -69,6 +103,17 @@ class CameraSchema(ma.Schema):
 
 
 class CameraManufacturerSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
+
+    class Meta:
+        fields = ("id", "name", "created_at", "updated_at")
+
+
+class StreamerSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid", required=True)
+    name = ma.fields.Str(required=False)
+
     class Meta:
         fields = ("id", "name", "created_at", "updated_at")
 

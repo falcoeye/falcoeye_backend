@@ -58,6 +58,9 @@ class Role(Model):
             role = Role.query.filter_by(name=r).first()
             if role is None:
                 role = Role(name=r)
+                db.session.add(role)
+
+        db.session.commit()
 
     def has_permission(self, perm):
         return self.permissions & perm == perm
