@@ -46,3 +46,12 @@ class WorkflowList(Resource):
             return validation_error(False, errors), 400
 
         return WorkflowService.create_workflow(user_id=user_id, data=workflow_data)
+
+    @api.doc(
+        security="apikey",
+    )
+    @jwt_required()
+    def delete(self, name):
+        """Delete a workflow"""
+        current_user_id = get_jwt_identity()
+        return WorkflowService.delete_workflow(user_id=current_user_id, name=name)

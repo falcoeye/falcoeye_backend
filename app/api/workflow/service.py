@@ -32,7 +32,6 @@ class WorkflowService:
 
     @staticmethod
     def create_workflow(user_id, data):
-
         try:
             name = data["name"]
             if Workflow.query.filter_by(name=name).first() is not None:
@@ -57,6 +56,28 @@ class WorkflowService:
             resp = message(True, "Workflow has been added.")
             resp["workflow"] = workflow_info
             return resp, 201
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    def delete_camera(user_id, name):
+        """Delete a workflow from DB by name and user id"""
+        if not (
+            workflow := Workflow.query.filter_by(owner_id=user_id, name=name).first()
+        ):
+            return err_resp(
+                "Workflow not found or belongs to a different owner",
+                "workflow_404",
+                404,
+            )
+
+        try:
+            db.session.delete(workflow)
+            db.session.commit()
+
+            resp = message(True, "workflow deleted")
+            return resp, 200
+
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()
