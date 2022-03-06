@@ -40,7 +40,7 @@ class WorkflowService:
                 name=data["name"],
                 creator=user_id,
                 publish_date=datetime.utcnow(),
-                aimodel=data["aimodel"],
+                aimodel_id=data["aimodel_id"],
                 usedfor=data["usedfor"],
                 consideration=data["consideration"],
                 assumption=data["assumption"],
@@ -60,10 +60,30 @@ class WorkflowService:
             current_app.logger.error(error)
             return internal_err_resp()
 
-    def delete_camera(user_id, name):
+    @staticmethod
+    def get_workflow_by_id(workflow_id):
+        """Get workflow by ID"""
+        if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
+            return err_resp("Workflow not found!", "workflow_404", 404)
+
+        try:
+            workflow_data = load_workflow_data(workflow)
+            resp = message(True, "Workflow data sent")
+            resp["workflow"] = workflow_data
+
+            return resp, 200
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def delete_workflow(user_id, workflow_id):
         """Delete a workflow from DB by name and user id"""
         if not (
-            workflow := Workflow.query.filter_by(owner_id=user_id, name=name).first()
+            workflow := Workflow.query.filter_by(
+                owner_id=user_id, id=workflow_id
+            ).first()
         ):
             return err_resp(
                 "Workflow not found or belongs to a different owner",

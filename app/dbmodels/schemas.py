@@ -121,14 +121,32 @@ class StreamerSchema(ma.Schema):
 class WorkflowSchema(ma.Schema):
     class Meta:
         fields = (
+            "id",
             "name",
             "creator",
             "publish_date",
-            "aimodel",
+            "aimodel_id",
             "usedfor",
             "consideration",
             "assumption",
             "accepted_media",
             "results_type",
             "thumbnail_url",
+            "created_at",
+            "updated_at",
+        )
+
+
+class DatasetSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "creator",
+            "annotation_type",
+            "image_width",
+            "image_height",
+            "size_type",
+            "created_at",
+            "updated_at",
         )

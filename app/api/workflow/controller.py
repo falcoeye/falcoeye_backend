@@ -47,11 +47,24 @@ class WorkflowList(Resource):
 
         return WorkflowService.create_workflow(user_id=user_id, data=workflow_data)
 
+
+@api.route("/<workflow_id>")
+@api.param("workflow_id", " Workflow ID")
+class Workflow(Resource):
     @api.doc(
         security="apikey",
     )
     @jwt_required()
-    def delete(self, name):
+    def get(self, workflow_id):
+        """Get a workflow"""
+        # current_user_id = get_jwt_identity()
+        return WorkflowService.get_workflow_by_id(workflow_id)
+
+    @api.doc(
+        security="apikey",
+    )
+    @jwt_required()
+    def delete(self, workflow_id):
         """Delete a workflow"""
         current_user_id = get_jwt_identity()
-        return WorkflowService.delete_workflow(user_id=current_user_id, name=name)
+        return WorkflowService.delete_workflow(current_user_id, workflow_id)

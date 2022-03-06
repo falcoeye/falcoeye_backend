@@ -7,15 +7,17 @@ class WorkflowDto:
         "Worflow Object",
         {
             "name": fields.String,
-            "creator": fields.Integer,
+            # "creator": fields.Integer,
             "publish_date": fields.DateTime,
-            "aimodel": fields.Integer,
+            "aimodel_id": fields.String,
             "usedfor": fields.String,
             "consideration": fields.String,
             "assumption": fields.String,
             "accepted_media": fields.String,
             "results_type": fields.String,
             "thumbnail_url": fields.String,
+            "created_at": fields.DateTime,
+            "updated_at": fields.DateTime,
         },
     )
 

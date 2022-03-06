@@ -3,6 +3,7 @@ import pytest
 
 from app import create_app
 from app import db as database
+from app.dbmodels.ai import Dataset
 from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
@@ -115,3 +116,19 @@ def video(db, user, harbourcamera):
     db.session.add(video)
     db.session.commit()
     return video
+
+
+@pytest.fixture
+def dataset(db, user):
+    dataset = Dataset(
+        name="DummyDataset",
+        creator=user.id,
+        annotation_type="DummyType",
+        image_width=1920,
+        image_height=1080,
+        size_type="DummySizeType",
+    )
+
+    db.session.add(dataset)
+    db.session.commit()
+    return dataset
