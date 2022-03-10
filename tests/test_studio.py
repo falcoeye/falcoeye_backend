@@ -2,7 +2,6 @@ import json
 import os
 import uuid
 
-from .conftest import client
 from .utils import login_user
 
 

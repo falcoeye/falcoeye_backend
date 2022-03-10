@@ -1,6 +1,8 @@
+import uuid
 from datetime import datetime
 
 from app import bcrypt, db
+from app.dbmodels.base import GUID, Base
 
 # Alias common DB names
 Column = db.Column
@@ -18,7 +20,7 @@ class Permission:
 
 class Role(Model):
     __tablename__ = "roles"
-    id = Column(db.Integer, primary_key=True)
+    id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
     default = Column(db.Boolean, default=False, index=True)
     permissions = Column(db.Integer)
@@ -81,7 +83,7 @@ class User(Model):
     """User model for storing user related data"""
 
     __tablename__ = "user"
-    id = Column(db.Integer, primary_key=True)
+    id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(db.String(64), unique=True, index=True)
     username = Column(db.String(15), unique=True, index=True)
     name = Column(db.String(64))

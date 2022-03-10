@@ -13,7 +13,7 @@ relationship = db.relationship
 class Video(Base):
     __tablename__ = "video"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user = Column(db.Integer, db.ForeignKey("user.id"))
+    user = Column(GUID(), db.ForeignKey("user.id"))
     camera_id = Column(GUID(), db.ForeignKey("camera.id"))
     camera = relationship("Camera", innerjoin=True)
     note = Column(db.String)
@@ -25,7 +25,7 @@ class Video(Base):
 class Image(Base):
     __tablename__ = "image"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user = Column(db.Integer, db.ForeignKey("user.id"))
+    user = Column(GUID(), db.ForeignKey("user.id"))
     camera_id = Column(GUID(), db.ForeignKey("camera.id"))
     camera = relationship("Camera", innerjoin=True)
     note = Column(db.String)

@@ -16,7 +16,7 @@ def test_add_camera(client, user, manufacturer, streamer):
         "manufacturer_id": str(manufacturer.id),
         "streamer_id": str(streamer.id),
         "url": "https://test.test.com",
-        "owner_id": user.id,
+        "owner_id": str(user.id),
         "status": "RUNNING",
     }
     resp = client.post(

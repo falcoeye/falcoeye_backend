@@ -133,8 +133,9 @@ class CaptureService:
         try:
             # accessing camera information
             url = camera.url
-            stream_provider = camera.streamProvider
-            resolution = camera.resolution
+            streamer_id = camera.streamer_id
+            streamer = DBStreamer.query.filter_by(id=streamer_id).first()
+            resolution = "1080p"  # camera.resolution
 
             # creating a new registry key
             registry_key = Registry.create_key(user_id, camera_id)
@@ -153,22 +154,24 @@ class CaptureService:
             resp, status_code = Streamer.record_video(
                 registry_key,
                 url,
-                stream_provider,
-                "1080p",
+                streamer.name,
+                resolution,
                 start,
                 end,
                 length,
                 output_path,
             )
+            print(resp, status_code)
 
-            if registry_key == 200:
-                resp = message(True, "Record video request successfully submitted.")
+            if status_code == 200:
+                resp = message(True, "Capture image request successfully submitted")
                 resp["registry_key"] = registry_key
                 return resp, 200
             else:
-                # setting registry status to failed to record
-                Registry.register_failed_to_record(registry_key)
+                # setting registry status to capturing
+                Registry.register_failed_to_capture(registry_key)
                 return resp, status_code
+
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()
