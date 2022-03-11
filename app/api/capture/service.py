@@ -153,7 +153,6 @@ class CaptureService:
                 length,
                 output_path,
             )
-            print(resp, status_code)
 
             if status_code == 200:
                 resp = message(True, "Capture image request successfully submitted")

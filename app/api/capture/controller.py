@@ -49,5 +49,4 @@ class Status(Resource):
         # server_id = get_jwt_identity()
         server_id = "test"
         data = request.get_json()
-        print("DATA")
         return CaptureService.set_capture_request_status(server_id, registry_key, data)
