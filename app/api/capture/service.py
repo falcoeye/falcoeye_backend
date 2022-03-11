@@ -49,7 +49,7 @@ class CaptureService:
 
             # preparing storing information
             user_image_data = (
-                f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/images'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
             )
             mkdir(user_image_data)
             output_path = f"{user_image_data}/{registry_key}.jpg"
@@ -134,7 +134,7 @@ class CaptureService:
 
             # preparing storing information
             user_video_data = (
-                f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/videos'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos'
             )
             mkdir(user_video_data)
             output_path = f"{user_video_data}/{registry_key}.mp4"
