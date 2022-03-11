@@ -1,14 +1,7 @@
-import base64
-from datetime import datetime
-
-from falcoeye_core.io import source
 from flask import current_app
-from PIL import Image
 
-from app import db
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.camera import Streamer as DBStreamer
-from app.dbmodels.user import Role, User
 from app.utils import err_resp, internal_err_resp, message
 
 from .registry import Registry
@@ -78,7 +71,6 @@ class CaptureService:
                 return resp, status_code
 
         except Exception as error:
-            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
