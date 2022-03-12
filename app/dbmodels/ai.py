@@ -61,4 +61,4 @@ class Analysis(Base):
     workflow = relationship("Workflow", innerjoin=True)
     status = Column(db.String)  # active, error, completed
     results_path = Column(db.String)
-    thumpnail_url = Column(db.String)
+    thumbnail_url = Column(db.String)

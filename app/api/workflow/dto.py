@@ -4,7 +4,7 @@ from flask_restx import Namespace, fields
 class WorkflowDto:
     api = Namespace("workflow", description="Workflow related operations.")
     workflow = api.model(
-        "Worflow Object",
+        "Workflow Object",
         {
             "name": fields.String,
             # "creator": fields.Integer,

@@ -150,3 +150,36 @@ class DatasetSchema(ma.Schema):
             "created_at",
             "updated_at",
         )
+
+
+class AIModelSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "creator",
+            "publish_date",
+            "archeticture",
+            "backbone",
+            "dataset_id",
+            "technology",
+            "speed",
+            "created_at",
+            "updated_at",
+        )
+
+
+class AnalysisSchema(ma.Schema):
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "creator",
+            "creating_date",
+            "workflow_id",
+            "status",
+            "results_path",
+            "thumbnail_url",
+            "created_at",
+            "updated_at",
+        )

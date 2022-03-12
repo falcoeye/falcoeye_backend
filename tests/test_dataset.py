@@ -26,15 +26,19 @@ def test_add_dataset(client, user):
         "size_type": "DummySizeType",
     }
     resp = client.post(
-        "/api/workflow/",
+        "/api/dataset/",
         data=json.dumps(data),
         content_type="application/json",
         headers=headers,
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "Dataset has been added"
+    assert resp.json.get("message") == "Dataset has been added."
 
-    # resp = client.get("/api/manufacturer/", headers=headers)
-    # assert resp.json.get("manufacturer")[0].get("name") == "dummy manufacturer"
-    # assert resp.json.get("message") == "Manufacturer data sent"
-    # assert resp.status_code == 200
+
+def test_list_datasets(client, dataset):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/dataset/", headers=headers)
+    assert resp.status_code == 200
+    assert len(resp.json.get("dataset")) == 1
+    assert resp.json.get("message") == "dataset data sent"
