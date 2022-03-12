@@ -1,14 +1,7 @@
-import base64
-from datetime import datetime
-
-from falcoeye_core.io import source
 from flask import current_app
-from PIL import Image
 
-from app import db
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.camera import Streamer as DBStreamer
-from app.dbmodels.user import Role, User
 from app.utils import err_resp, internal_err_resp, message
 
 from .registry import Registry
@@ -56,7 +49,7 @@ class CaptureService:
 
             # preparing storing information
             user_image_data = (
-                f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/images'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
             )
             mkdir(user_image_data)
             output_path = f"{user_image_data}/{registry_key}.jpg"
@@ -66,7 +59,12 @@ class CaptureService:
 
             # Create capturing request
             resp, status_code = Streamer.capture_image(
-                registry_key, url, streamer.name, resolution, output_path
+                registry_key,
+                url,
+                streamer.name,
+                resolution,
+                output_path,
+                current_app.config.get("STREAMER_HOST"),
             )
             if status_code == 200:
                 resp = message(True, "Capture image request successfully submitted")
@@ -78,7 +76,6 @@ class CaptureService:
                 return resp, status_code
 
         except Exception as error:
-            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
@@ -142,7 +139,7 @@ class CaptureService:
 
             # preparing storing information
             user_video_data = (
-                f'{current_app.config["TEMPRARY_DATA_PATH"]}/{user_id}/videos'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos'
             )
             mkdir(user_video_data)
             output_path = f"{user_video_data}/{registry_key}.mp4"
@@ -160,8 +157,8 @@ class CaptureService:
                 end,
                 length,
                 output_path,
+                current_app.config.get("STREAMER_HOST"),
             )
-            print(resp, status_code)
 
             if status_code == 200:
                 resp = message(True, "Capture image request successfully submitted")

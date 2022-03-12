@@ -4,10 +4,10 @@ import requests
 
 
 class Streamer:
-    Host = "http://127.0.0.1:5000/"
-
     @staticmethod
-    def capture_image(registry_key, url, stream_provider, resolution, output_path):
+    def capture_image(
+        registry_key, url, stream_provider, resolution, output_path, streamer_host
+    ):
         data = {
             "registry_key": registry_key,
             "url": url,
@@ -15,12 +15,20 @@ class Streamer:
             "resolution": resolution,
             "output_path": output_path,
         }
-        rv = requests.post(f"{Streamer.Host}/api/capture", data=json.dumps(data))
+        rv = requests.post(f"{streamer_host}/api/capture", data=json.dumps(data))
         return rv, 200
 
     @staticmethod
     def record_video(
-        registry_key, url, stream_provider, resolution, start, end, length, output_path
+        registry_key,
+        url,
+        stream_provider,
+        resolution,
+        start,
+        end,
+        length,
+        output_path,
+        streamer_host,
     ):
 
         # handle scheduling here
@@ -37,5 +45,5 @@ class Streamer:
             "length": length,
             "output_path": output_path,
         }
-        rv = requests.post(f"{Streamer.Host}/api/record", data=json.dumps(data))
+        rv = requests.post(f"{streamer_host}/api/record", data=json.dumps(data))
         return rv, 200

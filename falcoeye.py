@@ -14,4 +14,5 @@ print(os.getenv("FLASK_CONFIG"))
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app, db)
 
-app.run()
+if __name__ == "__main__":
+    app.run()
