@@ -59,7 +59,12 @@ class CaptureService:
 
             # Create capturing request
             resp, status_code = Streamer.capture_image(
-                registry_key, url, streamer.name, resolution, output_path
+                registry_key,
+                url,
+                streamer.name,
+                resolution,
+                output_path,
+                current_app.config.get("STREAMER_HOST"),
             )
             if status_code == 200:
                 resp = message(True, "Capture image request successfully submitted")
@@ -152,6 +157,7 @@ class CaptureService:
                 end,
                 length,
                 output_path,
+                current_app.config.get("STREAMER_HOST"),
             )
 
             if status_code == 200:
