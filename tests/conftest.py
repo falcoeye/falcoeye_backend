@@ -77,8 +77,8 @@ def camera(db, user, manufacturer, streamer):
 
 
 @pytest.fixture
-def harbourcamera(db, user, manufacturer, streamer):
-    harbourcamera = Camera(
+def harbour_camera(db, user, manufacturer, streamer):
+    harbour_camera = Camera(
         name="Harbour Village Bonaire Coral Reef",
         status="RUNNING",
         manufacturer_id=manufacturer.id,
@@ -86,16 +86,16 @@ def harbourcamera(db, user, manufacturer, streamer):
         owner_id=user.id,
         url="https://www.youtube.com/watch?v=tk-qJJbdOh4",
     )
-    db.session.add(harbourcamera)
+    db.session.add(harbour_camera)
     db.session.commit()
-    return harbourcamera
+    return harbour_camera
 
 
 @pytest.fixture
-def image(db, user, harbourcamera):
+def image(db, user, harbour_camera):
 
     image = Image(
-        user=user.id, camera_id=harbourcamera.id, tags="DummyTags", note="DummyNote"
+        user=user.id, camera_id=harbour_camera.id, tags="DummyTags", note="DummyNote"
     )
     db.session.add(image)
     db.session.commit()
@@ -103,11 +103,11 @@ def image(db, user, harbourcamera):
 
 
 @pytest.fixture
-def video(db, user, harbourcamera):
+def video(db, user, harbour_camera):
 
     video = Video(
         user=user.id,
-        camera_id=harbourcamera.id,
+        camera_id=harbour_camera.id,
         tags="DummyTags",
         note="DummyNote",
         duration=10,
