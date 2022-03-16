@@ -5,10 +5,16 @@ MAINTAINER "falcoeye team"
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
 
-EXPOSE 80
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev \
+    && pip3 install -U pip \
+    && pip3 install --no-cache-dir -r requirements.txt \
+    && apk del .build-deps
+
+RUN pip3 install gunicorn
+
+EXPOSE 8000
 
 COPY . .
 
-CMD [ "python3", "falcoeye.py" ]
+CMD ["gunicorn", "-w 3", "-b :8000", "falcoeye:app"]
