@@ -90,7 +90,7 @@ class User(Model):
     password_hash = Column(db.String(128))
 
     joined_date = Column(db.DateTime, default=datetime.utcnow)
-    role_id = Column(db.Integer, db.ForeignKey("roles.id"))
+    role_id = Column(GUID(), db.ForeignKey("roles.id"))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
