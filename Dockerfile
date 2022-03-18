@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.9-slim
 
 MAINTAINER "falcoeye team"
 
@@ -6,15 +6,17 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt ./
 
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev \
-    && pip3 install -U pip \
-    && pip3 install --no-cache-dir -r requirements.txt \
-    && apk del .build-deps
+RUN apt-get update && \
+    apt-get -y install gcc musl-dev libffi-dev libpq-dev netcat && \
+    apt-get clean && \
+    pip3 install -U pip && \
+    pip3 install --no-cache-dir -r requirements.txt
 
 RUN pip3 install gunicorn
 
-EXPOSE 8000
+EXPOSE 5000
 
 COPY . .
+RUN chmod +x /usr/src/app/entrypoint.sh
 
-CMD ["gunicorn", "-w 3", "-b :8000", "falcoeye:app"]
+CMD ["/usr/src/app/entrypoint.sh"]
