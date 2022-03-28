@@ -28,6 +28,7 @@ pluggy==1.0.0
 py==1.11.0
 pycparser==2.20
 PyJWT==2.1.0
+psycopg2==2.9.3
 pyparsing==3.0.7
 pyrsistent==0.18.0
 python-dateutil==2.8.2

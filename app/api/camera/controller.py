@@ -79,10 +79,15 @@ class Camera(Resource):
         current_user_id = get_jwt_identity()
         return CameraService.delete_camera(current_user_id, camera_id)
 
+    @api_camera.expect(CameraDto.camera, validate=False)
     @jwt_required()
     def put(self, camera_id):
         """Update a camera item"""
-        # TODO: add service to update camera item
+        camera_data = request.get_json()
+        current_user_id = get_jwt_identity()
+        return CameraService.update_camera_by_id(
+            current_user_id, camera_id, camera_data
+        )
 
 
 @api_manufacturer.route("/")
