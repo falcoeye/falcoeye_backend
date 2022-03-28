@@ -23,6 +23,8 @@ class Config:
 
     # Streamer config
     STREAMER_HOST = os.environ.get("STREAMER_HOST", "http://127.0.0.1:5000")
+    AI_HOST = os.environ.get("AI_HOST", "http://127.0.0.1:6000")
+    WORKFLOW_HOST = os.environ.get("WORKFLOW_HOST", "http://127.0.0.1:7000")
 
 
 class DevelopmentConfig(Config):
