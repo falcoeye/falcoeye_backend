@@ -20,7 +20,7 @@ def test_add_dataset(client, user):
     data = {
         "name": "dummy dataset in test",
         "annotation_type": "DummyType",
-        "creator": 0,
+        "creator": str(user.id),
         "image_width": 1920,
         "image_height": 1080,
         "size_type": "DummySizeType",

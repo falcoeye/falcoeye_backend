@@ -122,7 +122,7 @@ def video(db, user, harbour_camera):
 def dataset(db, user):
     dataset = Dataset(
         name="DummyDataset",
-        creator=user.id,
+        creator=str(user.id),
         annotation_type="DummyType",
         image_width=1920,
         image_height=1080,
