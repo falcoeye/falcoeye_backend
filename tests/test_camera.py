@@ -1,7 +1,11 @@
 import json
 import uuid
 
+from app.dbmodels.schemas import CameraSchema
+
 from .utils import login_user
+
+camera_schema = CameraSchema()
 
 
 def test_add_camera(client, user, manufacturer, streamer):
@@ -16,7 +20,7 @@ def test_add_camera(client, user, manufacturer, streamer):
         "manufacturer_id": str(manufacturer.id),
         "streamer_id": str(streamer.id),
         "url": "https://test.test.com",
-        "owner_id": user.id,
+        "owner_id": str(user.id),
         "status": "RUNNING",
     }
     resp = client.post(
@@ -83,8 +87,21 @@ def test_delete_invalid_camera_by_id(client, user):
 
 
 def test_update_camera_by_id(client, camera):
-    # TODO
-    pass
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    camera.name = "UpdatedCamera"
+    resp = client.put(
+        f"/api/camera/{camera.id}",
+        headers=headers,
+        data=json.dumps(camera_schema.dump(camera)),
+        content_type="application/json",
+    )
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "Camera has been updated"
+
+    resp = client.get(f"/api/camera/{camera.id}", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("camera").get("name") == "UpdatedCamera"
 
 
 def test_list_manufacturers(client, user, manufacturer):

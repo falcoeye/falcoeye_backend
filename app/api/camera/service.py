@@ -128,6 +128,65 @@ class CameraService:
             current_app.logger.error(error)
             return internal_err_resp()
 
+    @staticmethod
+    def update_camera_by_id(user_id, camera_id, data):
+        name = data["name"]
+        manufacturer_id = data["manufacturer_id"]
+        streamer_id = data["streamer_id"]
+        url = data["url"]
+
+        utm_x = data.get("utm_x")
+        utm_y = data.get("utm_y")
+        resolution_x = data.get("resolution_x")
+        resolution_y = data.get("resolution_y")
+        status = data.get("status")
+        connection_date = data.get("connection_date")
+        if connection_date:
+            connection_date = dateutil.parser.isoparse(connection_date)
+
+        if not (
+            camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
+        ):
+            return err_resp("Camera not found!", "camera_404", 404)
+
+        # check if manufacturer exists
+        if not (
+            manufacturer := CameraManufacturer.query.filter_by(
+                id=manufacturer_id
+            ).first()
+        ):
+            return err_resp(
+                "Manufacturer is not registered", "invalid_manufacturer", 403
+            )
+
+        if not (streamer := Streamer.query.filter_by(id=streamer_id).first()):
+            return err_resp("streamer is not registered", "invalid_streamer", 403)
+
+        try:
+            updated_camera = Camera(
+                name=name,
+                url=url,
+                owner_id=user_id,
+                manufacturer_id=manufacturer.id,
+                streamer_id=streamer.id,
+                utm_x=utm_x,
+                utm_y=utm_y,
+                resolution_x=resolution_x,
+                resolution_y=resolution_y,
+                status=status,
+                connection_date=connection_date,
+            )
+            camera = updated_camera
+            db.session.commit()
+
+            resp = message(True, "Camera has been updated")
+
+            return resp, 200
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
 
 class CameraManufacturerService:
     @staticmethod

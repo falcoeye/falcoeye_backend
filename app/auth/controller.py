@@ -65,7 +65,6 @@ class AuthRegister(Resource):
         """User registration"""
         # Grab the json data
         register_data = request.get_json()
-        print(register_data)
         # Validate data
         if errors := register_schema.validate(register_data):
             return validation_error(False, errors), 400

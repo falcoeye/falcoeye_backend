@@ -56,7 +56,7 @@ class Camera(Base):
     name = Column(db.String(64), unique=True)
     utm_x = Column(db.Float)
     utm_y = Column(db.Float)
-    owner_id = Column(db.Integer, db.ForeignKey("user.id"))
+    owner_id = Column(GUID(), db.ForeignKey("user.id"))
     manufacturer_id = Column(GUID(), db.ForeignKey("camera_manufacturer.id"))
     manufacturer = relationship("CameraManufacturer", innerjoin=True)
     streamer_id = Column(GUID(), db.ForeignKey("streamer.id"))

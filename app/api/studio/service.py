@@ -42,6 +42,7 @@ class StudioService:
         if not (image := Image.query.filter_by(user=user_id, id=media_id).first()):
             return err_resp("Image not found!", "image_404", 404)
         try:
+            # TODO: Add image link
             image_data = load_image_data(image)
             resp = message(True, "Image data sent")
             resp["image"] = image_data
@@ -56,8 +57,10 @@ class StudioService:
         note = data.get("note", "")
         tags = data.get("tags", "")
         workflow = data.get("workflow", None)
-        if not (camera := Camera.query.filter_by(id=camera_id).first()):
-            return err_resp("Camera is not registered", "invalid_manufacturer", 403)
+        if not (
+            camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
+        ):
+            return err_resp("Camera is not registered", "invalid_camera", 403)
 
         try:
             new_image = Image(

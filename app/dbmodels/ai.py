@@ -1,8 +1,9 @@
 import uuid
-from datetime import datetime
 
+from datetime import datetime
 from app import db
 from app.dbmodels.base import GUID, Base
+
 
 # Alias common DB names
 Column = db.Column
@@ -25,7 +26,7 @@ class AIModel(Base):
     __tablename__ = "ai_model"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
-    creator = Column(db.Integer, db.ForeignKey("user.id"))
+    creator = Column(GUID(), db.ForeignKey("user.id"))
     publish_date = Column(db.DateTime)
     archeticture = Column(db.String)  # ssd, frcnn,...etc
     backbone = Column(db.String)  # resnet, mobilenet,...etc
@@ -39,7 +40,7 @@ class Workflow(Base):
     __tablename__ = "workflow"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
-    creator = Column(db.Integer, db.ForeignKey("user.id"))
+    creator = Column(GUID(), db.ForeignKey("user.id"))
     publish_date = Column(db.DateTime)
     aimodel_id = Column(GUID(), db.ForeignKey("ai_model.id"))
     aimodel = relationship("AIModel", innerjoin=True)
@@ -55,7 +56,7 @@ class Analysis(Base):
     __tablename__ = "analysis"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
-    creator = Column(db.Integer, db.ForeignKey("user.id"))
+    creator = Column(GUID(), db.ForeignKey("user.id"))
     creating_date = Column(db.DateTime)
     workflow_id = Column(GUID(), db.ForeignKey("workflow.id"))
     workflow = relationship("Workflow", innerjoin=True)
