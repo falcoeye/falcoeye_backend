@@ -1,9 +1,8 @@
 import uuid
-
 from datetime import datetime
+
 from app import db
 from app.dbmodels.base import GUID, Base
-
 
 # Alias common DB names
 Column = db.Column
