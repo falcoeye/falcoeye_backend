@@ -14,7 +14,7 @@ class Dataset(Base):
     __tablename__ = "dataset"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
-    creator = Column(db.Integer, db.ForeignKey("user.id"))
+    creator = Column(GUID(), db.ForeignKey("user.id"))
     annotation_type = Column(db.String)  # xml, json, what version, ... etc
     image_width = Column(db.Integer)
     image_height = Column(db.Integer)
