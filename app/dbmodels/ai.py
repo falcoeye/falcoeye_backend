@@ -1,9 +1,8 @@
 import uuid
-
 from datetime import datetime
+
 from app import db
 from app.dbmodels.base import GUID, Base
-
 
 # Alias common DB names
 Column = db.Column
@@ -15,7 +14,7 @@ class Dataset(Base):
     __tablename__ = "dataset"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
-    creator = Column(db.Integer, db.ForeignKey("user.id"))
+    creator = Column(GUID(), db.ForeignKey("user.id"))
     annotation_type = Column(db.String)  # xml, json, what version, ... etc
     image_width = Column(db.Integer)
     image_height = Column(db.Integer)
@@ -44,10 +43,12 @@ class Workflow(Base):
     publish_date = Column(db.DateTime)
     aimodel_id = Column(GUID(), db.ForeignKey("ai_model.id"))
     aimodel = relationship("AIModel", innerjoin=True)
+    structure_file = Column(db.String)
     usedfor = Column(db.String)
     consideration = Column(db.String)
     assumption = Column(db.String)
     accepted_media = Column(db.String)  # stream | videos | images
+    results_description = Column(db.String)
     results_type = Column(db.String)  # csv    | videos | images
     thumbnail_url = Column(db.String)
 

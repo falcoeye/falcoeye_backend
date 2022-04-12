@@ -127,6 +127,7 @@ class WorkflowSchema(ma.Schema):
             "publish_date",
             "aimodel_id",
             "usedfor",
+            "structure_file",
             "consideration",
             "assumption",
             "accepted_media",

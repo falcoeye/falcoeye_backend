@@ -18,6 +18,8 @@ class Video(Base):
     camera = relationship("Camera", innerjoin=True)
     note = Column(db.String)
     tags = Column(db.String)
+    url = Column(db.String)
+    thumbnail_url = Column(db.String)
     workflow = Column(GUID(), db.ForeignKey("workflow.id"))
     duration = Column(db.Integer)
 
@@ -30,4 +32,6 @@ class Image(Base):
     camera = relationship("Camera", innerjoin=True)
     note = Column(db.String)
     tags = Column(db.String)
+    url = Column(db.String)
+    thumbnail_url = Column(db.String)
     workflow = Column(GUID(), db.ForeignKey("workflow.id"))
