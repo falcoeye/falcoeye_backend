@@ -76,8 +76,8 @@ class CameraService:
         streamer_id = data["streamer_id"]
         url = data["url"]
 
-        utm_x = data.get("utm_x")
-        utm_y = data.get("utm_y")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
         resolution_x = data.get("resolution_x")
         resolution_y = data.get("resolution_y")
         status = data.get("status")
@@ -105,8 +105,8 @@ class CameraService:
                 owner_id=user_id,
                 manufacturer_id=manufacturer.id,
                 streamer_id=streamer.id,
-                utm_x=utm_x,
-                utm_y=utm_y,
+                latitude=latitude,
+                longitude=longitude,
                 resolution_x=resolution_x,
                 resolution_y=resolution_y,
                 status=status,
@@ -135,8 +135,8 @@ class CameraService:
         streamer_id = data["streamer_id"]
         url = data["url"]
 
-        utm_x = data.get("utm_x")
-        utm_y = data.get("utm_y")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
         resolution_x = data.get("resolution_x")
         resolution_y = data.get("resolution_y")
         status = data.get("status")
@@ -169,8 +169,8 @@ class CameraService:
                 owner_id=user_id,
                 manufacturer_id=manufacturer.id,
                 streamer_id=streamer.id,
-                utm_x=utm_x,
-                utm_y=utm_y,
+                latitude=latitude,
+                longitude=longitude,
                 resolution_x=resolution_x,
                 resolution_y=resolution_y,
                 status=status,

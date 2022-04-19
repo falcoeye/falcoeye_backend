@@ -27,7 +27,7 @@ class AIModel(Base):
     name = Column(db.String(64), unique=True)
     creator = Column(GUID(), db.ForeignKey("user.id"))
     publish_date = Column(db.DateTime)
-    archeticture = Column(db.String)  # ssd, frcnn,...etc
+    architecture = Column(db.String)  # ssd, frcnn,...etc
     backbone = Column(db.String)  # resnet, mobilenet,...etc
     dataset_id = Column(GUID(), db.ForeignKey("dataset.id"))
     dataset = relationship("Dataset", innerjoin=True)
@@ -58,9 +58,8 @@ class Analysis(Base):
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
     creator = Column(GUID(), db.ForeignKey("user.id"))
-    creating_date = Column(db.DateTime)
+    creation_date = Column(db.DateTime)
     workflow_id = Column(GUID(), db.ForeignKey("workflow.id"))
     workflow = relationship("Workflow", innerjoin=True)
-    status = Column(db.String)  # active, error, completed
+    status = Column(db.String)  # new, active, error, completed
     results_path = Column(db.String)
-    thumbnail_url = Column(db.String)

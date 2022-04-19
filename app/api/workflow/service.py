@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import current_app
 
 from app import db
-from app.dbmodels.ai import Workflow
+from app.dbmodels.ai import AIModel, Workflow
 from app.dbmodels.schemas import WorkflowSchema
 from app.utils import err_resp, internal_err_resp, message
 
@@ -36,18 +36,28 @@ class WorkflowService:
             name = data["name"]
             if Workflow.query.filter_by(name=name).first() is not None:
                 return err_resp("Name is already being used.", "name_taken", 403)
+
+            aimodel_id = data["aimodel_id"]
+            # ai models table are assumed to be accessable by everyone here
+            if not (aimodel := AIModel.query.filter_by(id=aimodel_id).first()):
+                return err_resp("Model not found!", "camera_404", 404)
+
+            # TODO: creation date vs publish date (which one)
             new_workflow = Workflow(
                 name=data["name"],
                 creator=user_id,
                 publish_date=datetime.utcnow(),
-                aimodel_id=data["aimodel_id"],
+                aimodel_id=aimodel.id,
+                structure_file=data["structure_file"],
                 usedfor=data["usedfor"],
                 consideration=data["consideration"],
                 assumption=data["assumption"],
                 accepted_media=data["accepted_media"],
+                results_description=data["results_description"],
                 results_type=data["results_type"],
                 thumbnail_url=data["thumbnail_url"],
             )
+
             db.session.add(new_workflow)
             db.session.flush()
             db.session.commit()
@@ -82,11 +92,11 @@ class WorkflowService:
         """Delete a workflow from DB by name and user id"""
         if not (
             workflow := Workflow.query.filter_by(
-                owner_id=user_id, id=workflow_id
+                creator=user_id, id=workflow_id
             ).first()
         ):
             return err_resp(
-                "Workflow not found or belongs to a different owner",
+                "Workflow not found!",
                 "workflow_404",
                 404,
             )

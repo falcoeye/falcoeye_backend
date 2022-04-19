@@ -1,9 +1,11 @@
 """Global pytest fixtures."""
+import datetime
+
 import pytest
 
 from app import create_app
 from app import db as database
-from app.dbmodels.ai import Dataset
+from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
 from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
@@ -105,7 +107,6 @@ def image(db, user, harbour_camera):
 
 @pytest.fixture
 def video(db, user, harbour_camera):
-
     video = Video(
         user=user.id,
         camera_id=harbour_camera.id,
@@ -132,3 +133,56 @@ def dataset(db, user):
     db.session.add(dataset)
     db.session.commit()
     return dataset
+
+
+@pytest.fixture
+def aimodel(db, user, dataset):
+
+    model = AIModel(
+        name="FourtyThreeFish",
+        creator=user.id,
+        publish_date=datetime.datetime.now(),
+        architecture="frcnn",
+        backbone="resnet50",
+        dataset_id=dataset.id,
+        technology="tensorflow",
+        speed=1,
+    )
+    db.session.add(model)
+    db.session.commit()
+    return model
+
+
+@pytest.fixture
+def workflow(db, user, aimodel):
+    workflow = Workflow(
+        name="FishCounter",
+        creator=user.id,
+        publish_date=datetime.datetime.now(),
+        aimodel_id=aimodel.id,
+        structure_file="/path/to/workflow.json",
+        usedfor="detecting stuff",
+        consideration="be careful",
+        assumption="barely works",
+        accepted_media="Video|Camera",
+        results_description="stuff",
+        results_type="csv",
+        thumbnail_url="/path/to/thumbnail.jpg",
+    )
+    db.session.add(workflow)
+    db.session.commit()
+    return workflow
+
+
+@pytest.fixture
+def analysis(db, user, workflow):
+    analysis = Analysis(
+        name="analysis",
+        creator=user.id,
+        workflow_id=workflow.id,
+        status="completed",
+        results_path="/path/to/results",
+    )
+    db.session.add(analysis)
+    db.session.commit()
+    return analysis

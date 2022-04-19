@@ -4,6 +4,7 @@ from flask import current_app
 
 from app import db
 from app.dbmodels.ai import Analysis
+from app.dbmodels.ai import Workflow as Workflow
 from app.dbmodels.schemas import AnalysisSchema
 from app.utils import err_resp, internal_err_resp, message
 
@@ -33,24 +34,32 @@ class AnalysisService:
     @staticmethod
     def create_analysis(user_id, data):
         try:
+
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:
                 return err_resp("Name is already being used.", "name_taken", 403)
+
+            workflow_id = data.get("workflow_id", None)
+            if not workflow_id:
+                return err_resp("No workflow provided", "workflow_400", 400)
+
+            # workflows are assumed to be accessable by everyone here
+            if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
+                return err_resp("Workflow not found!", "camera_404", 404)
+
             new_analysis = Analysis(
-                name=data["name"],
+                name=name,
                 creator=user_id,
-                publish_date=datetime.utcnow(),
-                analysis_id=data["analysis_id"],
-                usedfor=data["usedfor"],
-                consideration=data["consideration"],
-                assumption=data["assumption"],
-                accepted_media=data["accepted_media"],
-                results_type=data["results_type"],
-                thumbnail_url=data["thumbnail_url"],
+                creation_date=datetime.utcnow(),
+                status="new",
+                workflow_id=workflow.id,
             )
+
             db.session.add(new_analysis)
             db.session.flush()
             db.session.commit()
+
+            # TODO: send to workflow microservice here
 
             analysis_info = analysis_schema.dump(new_analysis)
             resp = message(True, "Analysis has been added.")
@@ -72,7 +81,6 @@ class AnalysisService:
             resp["analysis"] = analysis_data
 
             return resp, 200
-
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()
@@ -82,11 +90,11 @@ class AnalysisService:
         """Delete a analysis from DB by name and user id"""
         if not (
             analysis := Analysis.query.filter_by(
-                owner_id=user_id, id=analysis_id
+                creator=user_id, id=analysis_id
             ).first()
         ):
             return err_resp(
-                "Analysis not found or belongs to a different owner",
+                "Analysis not found!",
                 "analysis_404",
                 404,
             )
@@ -94,6 +102,8 @@ class AnalysisService:
         try:
             db.session.delete(analysis)
             db.session.commit()
+
+            # TODO: delete data here
 
             resp = message(True, "analysis deleted")
             return resp, 200

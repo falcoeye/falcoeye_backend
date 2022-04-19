@@ -1,9 +1,10 @@
+import logging
 from datetime import datetime
 
 from flask import current_app
 
 from app import db
-from app.dbmodels.ai import AIModel
+from app.dbmodels.ai import AIModel, Dataset
 from app.dbmodels.schemas import AIModelSchema
 from app.utils import err_resp, internal_err_resp, message
 
@@ -36,18 +37,28 @@ class AIModelService:
             name = data["name"]
             if AIModel.query.filter_by(name=name).first() is not None:
                 return err_resp("Name is already being used.", "name_taken", 403)
+
+            dataset_name = data.get("dataset", "")
+
+            if dataset_name:
+                if not (dataset := Dataset.query.filter_by(name=dataset_name).first()):
+                    logging.warning(f"dataset {dataset_name} is not in the database")
+                    dataset_id = dataset.id
+            else:
+                dataset_name = ""
+                dataset_id = None
+
             new_aimodel = AIModel(
-                name=data["name"],
+                name=name,
                 creator=user_id,
                 publish_date=datetime.utcnow(),
-                aimodel_id=data["aimodel_id"],
-                usedfor=data["usedfor"],
-                consideration=data["consideration"],
-                assumption=data["assumption"],
-                accepted_media=data["accepted_media"],
-                results_type=data["results_type"],
-                thumbnail_url=data["thumbnail_url"],
+                architecture=data["architecture"],
+                backbone=data["backbone"],
+                dataset_id=dataset_id,
+                technology=data["technology"],
+                speed=data["speed"],
             )
+
             db.session.add(new_aimodel)
             db.session.flush()
             db.session.commit()
@@ -81,10 +92,10 @@ class AIModelService:
     def delete_aimodel(user_id, aimodel_id):
         """Delete a aimodel from DB by name and user id"""
         if not (
-            aimodel := AIModel.query.filter_by(owner_id=user_id, id=aimodel_id).first()
+            aimodel := AIModel.query.filter_by(creator=user_id, id=aimodel_id).first()
         ):
             return err_resp(
-                "AIModel not found or belongs to a different owner",
+                "AIModel not found!",
                 "aimodel_404",
                 404,
             )

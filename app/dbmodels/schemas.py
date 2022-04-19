@@ -126,15 +126,14 @@ class WorkflowSchema(ma.Schema):
             "creator",
             "publish_date",
             "aimodel_id",
-            "usedfor",
             "structure_file",
+            "usedfor",
             "consideration",
             "assumption",
             "accepted_media",
+            "results_description",
             "results_type",
             "thumbnail_url",
-            "created_at",
-            "updated_at",
         )
 
 
@@ -148,8 +147,7 @@ class DatasetSchema(ma.Schema):
             "image_width",
             "image_height",
             "size_type",
-            "created_at",
-            "updated_at",
+            "creation_date",
         )
 
 
@@ -160,7 +158,7 @@ class AIModelSchema(ma.Schema):
             "name",
             "creator",
             "publish_date",
-            "archeticture",
+            "architecture",
             "backbone",
             "dataset_id",
             "technology",
@@ -176,11 +174,8 @@ class AnalysisSchema(ma.Schema):
             "id",
             "name",
             "creator",
-            "creating_date",
+            "creation_date",
             "workflow_id",
             "status",
             "results_path",
-            "thumbnail_url",
-            "created_at",
-            "updated_at",
         )
