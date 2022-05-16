@@ -2,6 +2,8 @@ import json
 
 import requests
 
+from app.utils import internal_err_resp, message
+
 
 class Streamer:
     @staticmethod
@@ -15,8 +17,10 @@ class Streamer:
             "resolution": resolution,
             "output_path": output_path,
         }
-        rv = requests.post(f"{streamer_host}/api/capture", data=json.dumps(data))
-        return rv, 200
+        # TODO: re-implement streamer microservices with ducker and k8s in mind
+        # rv = requests.post(f"{streamer_host}/api/capture", data=json.dumps(data))
+        resp = message(True, "Capture request initiated")
+        return resp, 200
 
     @staticmethod
     def record_video(
@@ -45,5 +49,7 @@ class Streamer:
             "length": length,
             "output_path": output_path,
         }
-        rv = requests.post(f"{streamer_host}/api/record", data=json.dumps(data))
-        return rv, 200
+        # TODO: re-implement streamer microservices with ducker and k8s in mind
+        # rv = requests.post(f"{streamer_host}/api/record", data=json.dumps(data))
+        resp = message(True, "Record request initiated")
+        return resp, 200

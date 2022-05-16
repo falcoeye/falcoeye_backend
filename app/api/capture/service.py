@@ -1,10 +1,10 @@
 from flask import current_app
 
+from app.api.registry import Registry
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.camera import Streamer as DBStreamer
 from app.utils import err_resp, internal_err_resp, message
 
-from .registry import Registry
 from .streamer import Streamer
 from .utils import mkdir
 
@@ -15,10 +15,12 @@ class CaptureService:
         """Capture media"""
         camera_id = data.get("camera_id", None)
         capture_type = data.get("capture_type", None)
-        if not camera_id:
-            return err_resp("No camera provided", "media_400", 400)
-        if not capture_type:
-            return err_resp("No capture type provided", "media_400", 400)
+        if not camera_id or not capture_type:
+            return err_resp(
+                "Missing data: Camera id and capture type must be provided",
+                "media_400",
+                400,
+            )
 
         if capture_type == "image":
             return CaptureService.capture_image(user_id, camera_id)
@@ -67,7 +69,7 @@ class CaptureService:
                 current_app.config.get("STREAMER_HOST"),
             )
             if status_code == 200:
-                resp = message(True, "Capture image request successfully submitted")
+                resp = message(True, "Capture request succeeded")
                 resp["registry_key"] = registry_key
                 return resp, 200
             else:
@@ -161,7 +163,7 @@ class CaptureService:
             )
 
             if status_code == 200:
-                resp = message(True, "Capture image request successfully submitted")
+                resp = message(True, "Capture request succeeded")
                 resp["registry_key"] = registry_key
                 return resp, 200
             else:

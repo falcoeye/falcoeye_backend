@@ -10,15 +10,15 @@ class CameraDto:
             "name": fields.String,
             "utm_x": fields.Float,
             "utm_y": fields.Float,
-            "owner_id": fields.Integer,
+            "streamer_id": fields.String,  # youtube, angelcalm, rtsp
             "manufacturer_id": fields.String,
-            "resolution_x": fields.Integer,
-            "resolution_y": fields.Integer,
+            # for streaming servers
             "url": fields.Url,
-            "connection_date": fields.DateTime,
-            "status": fields.String,
-            "created_at": fields.DateTime,
-            "updated_at": fields.DateTime,
+            # for rtsp
+            "host": fields.String,
+            "port": fields.Integer,
+            "username": fields.String,
+            "password": fields.String,
         },
     )
 

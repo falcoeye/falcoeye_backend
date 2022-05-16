@@ -3,15 +3,17 @@ from flask_restx import Namespace, fields
 
 class MediaDto:
     api = Namespace("media", description="Media related operations.")
+    video_post = api.model(
+        "Vidoe object",
+        {"note": fields.String, "tags": fields.String, "registry_key": fields.String},
+    )
     video = api.model(
         "Vidoe object",
         {
-            "camera": fields.Integer,
-            "user": fields.Integer,
             "note": fields.String,
             "tags": fields.String,
             "duration": fields.Integer,
-            "workflow": fields.String,
+            "url": fields.String,
         },
     )
     video_resp = api.model(
@@ -23,14 +25,12 @@ class MediaDto:
         },
     )
     image = api.model(
+        "Vidoe object",
+        {"note": fields.String, "tags": fields.String, "url": fields.String},
+    )
+    image_post = api.model(
         "Image object",
-        {
-            "camera": fields.Integer,
-            "user": fields.Integer,
-            "note": fields.String,
-            "tags": fields.String,
-            "workflow": fields.String,
-        },
+        {"note": fields.String, "tags": fields.String, "registry_key": fields.String},
     )
 
     image_resp = api.model(

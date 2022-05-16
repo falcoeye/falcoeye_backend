@@ -19,8 +19,8 @@ class AnalysisList(Resource):
     @api.doc(
         """Get a list of all analysiss""",
         response={
-            200: ("Analysis data succesffuly sent", analysis_resp),
-            404: "No analysiss found",
+            200: ("Analysis data sent", analysis_resp),
+            404: "No analysiss found!",
         },
         security="apikey",
     )
@@ -33,7 +33,8 @@ class AnalysisList(Resource):
         "Add a new analysis",
         response={
             201: ("Successfully added analysis", analysis_resp),
-            400: "Malformed data or validations failed.",
+            403: "Invalid data.",
+            404: "Invalid data.",
         },
         security="apikey",
     )
@@ -57,8 +58,8 @@ class Analysis(Resource):
     @jwt_required()
     def get(self, analysis_id):
         """Get a analysis"""
-        # current_user_id = get_jwt_identity()
-        return AnalysisService.get_analysis_by_id(analysis_id)
+        current_user_id = get_jwt_identity()
+        return AnalysisService.get_analysis_by_id(current_user_id, analysis_id)
 
     @api.doc(
         security="apikey",

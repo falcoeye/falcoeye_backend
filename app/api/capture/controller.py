@@ -9,6 +9,9 @@ from app.utils import internal_err_resp, message
 from .service import CaptureService
 
 api = Namespace("capture", description="Capture related operations.")
+capture_data = api.model(
+    "Capture data", {"camera_id": fields.String, "capture_type": fields.String}
+)
 
 
 @api.route("")
@@ -16,10 +19,15 @@ class Capture(Resource):
     @api.doc(
         "Capture media",
         # TODO: Check the other errors
-        responses={200: ("Capture request succeeded")},
+        responses={
+            200: ("Capture request succeeded"),
+            400: ("Missing data: Camera id and capture type must be provided"),
+            404: ("Camera not found!"),
+        },
         security="apikey",
     )
     @jwt_required()
+    @api.expect(capture_data, validate=False)
     def post(self):
         """Initiate a caputre request"""
         data = request.get_json()

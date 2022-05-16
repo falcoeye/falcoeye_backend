@@ -22,7 +22,7 @@ class AnalysisService:
 
         try:
             analysis_data = load_analysis_data(analysiss, many=True)
-            resp = message(True, "analysis data sent")
+            resp = message(True, "Analysis data sent")
             resp["analysis"] = analysis_data
 
             return resp, 200
@@ -37,15 +37,15 @@ class AnalysisService:
 
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:
-                return err_resp("Name is already being used.", "name_taken", 403)
+                return err_resp("Invalid data.", "name_403", 403)
 
             workflow_id = data.get("workflow_id", None)
             if not workflow_id:
-                return err_resp("No workflow provided", "workflow_400", 400)
+                return err_resp("Invalid data.", "workflow_403", 403)
 
             # workflows are assumed to be accessable by everyone here
             if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
-                return err_resp("Workflow not found!", "camera_404", 404)
+                return err_resp("Invalid data.", "workflow_404", 404)
 
             new_analysis = Analysis(
                 name=name,
@@ -70,9 +70,13 @@ class AnalysisService:
             return internal_err_resp()
 
     @staticmethod
-    def get_analysis_by_id(analysis_id):
+    def get_analysis_by_id(user_id, analysis_id):
         """Get analysis by ID"""
-        if not (analysis := Analysis.query.filter_by(id=analysis_id).first()):
+        if not (
+            analysis := Analysis.query.filter_by(
+                creator=user_id, id=analysis_id
+            ).first()
+        ):
             return err_resp("Analysis not found!", "analysis_404", 404)
 
         try:
@@ -104,7 +108,6 @@ class AnalysisService:
             db.session.commit()
 
             # TODO: delete data here
-
             resp = message(True, "analysis deleted")
             return resp, 200
 

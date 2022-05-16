@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import current_app
 
 from app import db
+from app.api.registry import Registry, RegistryStatus
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
@@ -53,23 +54,22 @@ class StudioService:
 
     @staticmethod
     def create_image(user_id, data):
-        camera_id = data["camera_id"]
         note = data.get("note", "")
         tags = data.get("tags", "")
-        workflow = data.get("workflow", None)
-        if not (
-            camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
-        ):
-            return err_resp("Camera is not registered", "invalid_camera", 403)
 
+        registry_key = data.get("registry_key", None)
+
+        if not registry_key or not (status := Registry.check_status(registry_key)):
+            return err_resp("Invalid registry key", "registry_404", 403)
+
+        if status != RegistryStatus.READYTOSUBMIT:
+            return err_resp("Invalid registry key", "registry_404", 403)
+
+        # TODO: camera id and workflow name, if any, should be part of the metadata of the image
+
+        # user only send registry key here.
         try:
-            new_image = Image(
-                user=user_id,
-                camera_id=camera.id,
-                tags=tags,
-                note=note,
-                workflow=workflow,
-            )
+            new_image = Image(user=user_id, tags=tags, note=note)
             db.session.add(new_image)
             db.session.flush()
             db.session.commit()
@@ -115,20 +115,19 @@ class StudioService:
 
     @staticmethod
     def create_video(user_id, data):
-        camera_id = data["camera_id"]
         note = data.get("note", "")
         tags = data.get("tags", "")
-        workflow = data.get("workflow", None)
-        duration = data["duration"]
+
+        registry_key = data.get("registry_key", None)
+
+        if not registry_key or not (status := Registry.check_status(registry_key)):
+            return err_resp("Invalid registry key", "registry_404", 403)
+
+        if status != RegistryStatus.READYTOSUBMIT:
+            return err_resp("Invalid registry key", "registry_404", 403)
 
         try:
-            new_video = Video(
-                user=user_id,
-                camera_id=camera_id,
-                tags=tags,
-                note=note,
-                workflow=workflow,
-            )
+            new_video = Video(user=user_id, tags=tags, note=note)
             db.session.add(new_video)
             db.session.flush()
             db.session.commit()

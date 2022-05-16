@@ -11,8 +11,10 @@ from .dto import MediaDto
 from .service import StudioService
 
 api = MediaDto.api
-vid_resp = MediaDto.video_resp
-img_resp = MediaDto.image_resp
+video_resp = MediaDto.video_resp
+image_resp = MediaDto.image_resp
+video_post = MediaDto.video_post
+image_post = MediaDto.image_post
 
 image_schema = ImageSchema()
 video_schema = VideoSchema()
@@ -22,10 +24,7 @@ video_schema = VideoSchema()
 class StudioList(Resource):
     @api.doc(
         "Get a user media",
-        responses={
-            200: ("User media successfully sent"),
-            404: "No medias found!",
-        },
+        responses={200: ("User media successfully sent"), 204: "No medias found!"},
         security="apikey",
     )
     @jwt_required()
@@ -41,7 +40,7 @@ class StudioImageGet(Resource):
     @api.doc(
         "Get a user media",
         responses={
-            200: ("Image successfully sent", img_resp),
+            200: ("Image successfully sent", image_resp),
             404: "Image not found!",
         },
         security="apikey",
@@ -52,6 +51,14 @@ class StudioImageGet(Resource):
         current_user_id = get_jwt_identity()
         return StudioService.get_image(current_user_id, media_id)
 
+    @api.doc(
+        "Delete a user image",
+        responses={
+            200: ("Image successfully deleted", image_resp),
+            404: "Image not found!",
+        },
+        security="apikey",
+    )
     @jwt_required()
     def delete(self, media_id):
         """Delete user's image"""
@@ -61,7 +68,15 @@ class StudioImageGet(Resource):
 
 @api.route("/image")
 class StudioImagePost(Resource):
-    @api.expect(MediaDto.image, validate=False)
+    @api.doc(
+        "Get a user media",
+        responses={
+            200: ("Image successfully added", image_post),
+            403: "Invalid registry key",
+        },
+        security="apikey",
+    )
+    @api.expect(MediaDto.image_post, validate=False)
     @jwt_required()
     def post(self):
         """Add a user's image"""
@@ -78,7 +93,7 @@ class StudioVideoGet(Resource):
     @api.doc(
         "Get user's video",
         responses={
-            200: ("Video successfully sent", img_resp),
+            200: ("Video successfully sent", video_resp),
             404: "Video not found!",
         },
         security="apikey",
@@ -89,6 +104,14 @@ class StudioVideoGet(Resource):
         current_user_id = get_jwt_identity()
         return StudioService.get_video(current_user_id, media_id)
 
+    @api.doc(
+        "Delete user's video",
+        responses={
+            200: ("Video successfully deleted", video_resp),
+            404: "Video not found!",
+        },
+        security="apikey",
+    )
     @jwt_required()
     def delete(self, media_id):
         """Delete user's image"""
@@ -98,6 +121,15 @@ class StudioVideoGet(Resource):
 
 @api.route("/video")
 class StudioVideoPost(Resource):
+    @api.doc(
+        "Get a user media",
+        responses={
+            200: ("Video successfully added", video_post),
+            403: "Invalid registry key",
+        },
+        security="apikey",
+    )
+    @api.expect(MediaDto.video_post, validate=False)
     @jwt_required()
     def post(self):
         """Add a user's video"""
