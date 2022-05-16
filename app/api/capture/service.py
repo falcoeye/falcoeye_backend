@@ -2,7 +2,6 @@ from flask import current_app
 
 from app.api.registry import Registry
 from app.dbmodels.camera import Camera as Camera
-from app.dbmodels.camera import Streamer as DBStreamer
 from app.utils import err_resp, internal_err_resp, message
 
 from .streamer import Streamer
@@ -34,6 +33,7 @@ class CaptureService:
 
     @staticmethod
     def capture_image(user_id, camera_id):
+
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
@@ -42,8 +42,6 @@ class CaptureService:
         try:
             # accessing camera information
             url = camera.url
-            streamer_id = camera.streamer_id
-            streamer = DBStreamer.query.filter_by(id=streamer_id).first()
             resolution = "1080px"  # camera.resolution
 
             # creating a new registry key
@@ -59,11 +57,11 @@ class CaptureService:
             # setting registry status to capturing
             Registry.register_capturing(registry_key)
 
+            # TODO: This should provide the camera not the camera's url, so we can do both rtsp and others
             # Create capturing request
             resp, status_code = Streamer.capture_image(
                 registry_key,
                 url,
-                streamer.name,
                 resolution,
                 output_path,
                 current_app.config.get("STREAMER_HOST"),
@@ -132,8 +130,6 @@ class CaptureService:
         try:
             # accessing camera information
             url = camera.url
-            streamer_id = camera.streamer_id
-            streamer = DBStreamer.query.filter_by(id=streamer_id).first()
             resolution = "1080p"  # camera.resolution
 
             # creating a new registry key
@@ -149,11 +145,11 @@ class CaptureService:
             # setting registry status to recording
             Registry.register_recording(registry_key)
 
+            # TODO: This should provide the camera not the camera's url, so we can do both rtsp and others
             # Create recording request
             resp, status_code = Streamer.record_video(
                 registry_key,
                 url,
-                streamer.name,
                 resolution,
                 start,
                 end,

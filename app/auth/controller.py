@@ -58,6 +58,7 @@ class AuthRegister(Resource):
         responses={
             201: ("Successfully registered user.", auth_success),
             400: "Malformed data or validations failed.",
+            403: "Email is already being used.",
         },
     )
     @api.expect(auth_register, validate=False)

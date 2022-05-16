@@ -50,7 +50,7 @@ class AnalysisService:
             new_analysis = Analysis(
                 name=name,
                 creator=user_id,
-                creation_date=datetime.utcnow(),
+                created_at=datetime.utcnow(),
                 status="new",
                 workflow_id=workflow.id,
             )

@@ -6,7 +6,6 @@ from .aimodel.controller import api as aimodel_ns
 from .analysis.controller import api as analysis_ns
 from .camera.controller import api_camera as camera_ns
 from .camera.controller import api_manufacturer as manufacturer_ns
-from .camera.controller import api_streamer as streamer_ns
 from .capture.controller import api as capture_ns
 from .dataset.controller import api as dataset_ns
 from .studio.controller import api as studio_ns
@@ -26,7 +25,6 @@ api = Api(
 api.add_namespace(user_ns)
 api.add_namespace(studio_ns)
 api.add_namespace(camera_ns)
-api.add_namespace(streamer_ns)
 api.add_namespace(manufacturer_ns)
 api.add_namespace(capture_ns)
 api.add_namespace(manufacturer_ns)

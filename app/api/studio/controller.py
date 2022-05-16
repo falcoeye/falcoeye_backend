@@ -15,6 +15,7 @@ video_resp = MediaDto.video_resp
 image_resp = MediaDto.image_resp
 video_post = MediaDto.video_post
 image_post = MediaDto.image_post
+media_resp = MediaDto.media_resp
 
 image_schema = ImageSchema()
 video_schema = VideoSchema()
@@ -24,7 +25,10 @@ video_schema = VideoSchema()
 class StudioList(Resource):
     @api.doc(
         "Get a user media",
-        responses={200: ("User media successfully sent"), 204: "No medias found!"},
+        responses={
+            200: ("User media successfully sent", media_resp),
+            204: "No medias found!",
+        },
         security="apikey",
     )
     @jwt_required()
@@ -54,7 +58,7 @@ class StudioImageGet(Resource):
     @api.doc(
         "Delete a user image",
         responses={
-            200: ("Image successfully deleted", image_resp),
+            200: ("Image successfully deleted"),
             404: "Image not found!",
         },
         security="apikey",
@@ -71,7 +75,7 @@ class StudioImagePost(Resource):
     @api.doc(
         "Get a user media",
         responses={
-            200: ("Image successfully added", image_post),
+            200: ("Image successfully added", MediaDto.image),
             403: "Invalid registry key",
         },
         security="apikey",
@@ -107,14 +111,14 @@ class StudioVideoGet(Resource):
     @api.doc(
         "Delete user's video",
         responses={
-            200: ("Video successfully deleted", video_resp),
+            200: ("Video successfully deleted"),
             404: "Video not found!",
         },
         security="apikey",
     )
     @jwt_required()
     def delete(self, media_id):
-        """Delete user's image"""
+        """Delete user's video"""
         current_user_id = get_jwt_identity()
         return StudioService.delete_video(current_user_id, media_id)
 
@@ -124,7 +128,7 @@ class StudioVideoPost(Resource):
     @api.doc(
         "Get a user media",
         responses={
-            200: ("Video successfully added", video_post),
+            200: ("Video successfully added", MediaDto.video),
             403: "Invalid registry key",
         },
         security="apikey",

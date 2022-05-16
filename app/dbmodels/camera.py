@@ -33,21 +33,6 @@ class CameraManufacturer(Base):
         return f"<CameraManufacturer {self.name}>"
 
 
-class Streamer(Base):
-    """Streamer model for storing stream providers data"""
-
-    __tablename__ = "streamer"
-    id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(db.String(64), unique=True)
-    camera = relationship("Camera", back_populates="streamer", lazy="dynamic")
-
-    def __init__(self, **kwargs):
-        super(Streamer, self).__init__(**kwargs)
-
-    def __repr__(self):
-        return f"<Streamer {self.name}>"
-
-
 class Camera(Base):
     """Camera model for storing camera related data"""
 
@@ -59,14 +44,13 @@ class Camera(Base):
     owner_id = Column(GUID(), db.ForeignKey("user.id"))
     manufacturer_id = Column(GUID(), db.ForeignKey("camera_manufacturer.id"))
     manufacturer = relationship("CameraManufacturer", innerjoin=True)
-    streamer_id = Column(GUID(), db.ForeignKey("streamer.id"))
-    streamer = relationship("Streamer", innerjoin=True)
-    resolution_x = Column(db.Integer)
-    resolution_y = Column(db.Integer)
+    streaming_type = Column(db.String)
+    url = Column(db.String)
     username = Column(db.String)
     password = Column(db.String)
-    url = Column(db.String)
-    connection_date = Column(db.DateTime)
+    host = Column(db.String)
+    port = Column(db.Integer)
+    created_at = Column(db.DateTime)
     status = Column(db.Enum(CameraStatus), nullable=False)
 
     def __init__(self, **kwargs):

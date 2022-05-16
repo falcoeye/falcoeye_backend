@@ -1,16 +1,17 @@
+import datetime
+
 import dateutil.parser
 from flask import current_app
 
 from app import db
-from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
-from app.dbmodels.schemas import CameraManufacturerSchema, CameraSchema, StreamerSchema
+from app.dbmodels.camera import Camera, CameraManufacturer
+from app.dbmodels.schemas import CameraManufacturerSchema, CameraSchema
 from app.utils import err_resp, internal_err_resp, message
 
 from .utils import load_camera_data, load_manufacturer_data, load_streamer_data
 
 camera_schema = CameraSchema()
 manufacturer_schema = CameraManufacturerSchema()
-streamer_schema = StreamerSchema()
 
 
 class CameraService:
@@ -71,19 +72,19 @@ class CameraService:
 
     @staticmethod
     def create_camera(user_id, data):
+
         name = data["name"]
         manufacturer_id = data["manufacturer_id"]
-        streamer_id = data["streamer_id"]
+        streaming_type = data["streaming_type"]
+        host = data["host"]
+        port = data["port"]
+        username = data["username"]
+        password = data["password"]
         url = data["url"]
-
-        latitude = data.get("latitude")
-        longitude = data.get("longitude")
-        resolution_x = data.get("resolution_x")
-        resolution_y = data.get("resolution_y")
-        status = data.get("status")
-        connection_date = data.get("connection_date")
-        if connection_date:
-            connection_date = dateutil.parser.isoparse(connection_date)
+        latitude = data["latitude"]
+        longitude = data["longitude"]
+        status = data["status"]
+        created_at = datetime.utcnow()
 
         # check if manufacturer exists
         if not (
@@ -95,22 +96,21 @@ class CameraService:
                 "Manufacturer is not registered", "invalid_manufacturer", 403
             )
 
-        if not (streamer := Streamer.query.filter_by(id=streamer_id).first()):
-            return err_resp("streamer is not registered", "invalid_streamer", 403)
-
         try:
             new_camera = Camera(
                 name=name,
                 url=url,
+                host=host,
+                port=port,
+                username=username,
+                password=password,
                 owner_id=user_id,
                 manufacturer_id=manufacturer.id,
-                streamer_id=streamer.id,
+                streaming_type=streaming_type,
                 latitude=latitude,
                 longitude=longitude,
-                resolution_x=resolution_x,
-                resolution_y=resolution_y,
                 status=status,
-                connection_date=connection_date,
+                created_at=created_at,
             )
 
             db.session.add(new_camera)
@@ -130,24 +130,24 @@ class CameraService:
 
     @staticmethod
     def update_camera_by_id(user_id, camera_id, data):
-        name = data["name"]
-        manufacturer_id = data["manufacturer_id"]
-        streamer_id = data["streamer_id"]
-        url = data["url"]
-
-        latitude = data.get("latitude")
-        longitude = data.get("longitude")
-        resolution_x = data.get("resolution_x")
-        resolution_y = data.get("resolution_y")
-        status = data.get("status")
-        connection_date = data.get("connection_date")
-        if connection_date:
-            connection_date = dateutil.parser.isoparse(connection_date)
 
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
             return err_resp("Camera not found!", "camera_404", 404)
+
+        name = data.get("name", camera.name)
+        manufacturer_id = data.get("manufacturer_id", camera.manufacturer_id)
+        streaming_type = data.get("streaming_type", camera.streaming_type)
+        url = data.get("url", camera.url)
+        host = data.get("host", camera.host)
+        port = data.get("port", camera.port)
+        username = data.get("username", camera.username)
+        password = data.get("password", camera.password)
+        latitude = data.get("latitude", camera.latitude)
+        longitude = data.get("longitude", camera.longitude)
+        status = data.get("status", camera.status)
+        created_at = camera.created_at
 
         # check if manufacturer exists
         if not (
@@ -159,22 +159,21 @@ class CameraService:
                 "Manufacturer is not registered", "invalid_manufacturer", 403
             )
 
-        if not (streamer := Streamer.query.filter_by(id=streamer_id).first()):
-            return err_resp("streamer is not registered", "invalid_streamer", 403)
-
         try:
             updated_camera = Camera(
                 name=name,
                 url=url,
+                host=host,
+                port=port,
+                username=username,
+                password=password,
                 owner_id=user_id,
-                manufacturer_id=manufacturer.id,
-                streamer_id=streamer.id,
+                manufacturer_id=manufacturer_id,
+                streaming_type=streaming_type,
                 latitude=latitude,
                 longitude=longitude,
-                resolution_x=resolution_x,
-                resolution_y=resolution_y,
                 status=status,
-                connection_date=connection_date,
+                created_at=created_at,
             )
             camera = updated_camera
             db.session.commit()
@@ -294,107 +293,6 @@ class CameraManufacturerService:
             db.session.commit()
 
             resp = message(True, "Manufacturer deleted")
-            return resp, 200
-
-        except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
-
-
-class StreamerService:
-    @staticmethod
-    def get_streamer():
-        """Get a list of camera streamer"""
-        if not (streamers := Streamer.query.all()):
-            return err_resp("No streamer founds!", "streamer_404", 404)
-
-        try:
-            streamer_data = load_streamer_data(streamers, many=True)
-            resp = message(True, "Streamer data sent")
-            resp["streamer"] = streamer_data
-
-            return resp, 200
-
-        except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
-
-    @staticmethod
-    def get_streamer_by_id(streamer_id):
-        """Get camera streamer by ID"""
-        if not (streamer := Streamer.query.filter_by(id=streamer_id).first()):
-            return err_resp("Streamer not found!", "streamer_404", 404)
-
-        try:
-            streamer_data = load_streamer_data(streamer)
-            resp = message(True, "Streamer data sent")
-            resp["streamer"] = streamer_data
-
-            return resp, 200
-
-        except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
-
-    @staticmethod
-    def get_streamer_by_name(streamer_name):
-        """Get camera streamer by name"""
-        if not (streamer := Streamer.query.filter_by(name=streamer_name).first()):
-            return err_resp("Streamer not found!", "streamer_404", 404)
-
-        try:
-            streamer_data = load_streamer_data(streamer)
-            resp = message(True, "Streamer data sent")
-            resp["streamer"] = streamer_data
-
-            return resp, 200
-
-        except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
-
-    @staticmethod
-    def create_streamer(data):
-        name = data["name"]
-
-        # check if streamer exists
-        if Streamer.query.filter_by(name=name).first():
-            return err_resp("Streamer does exist", "existing_streamer", 403)
-
-        try:
-            new_streamer = Streamer(
-                name=name,
-            )
-
-            db.session.add(new_streamer)
-            db.session.flush()
-
-            streamer_info = streamer_schema.dump(new_streamer)
-            db.session.commit()
-
-            resp = message(True, "Streamer has been added")
-            resp["streamer"] = streamer_info
-
-            return resp, 201
-
-        except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
-
-    @staticmethod
-    def delete_streamer(user_id, streamer_id):
-        """Delete streamer from DB by streamer ID"""
-
-        # TODO: check if user is admin before deleting streamer
-
-        if not (streamer := Streamer.query.filter_by(id=streamer_id).first()):
-            return err_resp("Streamer not found!", "streamer_404", 404)
-
-        try:
-            db.session.delete(streamer)
-            db.session.commit()
-
-            resp = message(True, "Streamer deleted")
             return resp, 200
 
         except Exception as error:

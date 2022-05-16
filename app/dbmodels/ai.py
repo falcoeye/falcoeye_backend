@@ -58,7 +58,7 @@ class Analysis(Base):
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(db.String(64), unique=True)
     creator = Column(GUID(), db.ForeignKey("user.id"))
-    creation_date = Column(db.DateTime)
+    created_at = Column(db.DateTime)
     workflow_id = Column(GUID(), db.ForeignKey("workflow.id"))
     workflow = relationship("Workflow", innerjoin=True)
     status = Column(db.String)  # new, active, error, completed

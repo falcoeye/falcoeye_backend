@@ -87,30 +87,22 @@ class CameraSchema(ma.Schema):
         fields = (
             "id",
             "name",
-            "utm_x",
-            "utm_y",
+            "latitude",
+            "longitude",
             "manufacturer_id",
-            "streamer_id",
+            "streaming_type",
             "owner_id",
-            "resolution_x",
-            "resolution_y",
             "url",
-            "connection_date",
-            "status",
+            "host",
+            "port",
+            "username",
+            "password",
             "created_at",
-            "updated_at",
+            "status",
         )
 
 
 class CameraManufacturerSchema(ma.Schema):
-    # id = GUIDSerializationField(attribute="guid", required=True)
-    name = ma.fields.Str(required=False)
-
-    class Meta:
-        fields = ("id", "name", "created_at", "updated_at")
-
-
-class StreamerSchema(ma.Schema):
     # id = GUIDSerializationField(attribute="guid", required=True)
     name = ma.fields.Str(required=False)
 
@@ -147,7 +139,7 @@ class DatasetSchema(ma.Schema):
             "image_width",
             "image_height",
             "size_type",
-            "creation_date",
+            "created_at",
         )
 
 
@@ -174,7 +166,7 @@ class AnalysisSchema(ma.Schema):
             "id",
             "name",
             "creator",
-            "creation_date",
+            "created_at",
             "workflow_id",
             "status",
             "results_path",

@@ -7,7 +7,7 @@ class AnalysisDto:
         "Analysis Object",
         {
             "name": fields.String,
-            "creation_date": fields.DateTime,
+            "created_at": fields.DateTime,
             "workflow_id": fields.String,
             "status": fields.String,
             "results_path": fields.String,
