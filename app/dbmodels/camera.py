@@ -58,3 +58,14 @@ class Camera(Base):
 
     def __repr__(self):
         return f"<Camera {self.name}>"
+
+    def con_to_json(self):
+        if self.streaming_type == "StreamingServer":
+            return {"url": self.url}
+        elif self.streaming_type == "RTSP":
+            return {
+                "host": self.host,
+                "port": self.port,
+                "username": self.username,
+                "password": self.password,
+            }

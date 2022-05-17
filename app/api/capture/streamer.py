@@ -1,55 +1,40 @@
 import json
 
 import requests
+from flask import current_app
 
 from app.utils import internal_err_resp, message
 
 
 class Streamer:
     @staticmethod
-    def capture_image(
-        registry_key, url, stream_provider, resolution, output_path, streamer_host
-    ):
+    def capture_image(registry_key, camera, output_path):
+
         data = {
             "registry_key": registry_key,
-            "url": url,
-            "stream_provider": stream_provider,
-            "resolution": resolution,
+            "camera": camera.con_to_json(),
             "output_path": output_path,
         }
-        # TODO: re-implement streamer microservices with ducker and k8s in mind
-        # rv = requests.post(f"{streamer_host}/api/capture", data=json.dumps(data))
-        resp = message(True, "Capture request initiated")
-        return resp, 200
+        resp = requests.post(
+            f"{current_app.config.STREAMER_HOST}/api/capture", data=json.dumps(data)
+        )
+        return resp
 
     @staticmethod
     def record_video(
         registry_key,
-        url,
-        stream_provider,
-        resolution,
-        start,
-        end,
+        camera,
         length,
         output_path,
-        streamer_host,
     ):
-
-        # handle scheduling here
-        if end > 0:
-            length = min(60, end - start)
-        elif length <= 0:
-            length = 60
 
         data = {
             "registry_key": registry_key,
-            "url": url,
-            "stream_provider": stream_provider,
-            "resolution": resolution,
+            "camera": camera.con_to_json(),
             "length": length,
             "output_path": output_path,
         }
-        # TODO: re-implement streamer microservices with ducker and k8s in mind
-        # rv = requests.post(f"{streamer_host}/api/record", data=json.dumps(data))
-        resp = message(True, "Record request initiated")
-        return resp, 200
+        resp = requests.post(
+            f"{current_app.config.STREAMER_HOST}/api/record", data=json.dumps(data)
+        )
+        return resp

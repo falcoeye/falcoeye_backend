@@ -6,12 +6,10 @@ from flask_restx import Namespace, Resource, fields
 
 from app.utils import internal_err_resp, message
 
+from .dto import CaptureDto
 from .service import CaptureService
 
-api = Namespace("capture", description="Capture related operations.")
-capture_data = api.model(
-    "Capture data", {"camera_id": fields.String, "capture_type": fields.String}
-)
+api = CaptureDto.api
 
 
 @api.route("")
@@ -20,14 +18,15 @@ class Capture(Resource):
         "Capture media",
         # TODO: Check the other errors
         responses={
-            200: ("Capture request succeeded"),
+            200: ("Capture request succeeded", CaptureDto.capture_registry_key),
             400: ("Missing data: Camera id and capture type must be provided"),
+            403: ("Something went wrong. Couldn't initialize capturing request"),
             404: ("Camera not found!"),
         },
         security="apikey",
     )
     @jwt_required()
-    @api.expect(capture_data, validate=False)
+    @api.expect(CaptureDto.capture_post_data, validate=False)
     def post(self):
         """Initiate a caputre request"""
         data = request.get_json()
@@ -35,26 +34,45 @@ class Capture(Resource):
         return CaptureService.capture(user_id, data)
 
 
-@api.route("/status/<registry_key>")
+@api.route("/<registry_key>")
 @api.param("registry_key", "Registry key received from capture request")
-class Status(Resource):
+class CaptureData(Resource):
     @api.doc(
-        "Get a user media",
+        "Get a user capture data path",
         responses={
-            200: ("Capture status sent"),
-            403: ("Access to this capture status is forbidden"),
+            200: ("Capture data sent", CaptureDto.capture_data),
+            400: ("Capture data is not ready"),
+            403: ("Registry key not found"),
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, registry_key):
-        """Initiate a caputre status request"""
+        """Get a user capture data path"""
         current_user_id = get_jwt_identity()
         return CaptureService.get_capture_request_status(current_user_id, registry_key)
 
+
+@api.route("/status/<registry_key>")
+@api.param("registry_key", "Registry key received from capture request")
+class Status(Resource):
+    @api.doc(
+        "Get a user capture status",
+        responses={
+            200: ("Capture status sent", CaptureDto.capture_status),
+            403: ("Registry key not found"),
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, registry_key):
+        """Get a user capture status"""
+        current_user_id = get_jwt_identity()
+        return CaptureService.get_capture_request_status(current_user_id, registry_key)
+
+    # TODO: eliminate this
     # @jwt_required()
     def post(self, registry_key):
         # server_id = get_jwt_identity()
-        server_id = "test"
         data = request.get_json()
-        return CaptureService.set_capture_request_status(server_id, registry_key, data)
+        return CaptureService.set_capture_request_status(registry_key, data)

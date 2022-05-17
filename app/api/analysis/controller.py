@@ -9,8 +9,6 @@ from .dto import AnalysisDto
 from .service import AnalysisService
 
 api = AnalysisDto.api
-analysis_resp = AnalysisDto.analysis_resp
-
 analysis_schema = AnalysisSchema()
 
 
@@ -18,8 +16,8 @@ analysis_schema = AnalysisSchema()
 class AnalysisList(Resource):
     @api.doc(
         """Get a list of all analysiss""",
-        response={
-            200: ("Analysis data sent", analysis_resp),
+        responses={
+            200: ("Analysis data sent", AnalysisDto.analysis_list),
             404: "No analysiss found!",
         },
         security="apikey",
@@ -31,21 +29,18 @@ class AnalysisList(Resource):
 
     @api.doc(
         "Add a new analysis",
-        response={
-            201: ("Successfully added analysis", analysis_resp),
+        responses={
+            201: ("Successfully added analysis", AnalysisDto.analysis_resp),
             403: "Invalid data.",
-            404: "Invalid data.",
+            404: "Invalid data. Name already exists",
         },
         security="apikey",
     )
-    @api.expect(AnalysisDto.analysis, validate=False)
+    @api.expect(AnalysisDto.analysis_post, validate=False)
     @jwt_required()
     def post(self):
         analysis_data = request.get_json()
         user_id = get_jwt_identity()
-        if errors := analysis_schema.validate(analysis_data):
-            return validation_error(False, errors), 400
-
         return AnalysisService.create_analysis(user_id=user_id, data=analysis_data)
 
 
@@ -53,6 +48,11 @@ class AnalysisList(Resource):
 @api.param("analysis_id", " Analysis ID")
 class Analysis(Resource):
     @api.doc(
+        "Get user's analysis by id",
+        responses={
+            200: ("Analysis data sent", AnalysisDto.analysis_resp),
+            404: "Analysis not found!",
+        },
         security="apikey",
     )
     @jwt_required()
@@ -62,6 +62,11 @@ class Analysis(Resource):
         return AnalysisService.get_analysis_by_id(current_user_id, analysis_id)
 
     @api.doc(
+        "Delete user's analysis",
+        responses={
+            200: ("Analysis successfully deleted"),
+            404: "Analysis not found!",
+        },
         security="apikey",
     )
     @jwt_required()

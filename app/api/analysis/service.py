@@ -37,14 +37,14 @@ class AnalysisService:
 
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:
-                return err_resp("Invalid data.", "name_403", 403)
+                return err_resp("Invalid data. Name already exists", "name_404", 404)
 
             workflow_id = data.get("workflow_id", None)
-            if not workflow_id:
-                return err_resp("Invalid data.", "workflow_403", 403)
 
             # workflows are assumed to be accessable by everyone here
-            if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
+            if not workflow_id or not (
+                workflow := Workflow.query.filter_by(id=workflow_id).first()
+            ):
                 return err_resp("Invalid data.", "workflow_404", 404)
 
             new_analysis = Analysis(
