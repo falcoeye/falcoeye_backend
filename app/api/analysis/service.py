@@ -34,6 +34,7 @@ class AnalysisService:
     @staticmethod
     def create_analysis(user_id, data):
         try:
+            workflow_hostname = current_app.config.WORKFLOW_HOST_NAME
 
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:
@@ -60,7 +61,7 @@ class AnalysisService:
             db.session.commit()
 
             # TODO: send to workflow microservice here
-
+            # post_to_workflow()
             analysis_info = analysis_schema.dump(new_analysis)
             resp = message(True, "Analysis has been added.")
             resp["analysis"] = analysis_info

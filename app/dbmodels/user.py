@@ -11,11 +11,29 @@ relationship = db.relationship
 
 
 class Permission:
-    FOLLOW = 1
-    COMMENT = 2
-    WRITE = 4
-    MODERATE = 8
-    ADMIN = 16
+    ADD_WORKFLOW = 0
+    DELETE_WORKFLOW = 1
+    ADD_ANALYSIS = 2
+    VIEW_ANALYSIS = 3
+    DELETE_ANALYSIS = 4
+    STOP_ANALYSIS = 5
+    CHANGE_CAPTURE_STATUS = 6
+
+
+N = 16
+PERMISSIONS_BIN = [2 ** (i) for i in range(N)]
+
+
+def permissions_to_integer(permissions):
+    i = [0] * N
+    for p in permissions:
+        i[p] = PERMISSIONS_BIN[p]
+    return sum(i)
+
+
+def has_permission(intpermissions, perm_index):
+    b = bin(intpermissions).split("0b")[1]
+    return int(b[perm_index]) == 1
 
 
 class Role(Model):
@@ -39,44 +57,33 @@ class Role(Model):
     @staticmethod
     def insert_roles():
         roles = {
-            "User": [Permission.FOLLOW, Permission.COMMENT, Permission.WRITE],
-            "Moderator": [
-                Permission.FOLLOW,
-                Permission.COMMENT,
-                Permission.WRITE,
-                Permission.MODERATE,
+            "User": [
+                Permission.ADD_ANALYSIS,
+                Permission.VIEW_ANALYSIS,
+                Permission.DELETE_ANALYSIS,
             ],
             "Admin": [
-                Permission.FOLLOW,
-                Permission.COMMENT,
-                Permission.WRITE,
-                Permission.MODERATE,
-                Permission.ADMIN,
+                Permission.ADD_WORKFLOW,
+                Permission.DELETE_WORKFLOW,
+                Permission.ADD_ANALYSIS,
+                Permission.VIEW_ANALYSIS,
+                Permission.DELETE_ANALYSIS,
+                Permission.STOP_ANALYSIS,
+                Permission.CHANGE_CAPTURE_STATUS,
             ],
         }
 
         default_role = "User"
-        for r in roles:
+        for r, p in roles.items():
             role = Role.query.filter_by(name=r).first()
             if role is None:
-                role = Role(name=r)
+                role = Role(name=r, permissions=permissions_to_integer(p))
                 db.session.add(role)
 
         db.session.commit()
 
     def has_permission(self, perm):
-        return self.permissions & perm == perm
-
-    def add_permission(self, perm):
-        if not self.has_permission(perm):
-            self.permissions += perm
-
-    def remove_permission(self, perm):
-        if self.has_permission(perm):
-            self.permissions -= perm
-
-    def reset_permission(self):
-        self.permissions = 0
+        return self.permissions & has_permission(self.permissions, perm)
 
 
 class User(Model):
@@ -108,3 +115,7 @@ class User(Model):
 
     def __repr__(self):
         return f"<User {self.username}>"
+
+    def has_permission(self, permission):
+        role = Role.query.filter_by(id=self.role_id).first()
+        return role.has_permission(permission)

@@ -21,7 +21,7 @@ class CameraList(Resource):
     @api_camera.doc(
         "Get a list of user's cameras",
         responses={
-            200: ("Camera data successfully sent", CameraDto.camera_short),
+            200: ("Camera data successfully sent", CameraDto.camera_list),
             404: "No cameras found!",
         },
         security="apikey",

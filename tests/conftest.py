@@ -6,7 +6,7 @@ import pytest
 from app import create_app
 from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
-from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
+from app.dbmodels.camera import Camera, CameraManufacturer
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
 
@@ -42,10 +42,33 @@ def db(app, client, request):
 
 @pytest.fixture
 def user(db):
+    Role.insert_roles()
     user = User(email=EMAIL, password=PASSWORD, username=USERNAME)
     db.session.add(user)
     db.session.commit()
     return user
+
+
+@pytest.fixture
+def streaming_admin(db):
+    a = {
+        "email": "FALCOEYE_STREAMING@falcoeye.ai",
+        "password": "FALCOEYE_STREAMING_PASS",
+        "username": "FALCOEYE_STREAMING",
+        "name": "FALCOEYE STREAMING",
+    }
+    Role.insert_roles()
+    role = Role.query.filter_by(name="Admin").first()
+    user = User(
+        email=a["email"],
+        password=a["password"],
+        username=a["username"],
+        name=a["name"],
+        role_id=role.id,
+    )
+    db.session.add(user)
+    db.session.commit()
+    return a
 
 
 @pytest.fixture
@@ -57,20 +80,12 @@ def manufacturer(db):
 
 
 @pytest.fixture
-def streamer(db):
-    streamer = Streamer(name="youtube")
-    db.session.add(streamer)
-    db.session.commit()
-    return streamer
-
-
-@pytest.fixture
-def camera(db, user, manufacturer, streamer):
+def camera(db, user, manufacturer):
     camera = Camera(
         name="DummyCamera",
         status="RUNNING",
         manufacturer_id=manufacturer.id,
-        streamer_id=streamer.id,
+        streaming_type="StreamingServer",
         owner_id=user.id,
         url="https://test.test.com",
     )
@@ -85,7 +100,7 @@ def harbour_camera(db, user, manufacturer, streamer):
         name="Harbour Village Bonaire Coral Reef",
         status="RUNNING",
         manufacturer_id=manufacturer.id,
-        streamer_id=streamer.id,
+        streaming_type="StreamingServer",
         owner_id=user.id,
         url="https://www.youtube.com/watch?v=tk-qJJbdOh4",
     )

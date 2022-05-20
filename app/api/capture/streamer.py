@@ -14,9 +14,10 @@ class Streamer:
             "registry_key": registry_key,
             "camera": camera.con_to_json(),
             "output_path": output_path,
+            "capture_type": "image",
         }
         resp = requests.post(
-            f"{current_app.config.STREAMER_HOST}/api/capture", data=json.dumps(data)
+            f"{current_app.config['STREAMER_HOST']}/api/capture", data=json.dumps(data)
         )
         return resp
 
@@ -33,8 +34,9 @@ class Streamer:
             "camera": camera.con_to_json(),
             "length": length,
             "output_path": output_path,
+            "capture_type": "video",
         }
         resp = requests.post(
-            f"{current_app.config.STREAMER_HOST}/api/record", data=json.dumps(data)
+            f"{current_app.config['STREAMER_HOST']}/api/capture", data=json.dumps(data)
         )
         return resp

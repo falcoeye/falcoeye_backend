@@ -68,11 +68,10 @@ class Status(Resource):
     def get(self, registry_key):
         """Get a user capture status"""
         current_user_id = get_jwt_identity()
-        return CaptureService.get_capture_request_status(current_user_id, registry_key)
+        return CaptureService.get_capture_status(current_user_id, registry_key)
 
-    # TODO: eliminate this
-    # @jwt_required()
+    @jwt_required()
     def post(self, registry_key):
-        # server_id = get_jwt_identity()
+        server_id = get_jwt_identity()
         data = request.get_json()
-        return CaptureService.set_capture_request_status(registry_key, data)
+        return CaptureService.set_capture_status(server_id, registry_key, data)

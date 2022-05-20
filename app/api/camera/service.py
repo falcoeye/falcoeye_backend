@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import dateutil.parser
 from flask import current_app

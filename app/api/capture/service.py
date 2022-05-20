@@ -1,14 +1,10 @@
 from flask import current_app
 
 from app import db
-from app.api.registry import (
-    Registry,
-    RegistryStatus,
-    change_status,
-    get_status,
-    register,
-)
+from app.api.registry import change_status, get_status, register
 from app.dbmodels.camera import Camera as Camera
+from app.dbmodels.Registry import Registry
+from app.dbmodels.user import Permission, Role, User
 from app.utils import err_resp, internal_err_resp, message
 
 from .streamer import Streamer
@@ -60,15 +56,15 @@ class CaptureService:
             db.session.commit()
 
             # Create capturing request
-            resp = Streamer.capture_image(registry_object.id, camera, output_path)
+            resp = Streamer.capture_image(str(registry_object.id), camera, output_path)
 
             if resp.status_code == 200:
                 resp = message(True, "Capture request succeeded")
-                resp["registry_key"] = registry_object.id
+                resp["registry_key"] = str(registry_object.id)
                 return resp, 200
             else:
                 # setting registry status to capturing
-                change_status(registry_object.id, "FAILED")
+                change_status(str(registry_object.id), "FAILED")
                 err_resp(
                     "Something went wrong. Couldn't initialize capturing request",
                     "capture_403",
@@ -97,7 +93,7 @@ class CaptureService:
                 f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos'
             )
             mkdir(user_video_data)
-            output_path = f"{user_video_data}/{registry_object.id}.mp4"
+            output_path = f"{user_video_data}/{str(registry_object.id)}.mp4"
 
             # TODO: not sure how to name file with registry object id before generating the object
             registry_object.capture_path = output_path
@@ -106,16 +102,16 @@ class CaptureService:
 
             # Create recording request
             resp = Streamer.record_video(
-                registry_object.id, camera, length, output_path
+                str(registry_object.id), camera, length, output_path
             )
 
             if resp.status_code == 200:
                 resp = message(True, "Capture request succeeded")
-                resp["registry_key"] = registry_object.id
+                resp["registry_key"] = str(registry_object.id)
                 return resp, 200
             else:
                 # setting registry status to capturing
-                change_status(registry_object.id, "FAILED")
+                change_status(str(registry_object.id), "FAILED")
                 err_resp(
                     "Something went wrong. Couldn't initialize capturing request",
                     "capture_404",
@@ -144,17 +140,23 @@ class CaptureService:
     @staticmethod
     def get_capture_status(user_id, registry_key):
 
-        if not (registry_item := Registry.query.filter_by(id=registry_key).first()):
+        if not (registry_status := get_status(registry_key)):
             # TODO: check on the numbers 403
             return err_resp("Registry key not found", "not_found_403", 403)
 
         resp = message(True, "Capture status sent")
-        resp["capture_status"] = registry_item.status
+        resp["capture_status"] = registry_status
         return resp, 200
 
-    # TODO eliminate this
     @staticmethod
-    def set_capture_status(registry_key, data):
+    def set_capture_status(server_id, registry_key, data):
+        if not (user := User.query.filter_by(id=server_id).first()):
+            return err_resp("User not found!", "user_404", 404)
+
+        # only admin is allowed
+        if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
+            return err_resp("Access denied", "role_403", 403)
+
         new_status = data.get("status")
         change_status(registry_key, new_status)
         return message(True, "Change status has been handled"), 200

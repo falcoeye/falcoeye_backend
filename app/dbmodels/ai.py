@@ -62,4 +62,5 @@ class Analysis(Base):
     workflow_id = Column(GUID(), db.ForeignKey("workflow.id"))
     workflow = relationship("Workflow", innerjoin=True)
     status = Column(db.String)  # new, active, error, completed
+    message = Column(db.String)
     results_path = Column(db.String)

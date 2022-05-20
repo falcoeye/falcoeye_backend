@@ -3,11 +3,11 @@ from datetime import datetime
 from flask import current_app
 
 from app import db
-from app.api.registry import Registry, RegistryStatus
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
+from app.registry import get_status
 from app.utils import err_resp, internal_err_resp, message
 
 from .utils import load_image_data, load_video_data
@@ -59,11 +59,11 @@ class StudioService:
 
         registry_key = data.get("registry_key", None)
 
-        if not registry_key or not (status := Registry.check_status(registry_key)):
-            return err_resp("Invalid registry key", "registry_404", 403)
+        if not registry_key or not (status := get_status(registry_key)):
+            return err_resp("Invalid registry key", "registry_404", 404)
 
-        if status != RegistryStatus.READYTOSUBMIT:
-            return err_resp("Invalid registry key", "registry_404", 403)
+        if status == "FAILED":
+            return err_resp("Registry item failed", "registry_404", 404)
 
         # TODO: camera id and workflow name, if any, should be part of the metadata of the image
 
@@ -120,11 +120,11 @@ class StudioService:
 
         registry_key = data.get("registry_key", None)
 
-        if not registry_key or not (status := Registry.check_status(registry_key)):
-            return err_resp("Invalid registry key", "registry_404", 403)
+        if not registry_key or not (status := get_status(registry_key)):
+            return err_resp("Invalid registry key", "registry_404", 404)
 
-        if status != RegistryStatus.READYTOSUBMIT:
-            return err_resp("Invalid registry key", "registry_404", 403)
+        if status == "FAILED":
+            return err_resp("Registry item failed", "registry_404", 404)
 
         try:
             new_video = Video(user=user_id, tags=tags, note=note)
