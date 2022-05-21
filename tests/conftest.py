@@ -1,5 +1,5 @@
 """Global pytest fixtures."""
-import datetime
+from datetime import datetime
 
 import pytest
 
@@ -7,6 +7,7 @@ from app import create_app
 from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
 from app.dbmodels.camera import Camera, CameraManufacturer
+from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
 
@@ -95,7 +96,7 @@ def camera(db, user, manufacturer):
 
 
 @pytest.fixture
-def harbour_camera(db, user, manufacturer, streamer):
+def harbour_camera(db, user, manufacturer):
     harbour_camera = Camera(
         name="Harbour Village Bonaire Coral Reef",
         status="RUNNING",
@@ -107,6 +108,34 @@ def harbour_camera(db, user, manufacturer, streamer):
     db.session.add(harbour_camera)
     db.session.commit()
     return harbour_camera
+
+
+@pytest.fixture
+def registry_image(db, user, camera):
+    registry = Registry(
+        camera_id=str(camera.id),
+        user=str(user.id),
+        media_type="image",
+        status="STARTED",
+        capture_path="",
+    )
+    db.session.add(registry)
+    db.session.commit()
+    return registry
+
+
+@pytest.fixture
+def registry_video(db, user, camera):
+    registry = Registry(
+        camera_id=str(camera.id),
+        user=str(user.id),
+        media_type="video",
+        status="STARTED",
+        capture_path="",
+    )
+    db.session.add(registry)
+    db.session.commit()
+    return registry
 
 
 @pytest.fixture
@@ -156,7 +185,7 @@ def aimodel(db, user, dataset):
     model = AIModel(
         name="FourtyThreeFish",
         creator=user.id,
-        publish_date=datetime.datetime.now(),
+        publish_date=datetime.now(),
         architecture="frcnn",
         backbone="resnet50",
         dataset_id=dataset.id,
@@ -173,15 +202,13 @@ def workflow(db, user, aimodel):
     workflow = Workflow(
         name="FishCounter",
         creator=user.id,
-        publish_date=datetime.datetime.now(),
+        publish_date=datetime.now(),
         aimodel_id=aimodel.id,
         structure_file="/path/to/workflow.json",
         usedfor="detecting stuff",
         consideration="be careful",
         assumption="barely works",
-        accepted_media="Video|Camera",
         results_description="stuff",
-        results_type="csv",
         thumbnail_url="/path/to/thumbnail.jpg",
     )
     db.session.add(workflow)
@@ -193,10 +220,12 @@ def workflow(db, user, aimodel):
 def analysis(db, user, workflow):
     analysis = Analysis(
         name="analysis",
-        creator=user.id,
-        workflow_id=workflow.id,
+        creator=str(user.id),
+        workflow_id=str(workflow.id),
         status="completed",
         results_path="/path/to/results",
+        message="",
+        created_at=datetime.utcnow(),
     )
     db.session.add(analysis)
     db.session.commit()

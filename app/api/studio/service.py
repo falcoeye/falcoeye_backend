@@ -3,11 +3,11 @@ from datetime import datetime
 from flask import current_app
 
 from app import db
+from app.api.registry import get_status
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
-from app.registry import get_status
 from app.utils import err_resp, internal_err_resp, message
 
 from .utils import load_image_data, load_video_data
@@ -56,7 +56,8 @@ class StudioService:
     def create_image(user_id, data):
         note = data.get("note", "")
         tags = data.get("tags", "")
-
+        camera_id = data.get("camera_id", None)
+        workflow_id = data.get("workflow_id", None)
         registry_key = data.get("registry_key", None)
 
         if not registry_key or not (status := get_status(registry_key)):
@@ -69,7 +70,14 @@ class StudioService:
 
         # user only send registry key here.
         try:
-            new_image = Image(user=user_id, tags=tags, note=note)
+            new_image = Image(
+                user=user_id,
+                tags=tags,
+                note=note,
+                camera_id=camera_id,
+                workflow_id=workflow_id,
+                created_at=datetime.utcnow(),
+            )
             db.session.add(new_image)
             db.session.flush()
             db.session.commit()
@@ -117,6 +125,10 @@ class StudioService:
     def create_video(user_id, data):
         note = data.get("note", "")
         tags = data.get("tags", "")
+        camera_id = data.get("camera_id", None)
+        workflow_id = data.get("workflow_id", None)
+        registry_key = data.get("registry_key", None)
+        duration = data.get("duration", -1)
 
         registry_key = data.get("registry_key", None)
 
@@ -127,7 +139,15 @@ class StudioService:
             return err_resp("Registry item failed", "registry_404", 404)
 
         try:
-            new_video = Video(user=user_id, tags=tags, note=note)
+            new_video = Video(
+                user=user_id,
+                tags=tags,
+                note=note,
+                camera_id=camera_id,
+                workflow_id=workflow_id,
+                created_at=datetime.utcnow(),
+                duration=duration,
+            )
             db.session.add(new_video)
             db.session.flush()
             db.session.commit()

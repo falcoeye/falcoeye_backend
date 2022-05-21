@@ -56,11 +56,10 @@ class VideoSchema(ma.Schema):
 
 class ImageSchema(ma.Schema):
     # id = GUIDSerializationField(attribute="guid",required=True)
-    camera_id = GUIDSerializationField(attribute="camera_id", required=True)
+    # camera_id = GUIDSerializationField(attribute="camera_id", required=True)
     # user = GUIDSerializationField(attribute="user",required=True)
     note = ma.fields.Str(required=False)
     tags = ma.fields.Str(required=False)
-    workflow = GUIDSerializationField(attribute="workflow", required=False)
 
     class Meta:
         model_converter = GUIDConverter

@@ -85,8 +85,6 @@ class StudioImagePost(Resource):
     def post(self):
         """Add a user's image"""
         image_data = request.get_json()
-        if errors := image_schema.validate(image_data):
-            return validation_error(False, errors), 400
         user_id = get_jwt_identity()
         return StudioService.create_image(user_id=user_id, data=image_data)
 
@@ -138,7 +136,5 @@ class StudioVideoPost(Resource):
     def post(self):
         """Add a user's video"""
         video_data = request.get_json()
-        if errors := video_schema.validate(video_data):
-            return validation_error(False, errors), 400
         user_id = get_jwt_identity()
         return StudioService.create_video(user_id=user_id, data=video_data)

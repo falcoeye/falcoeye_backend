@@ -25,9 +25,7 @@ def test_add_workflow(client, user, aimodel):
         "usedfor": "detecting stuff",
         "consideration": "be careful",
         "assumption": "barely works",
-        "accepted_media": "Video|Camera",
         "results_description": "stuff",
-        "results_type": "csv",
         "thumbnail_url": "/path/to/thumbnail.jpg",
     }
     resp = client.post(

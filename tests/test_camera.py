@@ -8,7 +8,7 @@ from .utils import login_user
 camera_schema = CameraSchema()
 
 
-def test_add_camera(client, user, manufacturer, streamer):
+def test_add_camera(client, user, manufacturer):
     resp = login_user(client)
     assert "access_token" in resp.json
 
@@ -18,7 +18,7 @@ def test_add_camera(client, user, manufacturer, streamer):
     data = {
         "name": "dummy camera",
         "manufacturer_id": str(manufacturer.id),
-        "streamer_id": str(streamer.id),
+        "streaming_type": "StreamingServer",
         "url": "https://test.test.com",
         "owner_id": str(user.id),
         "status": "RUNNING",

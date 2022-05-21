@@ -9,7 +9,6 @@ from .dto import WorkflowDto
 from .service import WorkflowService
 
 api = WorkflowDto.api
-workflow_resp = WorkflowDto.workflow_resp
 
 workflow_schema = WorkflowSchema()
 
@@ -18,8 +17,8 @@ workflow_schema = WorkflowSchema()
 class WorkflowList(Resource):
     @api.doc(
         """Get a list of all workflows""",
-        response={
-            200: ("Workflow data succesffuly sent", workflow_resp),
+        responses={
+            200: ("Workflow data succesffuly sent", WorkflowDto.workflow_list),
             404: "No workflows found",
         },
         security="apikey",
@@ -31,13 +30,13 @@ class WorkflowList(Resource):
 
     @api.doc(
         "Add a new workflow",
-        response={
-            201: ("Successfully added workflow", workflow_resp),
+        responses={
+            201: ("Successfully added workflow", WorkflowDto.workflow_resp),
             400: "Malformed data or validations failed.",
         },
         security="apikey",
     )
-    @api.expect(WorkflowDto.workflow, validate=False)
+    @api.expect(WorkflowDto.workflow_post_data, validate=False)
     @jwt_required()
     def post(self):
         workflow_data = request.get_json()
@@ -52,6 +51,11 @@ class WorkflowList(Resource):
 @api.param("workflow_id", " Workflow ID")
 class Workflow(Resource):
     @api.doc(
+        "Show a worfklow item",
+        responses={
+            200: ("Workflow data successfully sent", WorkflowDto.workflow_resp),
+            404: "No workflow found!",
+        },
         security="apikey",
     )
     @jwt_required()
@@ -61,6 +65,11 @@ class Workflow(Resource):
         return WorkflowService.get_workflow_by_id(workflow_id)
 
     @api.doc(
+        "Delete a workflow",
+        responses={
+            200: ("Workflow successfully deleted"),
+            404: "Workflow not found!",
+        },
         security="apikey",
     )
     @jwt_required()

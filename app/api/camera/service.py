@@ -76,14 +76,14 @@ class CameraService:
         name = data["name"]
         manufacturer_id = data["manufacturer_id"]
         streaming_type = data["streaming_type"]
-        host = data["host"]
-        port = data["port"]
-        username = data["username"]
-        password = data["password"]
-        url = data["url"]
-        latitude = data["latitude"]
-        longitude = data["longitude"]
-        status = data["status"]
+        host = data.get("host", None)
+        port = data.get("port", None)
+        username = data.get("username", None)
+        password = data.get("password", None)
+        url = data.get("url", None)
+        latitude = data.get("latitude", None)
+        longitude = data.get("longitude", None)
+        status = data.get("status", "stopped")
         created_at = datetime.utcnow()
 
         # check if manufacturer exists

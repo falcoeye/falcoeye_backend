@@ -34,7 +34,7 @@ class AnalysisService:
     @staticmethod
     def create_analysis(user_id, data):
         try:
-            workflow_hostname = current_app.config.WORKFLOW_HOST_NAME
+            workflow_hostname = current_app.config["WORKFLOW_HOST"]
 
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:

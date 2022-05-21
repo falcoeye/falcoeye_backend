@@ -11,7 +11,7 @@ def test_list_analysis(client, analysis):
     resp = client.get("/api/analysis/", headers=headers)
     assert resp.status_code == 200
     assert len(resp.json.get("analysis")) == 1
-    assert resp.json.get("message") == "analysis data sent"
+    assert resp.json.get("message") == "Analysis data sent"
 
 
 def test_add_analysis(client, user, workflow):

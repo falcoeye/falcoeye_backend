@@ -52,9 +52,7 @@ class WorkflowService:
                 usedfor=data["usedfor"],
                 consideration=data["consideration"],
                 assumption=data["assumption"],
-                accepted_media=data["accepted_media"],
                 results_description=data["results_description"],
-                results_type=data["results_type"],
                 thumbnail_url=data["thumbnail_url"],
             )
 

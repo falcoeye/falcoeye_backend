@@ -47,9 +47,7 @@ class Workflow(Base):
     usedfor = Column(db.String)
     consideration = Column(db.String)
     assumption = Column(db.String)
-    accepted_media = Column(db.String)  # stream | videos | images
     results_description = Column(db.String)
-    results_type = Column(db.String)  # csv    | videos | images
     thumbnail_url = Column(db.String)
 
 

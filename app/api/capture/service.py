@@ -3,7 +3,7 @@ from flask import current_app
 from app import db
 from app.api.registry import change_status, get_status, register
 from app.dbmodels.camera import Camera as Camera
-from app.dbmodels.Registry import Registry
+from app.dbmodels.registry import Registry
 from app.dbmodels.user import Permission, Role, User
 from app.utils import err_resp, internal_err_resp, message
 
