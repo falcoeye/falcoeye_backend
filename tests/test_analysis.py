@@ -1,8 +1,24 @@
 import datetime
 import json
+import os
 import uuid
+from unittest import mock
 
 from .utils import login_user
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+def mocked_workflow_post(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        def response(self):
+            return self.json_data, self.status_code
+
+    return MockResponse({"status": True, "message": "Analysis started"}, 200)
 
 
 def test_list_analysis(client, analysis):
@@ -14,7 +30,8 @@ def test_list_analysis(client, analysis):
     assert resp.json.get("message") == "Analysis data sent"
 
 
-def test_add_analysis(client, user, workflow):
+@mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
+def test_add_analysis(mock_post, client, user, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     data = {
@@ -22,6 +39,12 @@ def test_add_analysis(client, user, workflow):
         "creator": str(user.id),
         "workflow_id": str(workflow.id),
         "status": "new",
+        "args": {
+            "filename": f"{basedir}/tests/media/lutjanis.mov",
+            "sample_every": 30,
+            "min_score_thresh": 0.30,
+            "max_boxes": 30,
+        },
     }
     resp = client.post(
         "/api/analysis/",

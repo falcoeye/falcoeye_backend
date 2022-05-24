@@ -40,23 +40,19 @@ class CaptureService:
             return err_resp("Camera not found!", "camera_404", 404)
 
         try:
-            # creating a new registry item
-            registry_object = register(user_id, camera_id, "image")
-
             # preparing storing information
             user_image_data = (
                 f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
             )
             mkdir(user_image_data)
-            output_path = f"{user_image_data}/{registry_object.id}.jpg"
 
-            # TODO: not sure how to name file with registry object id before generating the object
-            registry_object.capture_path = output_path
-            db.session.flush()
-            db.session.commit()
+            # creating a new registry item
+            registry_object = register(user_id, camera_id, "image", user_image_data)
 
             # Create capturing request
-            resp = Streamer.capture_image(str(registry_object.id), camera, output_path)
+            resp = Streamer.capture_image(
+                str(registry_object.id), camera, registry_object.capture_path
+            )
 
             if resp.status_code == 200:
                 resp = message(True, "Capture request succeeded")
@@ -85,24 +81,19 @@ class CaptureService:
 
         try:
 
-            # creating a new registry key
-            registry_object = register(user_id, camera_id, "video")
-
             # preparing storing information
             user_video_data = (
                 f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos'
             )
             mkdir(user_video_data)
-            output_path = f"{user_video_data}/{str(registry_object.id)}.mp4"
 
-            # TODO: not sure how to name file with registry object id before generating the object
-            registry_object.capture_path = output_path
-            db.session.flush()
-            db.session.commit()
+            # creating a new registry key
+            registry_object = register(user_id, camera_id, "video", user_video_data)
 
-            # Create recording request
+            # Create recording request. Output path (registry_object.capture_path)
+            # is created in register function
             resp = Streamer.record_video(
-                str(registry_object.id), camera, length, output_path
+                str(registry_object.id), camera, length, registry_object.capture_path
             )
 
             if resp.status_code == 200:

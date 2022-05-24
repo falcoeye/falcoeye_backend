@@ -1,5 +1,7 @@
+import json
 from datetime import datetime
 
+import requests
 from flask import current_app
 
 from app import db
@@ -8,7 +10,7 @@ from app.dbmodels.ai import Workflow as Workflow
 from app.dbmodels.schemas import AnalysisSchema
 from app.utils import err_resp, internal_err_resp, message
 
-from .utils import load_analysis_data
+from .utils import load_analysis_data, load_workflow_structure
 
 analysis_schema = AnalysisSchema()
 
@@ -35,7 +37,6 @@ class AnalysisService:
     def create_analysis(user_id, data):
         try:
             workflow_hostname = current_app.config["WORKFLOW_HOST"]
-
             name = data["name"]
             if Analysis.query.filter_by(name=name).first() is not None:
                 return err_resp("Invalid data. Name already exists", "name_404", 404)
@@ -55,18 +56,42 @@ class AnalysisService:
                 status="new",
                 workflow_id=workflow.id,
             )
+            storage_path = f"{current_app.config['ANALYSIS_STORAGE']}/{new_analysis.id}"
+            new_analysis.results_path = storage_path
 
+            # Analysis started. create a db object
             db.session.add(new_analysis)
             db.session.flush()
             db.session.commit()
 
-            # TODO: send to workflow microservice here
-            # post_to_workflow()
-            analysis_info = analysis_schema.dump(new_analysis)
-            resp = message(True, "Analysis has been added.")
-            resp["analysis"] = analysis_info
-            return resp, 201
+            wf_structure = load_workflow_structure(workflow.structure_file)
+            wf_args = data.get("args", {})
+            # This is where analysis output will be stored. Must be augmented here
+            wf_args["prefix"] = storage_path
+            data = {
+                "analysis": {"id": str(new_analysis.id), "args": wf_args},
+                "workflow": wf_structure,
+            }
+            wf_resp = requests.post(
+                f"{current_app.config['WORKFLOW_HOST']}/api/analysis",
+                data=json.dumps(data),
+            )
+
+            if wf_resp.status_code == 200:
+                analysis_info = analysis_schema.dump(new_analysis)
+                resp = message(True, "Analysis has been added.")
+                resp["analysis"] = analysis_info
+                return resp, 201
+            else:
+                err_resp(
+                    "Something went wrong. Couldn't start the workflow",
+                    "analysis_403",
+                    403,
+                )
+                return err_resp, 403
+
         except Exception as error:
+            raise
             current_app.logger.error(error)
             return internal_err_resp()
 

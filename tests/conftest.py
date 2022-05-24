@@ -1,4 +1,5 @@
 """Global pytest fixtures."""
+import os
 from datetime import datetime
 
 import pytest
@@ -12,6 +13,8 @@ from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
 
 from .utils import EMAIL, PASSWORD, USERNAME
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 @pytest.fixture
@@ -204,7 +207,7 @@ def workflow(db, user, aimodel):
         creator=user.id,
         publish_date=datetime.now(),
         aimodel_id=aimodel.id,
-        structure_file="/path/to/workflow.json",
+        structure_file=f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json",
         usedfor="detecting stuff",
         consideration="be careful",
         assumption="barely works",

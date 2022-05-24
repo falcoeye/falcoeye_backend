@@ -1,8 +1,11 @@
 import datetime
 import json
+import os
 import uuid
 
 from .utils import login_user
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 def test_list_workflow(client, workflow):
@@ -21,7 +24,7 @@ def test_add_workflow(client, user, aimodel):
         "name": "FishCounter",
         "creator": str(user.id),
         "aimodel_id": str(aimodel.id),
-        "structure_file": "/path/to/workflow.json",
+        "structure_file": f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json",
         "usedfor": "detecting stuff",
         "consideration": "be careful",
         "assumption": "barely works",

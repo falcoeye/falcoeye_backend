@@ -10,16 +10,22 @@ def get_status(registry_id):
     return registry_item.status
 
 
-def register(user_id, camera_id, media_type, capture_path=""):
+def register(user_id, camera_id, media_type, prefix):
     try:
+
         new_registry_item = Registry(
             user=user_id,
             media_type=media_type,
             camera_id=camera_id,
             status="STARTED",
             created_at=datetime.utcnow(),
-            capture_path=capture_path,
         )
+        if media_type == "image":
+            capture_path = f"{prefix}/{new_registry_item.id}.jpg"
+        elif media_type == "video":
+            capture_path = f"{prefix}/{new_registry_item.id}.mp4"
+
+        new_registry_item.capture_path = capture_path
 
         db.session.add(new_registry_item)
         db.session.flush()
