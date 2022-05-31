@@ -24,7 +24,9 @@ class Config:
     # Streamer config
     STREAMER_HOST = os.environ.get("STREAMER_HOST", "http://127.0.0.1:5000")
     WORKFLOW_HOST = os.environ.get("WORKFLOW_HOST", "http://127.0.0.1:7000")
-    ANALYSIS_STORAGE = f"{basedir}/../faloceye_storage/"
+    ANALYSIS_STORAGE = os.environ.get(
+        "ANALYSIS_STORAGE", f"{basedir}/../faloceye_storage/"
+    )
 
 
 class DevelopmentConfig(Config):
