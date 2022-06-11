@@ -1,0 +1,20 @@
+[
+    // Manufacturer
+    {
+        "name": "ViewIntoTheBlue"
+    },
+    // Camera
+    {
+        "name": "Harbour Village Bonaire Coral Reef",
+        "manufacturer_id": "cbdb1a23-8113-4bf2-af89-a1a124a4c5c8",
+        "streaming_type": "StreamingServer",
+        "url": "https://www.youtube.com/watch?v=tk-qJJbdOh4",
+        "status": "RUNNING"
+    },
+    // Capture Image
+    {
+        "camera_id": "d4c9df5b-5c98-44c0-95cf-f058ecc8548c",
+        "capture_type": "image"
+    }
+
+]

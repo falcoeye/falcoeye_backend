@@ -16,11 +16,10 @@ def test_add_camera(client, user, manufacturer):
     headers = {"X-API-KEY": access_token}
 
     data = {
-        "name": "dummy camera",
+        "name": "Harbour Village Bonaire Coral Reef",
         "manufacturer_id": str(manufacturer.id),
         "streaming_type": "StreamingServer",
-        "url": "https://test.test.com",
-        "owner_id": str(user.id),
+        "url": "https://www.youtube.com/watch?v=tk-qJJbdOh4",
         "status": "RUNNING",
     }
     resp = client.post(
