@@ -32,7 +32,9 @@ def test_add_camera(client, user, manufacturer):
     assert resp.json.get("message") == "Camera has been added"
 
     resp = client.get("/api/camera/", headers=headers)
-    assert resp.json.get("camera")[0].get("name") == "dummy camera"
+    assert (
+        resp.json.get("camera")[0].get("name") == "Harbour Village Bonaire Coral Reef"
+    )
     assert resp.json.get("message") == "Camera data sent"
     assert resp.status_code == 200
 
