@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
 
+from flask import current_app
+
 from app import bcrypt, db
-from app.dbmodels.base import GUID, Base
+from app.dbmodels.base import GUID
 
 # Alias common DB names
 Column = db.Column
@@ -21,7 +23,7 @@ class Permission:
 
 
 N = 16
-PERMISSIONS_BIN = [2 ** (i) for i in range(N)]
+PERMISSIONS_BIN = [2**i for i in range(N)]
 
 
 def permissions_to_integer(permissions):
@@ -31,8 +33,8 @@ def permissions_to_integer(permissions):
     return sum(i)
 
 
-def has_permission(intpermissions, perm_index):
-    b = bin(intpermissions).split("0b")[1]
+def _has_permission(int_permissions, perm_index):
+    b = bin(int_permissions).split("0b")[1]
     return int(b[perm_index]) == 1
 
 
@@ -78,12 +80,13 @@ class Role(Model):
             role = Role.query.filter_by(name=r).first()
             if role is None:
                 role = Role(name=r, permissions=permissions_to_integer(p))
+                role.default = role.name == default_role
                 db.session.add(role)
 
         db.session.commit()
 
     def has_permission(self, perm):
-        return self.permissions & has_permission(self.permissions, perm)
+        return self.permissions & _has_permission(self.permissions, perm)
 
 
 class User(Model):
@@ -101,6 +104,11 @@ class User(Model):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config.get("FLASK_ADMIN"):
+                self.role = Role.query.filter_by(name="Admin").first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
 
     @property
     def password(self):
