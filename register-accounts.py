@@ -1,5 +1,4 @@
 import os
-import uuid
 
 import psycopg2
 import requests
@@ -8,29 +7,34 @@ URL = "http://localhost:5000"
 
 streaming_user = os.getenv("STREAMING_USER")
 streaming_password = os.getenv("STREAMING_PASSWORD")
+workflow_user = os.getenv("WORKFLOW_USER")
+workflow_password = os.getenv("WORKFLOW_PASSWORD")
 
-if streaming_user:
-    streaming_user = streaming_user.strip()
+users = [
+    (
+        streaming_user.strip(),
+        streaming_password.strip(),
+        "streaming",
+        "streaming account",
+    ),
+    (workflow_user.strip(), workflow_password.strip(), "workflow", "workflow account"),
+]
 
-if streaming_password:
-    streaming_password = streaming_password.strip()
-
-streaming_info = {
-    "email": streaming_user.strip(),
-    "username": "streaming",
-    "name": "streaming microservice",
-    "password": streaming_password,
-}
-
-r = requests.post(f"{URL}/auth/register", json=streaming_info)
 db_url = os.getenv("DATABASE_URL")
 with psycopg2.connect(db_url) as conn:
-    with conn.cursor() as curs:
-        curs.execute("select id from public.roles where name='Admin'")
-        role_id = curs.fetchone()[0]
-    with conn.cursor() as curs:
-        curs.execute(
-            "UPDATE public.user SET role_id = %s WHERE email = %s",
-            (role_id, streaming_user),
-        )
-    conn.commit()
+    for user in users:
+        payload = {
+            "email": user[0],
+            "password": user[1],
+            "username": user[2],
+            "name": user[3],
+        }
+        r = requests.post(f"{URL}/auth/register", json=payload)
+        with conn.cursor() as curs:
+            curs.execute("select id from public.roles where name='Admin'")
+            role_id = curs.fetchone()[0]
+            curs.execute(
+                "UPDATE public.user SET role_id = %s WHERE email = %s",
+                (role_id, user[0]),
+            )
+        conn.commit()
