@@ -107,7 +107,7 @@ class User(Model):
         if self.role is None:
             if self.email == current_app.config.get("FLASK_ADMIN"):
                 self.role = Role.query.filter_by(name="Admin").first()
-            if self.role is None:
+            else:
                 self.role = Role.query.filter_by(default=True).first()
 
     @property

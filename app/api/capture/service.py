@@ -1,3 +1,5 @@
+import logging
+
 from flask import current_app
 
 from app import db
@@ -17,6 +19,7 @@ class CaptureService:
         """Capture media"""
         camera_id = data.get("camera_id", None)
         capture_type = data.get("capture_type", None)
+        logging.info(f"Capture request {camera_id} {capture_type} from {user_id}")
 
         if not camera_id or not capture_type:
             return err_resp(
@@ -41,18 +44,21 @@ class CaptureService:
 
         try:
             # preparing storing information
+            logging.info(f"Capture image request {camera_id} from {user_id}")
             user_image_data = (
                 f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
             )
+            logging.info(f"Making directory {user_image_data}")
             mkdir(user_image_data)
 
             # creating a new registry item
             registry_object = register(user_id, camera_id, "image", user_image_data)
-
+            logging.info(f"Registry created {str(registry_object.id)}")
             # Create capturing request
             resp = Streamer.capture_image(
                 str(registry_object.id), camera, registry_object.capture_path
             )
+            logging.info(f"Response from streaming received {resp.status_code}")
 
             if resp.status_code == 200:
                 resp = message(True, "Capture request succeeded")
