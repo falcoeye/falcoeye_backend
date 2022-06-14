@@ -1,12 +1,15 @@
 import json
 
 import requests
+from falcoeye_kubernetes import FalcoServingKube
 from flask import current_app
 
 from app.utils import internal_err_resp, message
 
 
 class Streamer:
+    streaming_kube = FalcoServingKube("falcoeye-streaming")
+
     @staticmethod
     def capture_image(registry_key, camera, output_path):
 
@@ -16,9 +19,8 @@ class Streamer:
             "output_path": output_path,
             "capture_type": "image",
         }
-        resp = requests.post(
-            f"{current_app.config['STREAMER_HOST']}/api/capture", data=json.dumps(data)
-        )
+        streaming_server = Streamer.streaming_kube.kube.get_service_address()
+        resp = requests.post(f"{streaming_server}/api/capture", data=json.dumps(data))
         return resp
 
     @staticmethod

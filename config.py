@@ -27,6 +27,7 @@ class Config:
     ANALYSIS_STORAGE = os.environ.get(
         "ANALYSIS_STORAGE", f"{basedir}/../faloceye_storage/"
     )
+    TEMPORARY_DATA_PATH = os.environ.get("TEMPORARY_DATA_PATH", "/falcoeye-temp/data/")
 
 
 class DevelopmentConfig(Config):
@@ -37,7 +38,6 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # temp directory for data
-    TEMPORARY_DATA_PATH = f"{basedir}/data/"
 
     # Add logger
 

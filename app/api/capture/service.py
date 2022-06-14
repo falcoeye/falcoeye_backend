@@ -48,8 +48,6 @@ class CaptureService:
             user_image_data = (
                 f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
             )
-            logging.info(f"Making directory {user_image_data}")
-            mkdir(user_image_data)
 
             # creating a new registry item
             registry_object = register(user_id, camera_id, "image", user_image_data)
