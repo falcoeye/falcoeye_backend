@@ -19,8 +19,10 @@ class Streamer:
             "output_path": output_path,
             "capture_type": "image",
         }
-        streaming_server = Streamer.streaming_kube.kube.get_service_address()
-        resp = requests.post(f"{streaming_server}/api/capture", data=json.dumps(data))
+        streaming_server = Streamer.streaming_kube.get_service_address()
+        resp = requests.post(
+            f"http://{streaming_server}/api/capture", data=json.dumps(data)
+        )
         return resp
 
     @staticmethod

@@ -73,6 +73,8 @@ class CameraService:
     @staticmethod
     def create_camera(user_id, data):
 
+        # check if manufacturer exists
+
         name = data["name"]
         manufacturer_id = data["manufacturer_id"]
         streaming_type = data["streaming_type"]
@@ -85,6 +87,10 @@ class CameraService:
         longitude = data.get("longitude", None)
         status = data.get("status", "stopped")
         created_at = datetime.utcnow()
+
+        # check if camera exists
+        if Camera.query.filter_by(owner_id=user_id, name=name).first():
+            return err_resp("Camera already exist", "existing_camera", 403)
 
         # check if manufacturer exists
         if not (
@@ -253,7 +259,7 @@ class CameraManufacturerService:
 
         # check if manufacturer exists
         if CameraManufacturer.query.filter_by(name=name).first():
-            return err_resp("Manufacturer does exist", "existing_manufacturer", 403)
+            return err_resp("Manufacturer already exist", "existing_manufacturer", 403)
 
         try:
             new_manufacturer = CameraManufacturer(
@@ -266,7 +272,7 @@ class CameraManufacturerService:
             manufacturer_info = manufacturer_schema.dump(new_manufacturer)
             db.session.commit()
 
-            resp = message(True, "Manufacturer has been added")
+            resp = message(True, "Successfully added manufacturer")
             resp["manufacturer"] = manufacturer_info
 
             return resp, 201

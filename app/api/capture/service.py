@@ -129,22 +129,14 @@ class CaptureService:
 
         resp = message(True, "Capture status sent")
         resp["capture_path"] = registry_item.capture_path
+        resp["status"] = registry_item.status
+        resp["message"] = registry_item.message
+        resp["registry_key"] = registry_item.id
 
         return resp, 200
 
     @staticmethod
-    def get_capture_status(user_id, registry_key):
-
-        if not (registry_status := get_status(registry_key)):
-            # TODO: check on the numbers 403
-            return err_resp("Registry key not found", "not_found_403", 403)
-
-        resp = message(True, "Capture status sent")
-        resp["capture_status"] = registry_status
-        return resp, 200
-
-    @staticmethod
-    def set_capture_status(server_id, registry_key, data):
+    def set_capture_data(server_id, registry_key, data):
         if not (user := User.query.filter_by(id=server_id).first()):
             return err_resp("User not found!", "user_404", 404)
 

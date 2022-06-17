@@ -50,28 +50,19 @@ class CaptureData(Resource):
     def get(self, registry_key):
         """Get a user capture data path"""
         current_user_id = get_jwt_identity()
-        return CaptureService.get_capture_request_status(current_user_id, registry_key)
+        return CaptureService.get_capture_data(current_user_id, registry_key)
 
-
-@api.route("/status/<registry_key>")
-@api.param("registry_key", "Registry key received from capture request")
-class Status(Resource):
     @api.doc(
-        "Get a user capture status",
+        "Post a user capture data status",
         responses={
-            200: ("Capture status sent", CaptureDto.capture_status),
+            200: ("Capture status is changed", CaptureDto.capture_registry_post),
+            400: ("Capture data is not ready"),
             403: ("Registry key not found"),
         },
         security="apikey",
     )
     @jwt_required()
-    def get(self, registry_key):
-        """Get a user capture status"""
-        current_user_id = get_jwt_identity()
-        return CaptureService.get_capture_status(current_user_id, registry_key)
-
-    @jwt_required()
     def post(self, registry_key):
         server_id = get_jwt_identity()
         data = request.get_json()
-        return CaptureService.set_capture_status(server_id, registry_key, data)
+        return CaptureService.post_capture_data(server_id, registry_key, data)

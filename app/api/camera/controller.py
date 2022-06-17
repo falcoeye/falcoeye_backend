@@ -36,6 +36,7 @@ class CameraList(Resource):
         "Add a new camera",
         responses={
             201: ("Successfully added camera", CameraDto.camera_resp),
+            403: ("Camera already exists", "Manufacturer is not registered"),
             400: "Malformed data or validations failed.",
         },
         security="apikey",
@@ -126,6 +127,7 @@ class CameraManufacturerList(Resource):
                 "Successfully added manufacturer",
                 CameraManufacturerDto.manufacturer_resp,
             ),
+            403: "Manufacturer already exist",
             400: "Malformed data or validations failed.",
         },
         security="apikey",

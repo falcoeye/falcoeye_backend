@@ -22,18 +22,15 @@ class CaptureDto:
         },
     )
 
-    capture_status = api.model(
-        "Capture status",
-        {
-            "status": fields.Boolean,
-            "message": fields.String,
-            "capture_status": fields.String,
-        },
+    capture_registry_post = api.model(
+        "Capture data",
+        {"status": fields.Boolean, "message": fields.String},
     )
 
     capture_data = api.model(
         "Capture data",
         {
+            "registry_key": fields.String,
             "status": fields.Boolean,
             "message": fields.String,
             "capture_path": fields.String,
