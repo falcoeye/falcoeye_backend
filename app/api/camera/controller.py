@@ -36,7 +36,7 @@ class CameraList(Resource):
         "Add a new camera",
         responses={
             201: ("Successfully added camera", CameraDto.camera_resp),
-            403: ("Camera already exists", "Manufacturer is not registered"),
+            403: ("Camera already exists or Manufacturer is not registered"),
             400: "Malformed data or validations failed.",
         },
         security="apikey",
@@ -146,7 +146,7 @@ class CameraManufacturerList(Resource):
 
 @api_manufacturer.route("/<manufacturer_id>")
 @api_manufacturer.param("manufacturer_id", "Camera Manufacturer ID")
-class Manufacturer(Resource):
+class CameraManufacturer(Resource):
     @api_manufacturer.doc(
         "Show a camera manufacturer item",
         responses={

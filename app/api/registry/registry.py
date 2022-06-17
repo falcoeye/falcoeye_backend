@@ -23,6 +23,8 @@ def register(user_id, camera_id, media_type, prefix):
         db.session.add(new_registry_item)
         db.session.flush()
         db.session.commit()
+
+        # TODO: id is not populated until commit?
         if media_type == "image":
             capture_path = f"{prefix}/{new_registry_item.id}.jpg"
         elif media_type == "video":

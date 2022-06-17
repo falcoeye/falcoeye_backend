@@ -41,7 +41,6 @@ class CaptureData(Resource):
         "Get a user capture data path",
         responses={
             200: ("Capture data sent", CaptureDto.capture_data),
-            400: ("Capture data is not ready"),
             403: ("Registry key not found"),
         },
         security="apikey",
@@ -55,7 +54,7 @@ class CaptureData(Resource):
     @api.doc(
         "Post a user capture data status",
         responses={
-            200: ("Capture status is changed", CaptureDto.capture_registry_post),
+            200: ("Change capture data been handled"),
             400: ("Capture data is not ready"),
             403: ("Registry key not found"),
         },
@@ -65,4 +64,4 @@ class CaptureData(Resource):
     def post(self, registry_key):
         server_id = get_jwt_identity()
         data = request.get_json()
-        return CaptureService.post_capture_data(server_id, registry_key, data)
+        return CaptureService.set_capture_data(server_id, registry_key, data)

@@ -24,7 +24,7 @@
     "tests":[
         {
             "name": "Adding manufacturer",
-            "type": "post",
+            "req_type": "post",
             "link": "/api/manufacturer/",
             "pass": [
                 "Manufacturer has been added",
@@ -36,7 +36,7 @@
         },
         {
             "name": "Get manufacturer",
-            "type": "get",
+            "req_type": "get",
             "link": "/api/manufacturer",
             "pass": [
                 "Manufacturer data sent"
@@ -66,7 +66,7 @@
         },
         {
             "name": "Adding camera",
-            "type": "post",
+            "req_type": "post",
             "link": "/api/camera/",
             "pass": [
                 "Camera already exist",
@@ -82,7 +82,7 @@
         },
         {
             "name": "Get camera",
-            "type": "get",
+            "req_type": "get",
             "link": "/api/camera",
             "pass": [
                 "Camera data sent"
@@ -112,13 +112,34 @@
         },
         {
             "name": "Capture image",
-            "type": "post",
+            "req_type": "post",
             "link": "/api/capture",
             "args":{
                 "camera_id": "$harbour_id",
                 "capture_type": "image"
             },
-            "pass": ["Capture request succeeded"]
+            "pass": ["Capture request succeeded"],
+            "store": {
+                "registry_key":[
+                    {
+                    "type": "dict",
+                    "key": "registry_key",
+                    "from": "response"
+                }
+            ]
+            }
+        },
+        {
+            "name": "Waiting for capture",
+            "test_type": "wait_until",
+            "link": ["/api/capture/","$registry_key"],
+            "timeout": 100,
+            "sleep": 3,
+            "req_type": "get",
+            "condition":{
+                "key":"capture_status",
+                "value": ["SUCCEEDED","FAILED"]
+            }
         }
     ]
 }

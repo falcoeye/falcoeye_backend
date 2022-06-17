@@ -119,24 +119,25 @@ class CaptureService:
             return internal_err_resp()
 
     @staticmethod
-    def get_capture_data(user_id, registry_key, data):
+    def get_capture_data(user_id, registry_key):
         if not (registry_item := Registry.query.filter_by(id=registry_key).first()):
             # TODO: check on the numbers 403, and 404
             return err_resp("Registry key not found", "not_found_403", 403)
 
-        if registry_item.status == "STARTED":
-            return err_resp("Capture data is not ready", "not_ready_400", 400)
-
-        resp = message(True, "Capture status sent")
+        resp = message(True, "Capture data sent")
         resp["capture_path"] = registry_item.capture_path
-        resp["status"] = registry_item.status
-        resp["message"] = registry_item.message
-        resp["registry_key"] = registry_item.id
+        resp["capture_status"] = registry_item.status
+        resp["registry_key"] = str(registry_item.id)
 
         return resp, 200
 
     @staticmethod
     def set_capture_data(server_id, registry_key, data):
+
+        new_status = data.get("capture_status")
+        logging.info(
+            f"Received registery status change request for {registry_key} from {server_id}: {new_status}"
+        )
         if not (user := User.query.filter_by(id=server_id).first()):
             return err_resp("User not found!", "user_404", 404)
 
@@ -144,6 +145,5 @@ class CaptureService:
         if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
             return err_resp("Access denied", "role_403", 403)
 
-        new_status = data.get("status")
         change_status(registry_key, new_status)
-        return message(True, "Change status has been handled"), 200
+        return message(True, "Change capture data been handled"), 200

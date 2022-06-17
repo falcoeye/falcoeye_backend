@@ -16,6 +16,7 @@ class CaptureDto:
     capture_registry_key = api.model(
         "Capture registry key",
         {
+            "capture_status": fields.String,
             "status": fields.Boolean,
             "message": fields.String,
             "registry_key": fields.String,
@@ -24,14 +25,14 @@ class CaptureDto:
 
     capture_registry_post = api.model(
         "Capture data",
-        {"status": fields.Boolean, "message": fields.String},
+        {"status": fields.String, "message": fields.String},
     )
 
     capture_data = api.model(
         "Capture data",
         {
             "registry_key": fields.String,
-            "status": fields.Boolean,
+            "capture_status": fields.String,
             "message": fields.String,
             "capture_path": fields.String,
         },

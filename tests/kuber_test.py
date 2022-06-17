@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+import time
 
 import requests
 from falcoeye_kubernetes import FalcoServingKube
@@ -94,32 +95,86 @@ def calculate_args(test_name, args):
                 )
 
 
-def run_test(testdict):
+def calculate_link(link):
+    if type(link) == list:
+        nlink = ""
+        for l in link:
+            if "$" in l:
+                l = resources[l[1:]]
+            nlink += l
+        link = nlink
+    return link
+
+
+def run_request(testdict):
 
     name = testdict["name"]
-    reqtype = testdict["type"]
+    reqtype = testdict["req_type"]
     link = testdict["link"]
-    pass_msgs = testdict["pass"]
+    pass_msgs = testdict.get("pass", [])
     store = testdict.get("store", None)
     args = testdict.get("args", {})
     logging.info(f"Running {name} test")
 
+    link = calculate_link(link)
     calculate_args(name, args)
 
     if reqtype == "post":
-        print(f"{URL}{link}")
         resp = requests.post(f"{URL}{link}", json=args, headers=header)
     elif reqtype == "get":
         resp = requests.get(f"{URL}{link}", json=args, headers=header)
     resdict = resp.json()
     message = resdict["message"]
-    if message in pass_msgs:
+    if len(pass_msgs) > 0 and message in pass_msgs:
         logging.info(f"Test {name} passed with message: {message}")
     else:
         logging.error(f"Test {name} failed with message: {message}")
         exit()
     if store:
         calculate_store(name, store, resdict)
+
+
+def wait_until(testdict):
+
+    name = testdict["name"]
+    reqtype = testdict["req_type"]
+    link = testdict["link"]
+    args = testdict.get("args", {})
+    link = calculate_link(link)
+    calculate_args(name, args)
+    timeout = testdict.get("timeout", 60)
+    sleep = testdict.get("sleep", 3)
+    condition = testdict["condition"]
+    ckey = condition["key"]
+    cval = condition["value"]
+    if type(cval) == str:
+        cval = [cval]
+
+    logging.info(f"Running {name} test")
+
+    if reqtype == "post":
+        func = requests.post
+    elif reqtype == "get":
+        func = requests.get
+
+    tm = 0
+    while tm < timeout:
+        resp = func(f"{URL}{link}", json=args, headers=header)
+        resdict = resp.json()
+        if resdict[ckey] in cval:
+            logging.info(f"Condition met {ckey} = {resdict[ckey]}")
+            return
+        logging.info(f"Condition not yet met {ckey} = {resdict[ckey]}")
+        time.sleep(sleep)
+        tm += sleep
+
+
+def run_test(testdict):
+    test_type = testdict.get("test_type", "request")
+    if test_type == "request":
+        run_request(testdict)
+    elif test_type == "wait_until":
+        wait_until(testdict)
 
 
 if __name__ == "__main__":
