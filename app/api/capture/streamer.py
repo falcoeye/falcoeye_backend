@@ -40,7 +40,8 @@ class Streamer:
             "output_path": output_path,
             "capture_type": "video",
         }
+        streaming_server = Streamer.streaming_kube.get_service_address()
         resp = requests.post(
-            f"{current_app.config['STREAMER_HOST']}/api/capture", data=json.dumps(data)
+            f"http://{streaming_server}/api/capture", data=json.dumps(data)
         )
         return resp

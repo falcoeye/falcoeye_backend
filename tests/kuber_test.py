@@ -86,7 +86,7 @@ def calculate_store(test_name, store, respdict):
 
 def calculate_args(test_name, args):
     for k, v in args.items():
-        if v[0] == "$":
+        if type(v) == str and v[0] == "$":
             try:
                 args[k] = resources[v[1:]]
             except KeyError:
