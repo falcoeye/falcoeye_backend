@@ -1,17 +1,22 @@
+import base64
+import os
+import shutil
 from datetime import datetime
 
 import dateutil.parser
 from flask import current_app
 
 from app import db
-from app.dbmodels.camera import Camera, CameraManufacturer
-from app.dbmodels.schemas import CameraManufacturerSchema, CameraSchema
+from app.dbmodels.camera import Camera  # , CameraManufacturer
+from app.dbmodels.schemas import CameraSchema  # , CameraManufacturerSchema
 from app.utils import err_resp, internal_err_resp, message
 
-from .utils import load_camera_data, load_manufacturer_data, load_streamer_data
+from .utils import load_camera_data, mkdir
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 camera_schema = CameraSchema()
-manufacturer_schema = CameraManufacturerSchema()
+# manufacturer_schema = CameraManufacturerSchema()
 
 
 class CameraService:
@@ -76,7 +81,7 @@ class CameraService:
         # check if manufacturer exists
 
         name = data["name"]
-        manufacturer_id = data["manufacturer_id"]
+        # manufacturer_id = data["manufacturer_id"]
         streaming_type = data["streaming_type"]
         host = data.get("host", None)
         port = data.get("port", None)
@@ -87,20 +92,21 @@ class CameraService:
         longitude = data.get("longitude", None)
         status = data.get("status", "stopped")
         created_at = datetime.utcnow()
+        image = data.get("image", None)
 
         # check if camera exists
         if Camera.query.filter_by(owner_id=user_id, name=name).first():
             return err_resp("Camera already exist", "existing_camera", 403)
 
         # check if manufacturer exists
-        if not (
+        """if not (
             manufacturer := CameraManufacturer.query.filter_by(
                 id=manufacturer_id
             ).first()
         ):
             return err_resp(
                 "Manufacturer is not registered", "invalid_manufacturer", 403
-            )
+            )"""
 
         try:
             new_camera = Camera(
@@ -111,7 +117,7 @@ class CameraService:
                 username=username,
                 password=password,
                 owner_id=user_id,
-                manufacturer_id=manufacturer.id,
+                # manufacturer_id=manufacturer.id,
                 streaming_type=streaming_type,
                 latitude=latitude,
                 longitude=longitude,
@@ -121,6 +127,21 @@ class CameraService:
 
             db.session.add(new_camera)
             db.session.flush()
+
+            camera_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/cameras/{new_camera.id}'
+            )
+
+            mkdir(camera_dir)
+
+            base64_img = data.get("image", None)
+            camera_img = f"{camera_dir}/img_original.jpg"
+            if base64_img:
+                imgdata = base64.b64decode(base64_img)
+                with open(camera_img, "wb") as f:
+                    f.write(imgdata)
+            else:
+                shutil.copy2(f"{basedir}/assets/default_camera_img.jpg", camera_img)
 
             camera_info = camera_schema.dump(new_camera)
             db.session.commit()
@@ -143,7 +164,7 @@ class CameraService:
             return err_resp("Camera not found!", "camera_404", 404)
 
         name = data.get("name", camera.name)
-        manufacturer_id = data.get("manufacturer_id", camera.manufacturer_id)
+        # manufacturer_id = data.get("manufacturer_id", camera.manufacturer_id)
         streaming_type = data.get("streaming_type", camera.streaming_type)
         url = data.get("url", camera.url)
         host = data.get("host", camera.host)
@@ -156,14 +177,14 @@ class CameraService:
         created_at = camera.created_at
 
         # check if manufacturer exists
-        if not (
-            manufacturer := CameraManufacturer.query.filter_by(
-                id=manufacturer_id
-            ).first()
-        ):
-            return err_resp(
-                "Manufacturer is not registered", "invalid_manufacturer", 403
-            )
+        # if not (
+        #     manufacturer := CameraManufacturer.query.filter_by(
+        #         id=manufacturer_id
+        #     ).first()
+        # ):
+        #     return err_resp(
+        #         "Manufacturer is not registered", "invalid_manufacturer", 403
+        #     )
 
         try:
             updated_camera = Camera(
@@ -174,7 +195,7 @@ class CameraService:
                 username=username,
                 password=password,
                 owner_id=user_id,
-                manufacturer_id=manufacturer_id,
+                # manufacturer_id=manufacturer_id,
                 streaming_type=streaming_type,
                 latitude=latitude,
                 longitude=longitude,
@@ -193,10 +214,10 @@ class CameraService:
             return internal_err_resp()
 
 
-class CameraManufacturerService:
+"""class CameraManufacturerService:
     @staticmethod
     def get_manufacturer():
-        """Get a list of camera manufacturer"""
+        """ """Get a list of camera manufacturer""" """
         if not (manufacturers := CameraManufacturer.query.all()):
             return err_resp("No manufacturer founds!", "manufacturer_404", 404)
 
@@ -213,7 +234,7 @@ class CameraManufacturerService:
 
     @staticmethod
     def get_manufacturer_by_id(manufacturer_id):
-        """Get camera manufacturer by ID"""
+        """ """Get camera manufacturer by ID""" """
         if not (
             manufacturer := CameraManufacturer.query.filter_by(
                 id=manufacturer_id
@@ -234,7 +255,7 @@ class CameraManufacturerService:
 
     @staticmethod
     def get_manufacturer_by_name(manufacturer_name):
-        """Get camera manufacturer by name"""
+        """ """Get camera manufacturer by name""" """
         if not (
             manufacturer := CameraManufacturer.query.filter_by(
                 name=manufacturer_name
@@ -283,7 +304,7 @@ class CameraManufacturerService:
 
     @staticmethod
     def delete_manufacturer(user_id, manufacturer_id):
-        """Delete manufacturer from DB by manufacturer ID"""
+        """ """Delete manufacturer from DB by manufacturer ID""" """
 
         # TODO: check if user is admin before deleting manufacturer
 
@@ -303,4 +324,4 @@ class CameraManufacturerService:
 
         except Exception as error:
             current_app.logger.error(error)
-            return internal_err_resp()
+            return internal_err_resp()"""

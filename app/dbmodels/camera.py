@@ -18,8 +18,8 @@ class CameraStatus(str, enum.Enum):
     UNDER_MAINTENANCE = 3
 
 
-class CameraManufacturer(Base):
-    """Manufacturer model for storing camera manufacturer data"""
+"""class CameraManufacturer(Base):
+    """ """Manufacturer model for storing camera manufacturer data""" """
 
     __tablename__ = "camera_manufacturer"
     id = Column(GUID(), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -30,7 +30,7 @@ class CameraManufacturer(Base):
         super(CameraManufacturer, self).__init__(**kwargs)
 
     def __repr__(self):
-        return f"<CameraManufacturer {self.name}>"
+        return f"<CameraManufacturer {self.name}>"""
 
 
 class Camera(Base):
@@ -42,8 +42,8 @@ class Camera(Base):
     latitude = Column(db.Float)
     longitude = Column(db.Float)
     owner_id = Column(GUID(), db.ForeignKey("user.id"))
-    manufacturer_id = Column(GUID(), db.ForeignKey("camera_manufacturer.id"))
-    manufacturer = relationship("CameraManufacturer", innerjoin=True)
+    # manufacturer_id = Column(GUID(), db.ForeignKey("camera_manufacturer.id"))
+    # manufacturer = relationship("CameraManufacturer", innerjoin=True)
     streaming_type = Column(db.String)
     url = Column(db.String)
     username = Column(db.String)

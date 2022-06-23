@@ -1,6 +1,6 @@
 """Shared functions and constants for unit tests."""
-
 import json
+import os
 
 import requests
 
@@ -172,3 +172,9 @@ def create_camera(test_client, access_token, manufacturer_id, streamer_id, name=
                 cid = c["id"]
                 break
         return cid
+
+
+def mkdir(path):
+    if os.path.exists(path):
+        return
+    os.makedirs(path)

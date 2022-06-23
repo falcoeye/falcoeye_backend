@@ -27,7 +27,14 @@ class Config:
     ANALYSIS_STORAGE = os.environ.get(
         "ANALYSIS_STORAGE", f"{basedir}/../faloceye_storage/"
     )
-    TEMPORARY_DATA_PATH = os.environ.get("TEMPORARY_DATA_PATH", "/falcoeye-temp/data/")
+    TEMPORARY_DATA_PATH = os.environ.get(
+        "TEMPORARY_DATA_PATH", f"{basedir}/tests/falcoeye-temp/data/"
+    )
+    FALCOEYE_ASSETS = os.environ.get(
+        "FALCOEYE_ASSETS", f"{basedir}/tests/falcoeye-assets/"
+    )
+    USER_ASSETS = os.environ.get("USER_ASSETS", f"{basedir}/tests/user-assets/")
+    FLASK_ADMIN = "FALCOEYE_STREAMING@falcoeye.ai"
 
 
 class DevelopmentConfig(Config):
@@ -49,9 +56,6 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # temp directory for data
-    TEMPORARY_DATA_PATH = f"{basedir}/data/"
 
 
 class ProductionConfig(Config):

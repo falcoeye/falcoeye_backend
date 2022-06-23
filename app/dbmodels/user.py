@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime
 
@@ -34,8 +35,9 @@ def permissions_to_integer(permissions):
 
 
 def _has_permission(int_permissions, perm_index):
-    b = bin(int_permissions).split("0b")[1]
-    return int(b[perm_index]) == 1
+    b = bin(int_permissions).split("0b")[1].zfill(N)
+    logging.info(f"Binary permission: {b} perm index {perm_index}")
+    return int(b[::-1][perm_index]) == 1
 
 
 class Role(Model):
@@ -86,6 +88,7 @@ class Role(Model):
         db.session.commit()
 
     def has_permission(self, perm):
+        logging.info(f"My permissions: {self.permissions}")
         return self.permissions & _has_permission(self.permissions, perm)
 
 
@@ -105,7 +108,7 @@ class User(Model):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == current_app.config.get("FLASK_ADMIN"):
+            if self.email in current_app.config.get("FLASK_ADMIN").split(","):
                 self.role = Role.query.filter_by(name="Admin").first()
             else:
                 self.role = Role.query.filter_by(default=True).first()
@@ -125,5 +128,7 @@ class User(Model):
         return f"<User {self.username}>"
 
     def has_permission(self, permission):
+        logging.info(f"Checking if user has permission: {permission}")
         role = Role.query.filter_by(id=self.role_id).first()
+        logging.info(f"User role: {role.name}")
         return role.has_permission(permission)

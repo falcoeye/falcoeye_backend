@@ -1,19 +1,19 @@
-from flask import request
+from flask import current_app, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
-from app.dbmodels.schemas import CameraManufacturerSchema, CameraSchema
+from app.dbmodels.schemas import CameraSchema  # , CameraManufacturerSchema
 from app.utils import validation_error
 
-from .dto import CameraDto, CameraManufacturerDto
-from .service import CameraManufacturerService, CameraService
+from .dto import CameraDto  # , CameraManufacturerDto
+from .service import CameraService  # ,CameraManufacturerService
 
 api_camera = CameraDto.api
-api_manufacturer = CameraManufacturerDto.api
+# api_manufacturer = CameraManufacturerDto.api
 
 
 camera_schema = CameraSchema()
-manufacturer_schema = CameraManufacturerSchema()
+# manufacturer_schema = CameraManufacturerSchema()
 
 
 @api_camera.route("/")
@@ -102,7 +102,30 @@ class Camera(Resource):
         )
 
 
-@api_manufacturer.route("/")
+@api_camera.route("/<camera_id>/img_<img_size>")
+@api_camera.param("camera_id", "Camera ID")
+@api_camera.param("img_size", "Image Size")
+class Camera(Resource):
+    @api_camera.doc(
+        "Show a camera item",
+        responses={
+            200: ("Camera data successfully sent", CameraDto.camera_resp),
+            404: "No cameras found!",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, camera_id, img_size):
+        """Show a camera item"""
+        user_id = get_jwt_identity()
+        return send_from_directory(
+            f'{current_app.config["USER_ASSETS"]}/{user_id}/{camera_id}',
+            f"img_{img_size}.jpg",
+            mimetype="image/jpg",
+        )
+
+
+"""@api_manufacturer.route("/")
 class CameraManufacturerList(Resource):
     @api_manufacturer.doc(
         "Get a list of camera manufacturer",
@@ -117,7 +140,7 @@ class CameraManufacturerList(Resource):
     )
     @jwt_required()
     def get(self):
-        """Get a list of camera manufacturers"""
+        """ """Get a list of camera manufacturers""" """
         return CameraManufacturerService.get_manufacturer()
 
     @api_manufacturer.doc(
@@ -160,12 +183,12 @@ class CameraManufacturer(Resource):
     )
     @jwt_required()
     def get(self, manufacturer_id):
-        """Show a manufacturer item"""
+        """ """Show a manufacturer item""" """
         return CameraManufacturerService.get_manufacturer_by_id(manufacturer_id)
 
     @jwt_required()
     def delete(self, manufacturer_id):
-        """Delete a manufacturer item"""
+        """ """Delete a manufacturer item""" """
         current_user_id = get_jwt_identity()
         return CameraManufacturerService.delete_manufacturer(
             current_user_id, manufacturer_id
@@ -185,6 +208,6 @@ class CameraManufacturer(Resource):
     @api_camera.expect(CameraManufacturerDto.camera_manufacturer_post, validate=False)
     @jwt_required()
     def put(self, manufacturer_id):
-        """Update a manufacturer item"""
+        """ """Update a manufacturer item""" """
         # TODO: add service to update manufacturer item
-        pass
+        pass"""

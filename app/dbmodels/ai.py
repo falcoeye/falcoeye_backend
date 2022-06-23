@@ -43,12 +43,10 @@ class Workflow(Base):
     publish_date = Column(db.DateTime)
     aimodel_id = Column(GUID(), db.ForeignKey("ai_model.id"))
     aimodel = relationship("AIModel", innerjoin=True)
-    structure_file = Column(db.String)
     usedfor = Column(db.String)
     consideration = Column(db.String)
     assumption = Column(db.String)
     results_description = Column(db.String)
-    thumbnail_url = Column(db.String)
 
 
 class Analysis(Base):

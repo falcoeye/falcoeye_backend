@@ -1,4 +1,6 @@
-from flask import request
+import logging
+
+from flask import current_app, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
@@ -41,8 +43,9 @@ class WorkflowList(Resource):
     def post(self):
         workflow_data = request.get_json()
         user_id = get_jwt_identity()
-        if errors := workflow_schema.validate(workflow_data):
-            return validation_error(False, errors), 400
+        logging.info(f"Received new workflow from {user_id}")
+        # if errors := workflow_schema.validate(workflow_data):
+        #     return validation_error(False, errors), 400
 
         return WorkflowService.create_workflow(user_id=user_id, data=workflow_data)
 
@@ -77,3 +80,26 @@ class Workflow(Resource):
         """Delete a workflow"""
         current_user_id = get_jwt_identity()
         return WorkflowService.delete_workflow(current_user_id, workflow_id)
+
+
+@api.route("/<workflow_id>/img_<img_size>.jpg")
+@api.param("workflow_id", " Workflow ID")
+@api.param("img_size", " Image Size")
+class Workflow(Resource):
+    @api.doc(
+        "Show a worfklow item",
+        responses={
+            200: ("Workflow data successfully sent", WorkflowDto.workflow_resp),
+            404: "No workflow found!",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, workflow_id, img_size):
+        """Get a workflow"""
+        # current_user_id = get_jwt_identity()
+        return send_from_directory(
+            f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',
+            f"img_{img_size}.jpg",
+            mimetype="image/jpg",
+        )

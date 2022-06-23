@@ -29,7 +29,7 @@ class GUIDSerializationField(ma.fields.Field):
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ("email", "name", "username", "joined_date", "role_id")
+        fields = ("id", "email", "name", "username", "joined_date", "role_id")
 
 
 class VideoSchema(ma.Schema):
@@ -88,7 +88,7 @@ class CameraSchema(ma.Schema):
             "name",
             "latitude",
             "longitude",
-            "manufacturer_id",
+            # "manufacturer_id",
             "streaming_type",
             "owner_id",
             "url",
@@ -101,12 +101,12 @@ class CameraSchema(ma.Schema):
         )
 
 
-class CameraManufacturerSchema(ma.Schema):
+"""class CameraManufacturerSchema(ma.Schema):
     # id = GUIDSerializationField(attribute="guid", required=True)
     name = ma.fields.Str(required=False)
 
     class Meta:
-        fields = ("id", "name", "created_at", "updated_at")
+        fields = ("id", "name", "created_at", "updated_at")"""
 
 
 class WorkflowSchema(ma.Schema):
@@ -116,15 +116,6 @@ class WorkflowSchema(ma.Schema):
             "name",
             "creator",
             "publish_date",
-            "aimodel_id",
-            "structure_file",
-            "usedfor",
-            "consideration",
-            "assumption",
-            "accepted_media",
-            "results_description",
-            "results_type",
-            "thumbnail_url",
         )
 
 

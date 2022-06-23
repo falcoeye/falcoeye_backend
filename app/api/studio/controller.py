@@ -1,6 +1,9 @@
 import json
+import logging
+import os
+import re
 
-from flask import request
+from flask import current_app, request, send_from_directory
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
@@ -38,7 +41,7 @@ class StudioList(Resource):
         return StudioService.get_user_media(current_user_id)
 
 
-@api.route("/image/<media_id>")
+@api.route("/image/<media_id>/gg_<img_size>.jpg")
 @api.param("media_id", "Image ID")
 class StudioImageGet(Resource):
     @api.doc(
@@ -70,6 +73,31 @@ class StudioImageGet(Resource):
         return StudioService.delete_image(current_user_id, media_id)
 
 
+@api.route("/image/<string:media_id>/video_<string:img_size>.<extension>")
+@api.param("media_id", "Image ID")
+@api.param("img_size", "Image Resolution")
+@api.param("extension", "Image Extension")
+class StudioVideoServe(Resource):
+    @api.doc(
+        "Get user's video",
+        responses={
+            200: ("Video successfully sent", video_resp),
+            404: "Video not found!",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, media_id, img_size, extension):
+        """Get user's video"""
+        current_user_id = get_jwt_identity()
+        image_dir = (
+            f'{current_app.config["USER_ASSETS"]}/{current_user_id}/images/{media_id}/'
+        )
+        return send_from_directory(
+            image_dir, f"img_{img_size}.{extension}", mimetype="image/jpg"
+        )
+
+
 @api.route("/image")
 class StudioImagePost(Resource):
     @api.doc(
@@ -86,6 +114,7 @@ class StudioImagePost(Resource):
         """Add a user's image"""
         image_data = request.get_json()
         user_id = get_jwt_identity()
+        logging.info(f"Received new image from {user_id} with data {image_data}")
         return StudioService.create_image(user_id=user_id, data=image_data)
 
 
@@ -119,6 +148,51 @@ class StudioVideoGet(Resource):
         """Delete user's video"""
         current_user_id = get_jwt_identity()
         return StudioService.delete_video(current_user_id, media_id)
+
+
+@api.route("/video/<string:media_id>/video_<string:resolution>.mp4")
+@api.param("media_id", "Video ID")
+@api.param("resolution", "Video Resolution")
+class StudioVideoServe(Resource):
+    @api.doc(
+        "Get user's video",
+        responses={
+            200: ("Video successfully sent", video_resp),
+            404: "Video not found!",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, media_id, resolution):
+        """Get user's video"""
+        current_user_id = get_jwt_identity()
+        video_path = f'{current_app.config["USER_ASSETS"]}/{current_user_id}/videos/{media_id}/video_{resolution}.mp4'
+
+        # size = os.stat(video_path)
+        # size = size.st_size
+        # chunk_size = 10**3
+        # start = int(re.sub("\D", "", headers["range"]))
+        # end = min(start + chunk_size, size - 1)
+
+        # content_lenght = end - start + 1
+
+        # def get_chunk(video_path, start, end):
+        #     with open(video_path, "rb") as f:
+        #         f.seek(start)
+        #         chunk = f.read(end)
+        #     return chunk
+
+        # headers = {
+        #     "Content-Range": f"bytes {start}-{end}/{size}",
+        #     "Accept-Ranges": "bytes",
+        #     "Content-Length": content_lenght,
+        #     "Content-Type": "video/mp4",
+        # }
+
+        # return current_app.response_class(
+        #     get_chunk(video_path, start, end), 206, headers
+        # )
+        return None
 
 
 @api.route("/video")

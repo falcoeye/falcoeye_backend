@@ -23,7 +23,6 @@ class Video(Base):
     workflow = relationship("Workflow", innerjoin=True)
     duration = Column(db.Integer)
     created_at = Column(db.DateTime)
-    thumbnail_url = Column(db.String)
 
 
 class Image(Base):
@@ -36,6 +35,5 @@ class Image(Base):
     tags = Column(db.String)
     url = Column(db.String)
     created_at = Column(db.DateTime)
-    thumbnail_url = Column(db.String)
     workflow_id = Column(GUID(), db.ForeignKey("workflow.id"))
     workflow = relationship("Workflow", innerjoin=True)

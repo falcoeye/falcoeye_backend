@@ -1,16 +1,18 @@
+import logging
+import shutil
 from datetime import datetime
 
 from flask import current_app
 
 from app import db
-from app.api.registry import get_status
+from app.api import registry
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
 from app.utils import err_resp, internal_err_resp, message
 
-from .utils import load_image_data, load_video_data
+from .utils import load_image_data, load_video_data, mkdir
 
 
 class StudioService:
@@ -26,6 +28,12 @@ class StudioService:
         try:
             video_data = load_video_data(videos, many=True)
             image_data = load_image_data(images, many=True)
+            # TODO: eliminate this somehow
+            for v in video_data:
+                v["media_type"] = "video"
+            for i in image_data:
+                v["media_type"] = "image"
+
             media_data = video_data + image_data
 
             resp = message(True, "User media sent")
@@ -60,10 +68,12 @@ class StudioService:
         workflow_id = data.get("workflow_id", None)
         registry_key = data.get("registry_key", None)
 
-        if not registry_key or not (status := get_status(registry_key)):
+        if not registry_key or not (
+            registry_item := registry.get_registry(registry_key)
+        ):
             return err_resp("Invalid registry key", "registry_404", 404)
 
-        if status == "FAILED":
+        if registry_item.status == "FAILED":
             return err_resp("Registry item failed", "registry_404", 404)
 
         # TODO: camera id and workflow name, if any, should be part of the metadata of the image
@@ -81,6 +91,19 @@ class StudioService:
             db.session.add(new_image)
             db.session.flush()
             db.session.commit()
+
+            imgs_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{new_image.id}/'
+            )
+            mkdir(imgs_dir)
+
+            extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
+            try:
+                shutil.move(
+                    registry_item.capture_path, f"{imgs_dir}/img_original.{extension}"
+                )
+            except Exception as error:
+                return err_resp("Failed to move item", "move_404", 404)
 
             img_info = load_image_data(new_image)
             resp = message(True, "Image has been added")
@@ -128,14 +151,16 @@ class StudioService:
         camera_id = data.get("camera_id", None)
         workflow_id = data.get("workflow_id", None)
         registry_key = data.get("registry_key", None)
-        duration = data.get("duration", -1)
 
-        registry_key = data.get("registry_key", None)
-
-        if not registry_key or not (status := get_status(registry_key)):
+        logging.info(
+            f"Creating new video item for {user_id} using registry {registry_key}"
+        )
+        if not registry_key or not (
+            registry_item := registry.get_registry(registry_key)
+        ):
             return err_resp("Invalid registry key", "registry_404", 404)
 
-        if status == "FAILED":
+        if registry_item.status == "FAILED":
             return err_resp("Registry item failed", "registry_404", 404)
 
         try:
@@ -146,11 +171,25 @@ class StudioService:
                 camera_id=camera_id,
                 workflow_id=workflow_id,
                 created_at=datetime.utcnow(),
-                duration=duration,
             )
             db.session.add(new_video)
             db.session.flush()
             db.session.commit()
+
+            video_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{new_video.id}/'
+            )
+            logging.info(f"Creating user video directory {video_dir}")
+            mkdir(video_dir)
+            logging.info(f"Moving video from {registry_item.capture_path}")
+            extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
+            try:
+                shutil.move(
+                    registry_item.capture_path,
+                    f"{video_dir}/video_original.{extension}",
+                )
+            except Exception as error:
+                return err_resp("Failed to move item", "move_404", 404)
 
             video_info = load_video_data(new_video)
             resp = message(True, "Video has been added")

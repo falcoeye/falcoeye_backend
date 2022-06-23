@@ -8,7 +8,7 @@ import datetime
 from flask import Flask
 
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
-from app.dbmodels.camera import Camera, CameraManufacturer, Streamer
+from app.dbmodels.camera import Camera  # , CameraManufacturer, Streamer
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import User
 
@@ -39,42 +39,42 @@ def neom():
     return user
 
 
-def ViewIntoTheBlue():
-    if not (
-        manufacturer := CameraManufacturer.query.filter_by(
-            name="ViewIntoTheBlue"
-        ).first()
-    ):
-        manufacturer = CameraManufacturer(name="ViewIntoTheBlue")
-        db.session.add(manufacturer)
-        db.session.commit()
-    return manufacturer
+# def ViewIntoTheBlue():
+#     if not (
+#         manufacturer := CameraManufacturer.query.filter_by(
+#             name="ViewIntoTheBlue"
+#         ).first()
+#     ):
+#         manufacturer = CameraManufacturer(name="ViewIntoTheBlue")
+#         db.session.add(manufacturer)
+#         db.session.commit()
+#     return manufacturer
 
 
-def HikVision():
-    if not (
-        manufacturer := CameraManufacturer.query.filter_by(name="Hikvision").first()
-    ):
-        manufacturer = CameraManufacturer(name="Hikvision")
-        db.session.add(manufacturer)
-        db.session.commit()
-    return manufacturer
+# def HikVision():
+#     if not (
+#         manufacturer := CameraManufacturer.query.filter_by(name="Hikvision").first()
+#     ):
+#         manufacturer = CameraManufacturer(name="Hikvision")
+#         db.session.add(manufacturer)
+#         db.session.commit()
+#     return manufacturer
 
 
-def youtube():
-    if not (streamer := Streamer.query.filter_by(name="youtube").first()):
-        streamer = Streamer(name="youtube")
-        db.session.add(streamer)
-        db.session.commit()
-    return streamer
+# def youtube():
+#     if not (streamer := Streamer.query.filter_by(name="youtube").first()):
+#         streamer = Streamer(name="youtube")
+#         db.session.add(streamer)
+#         db.session.commit()
+#     return streamer
 
 
-def angelcam():
-    if not (streamer := Streamer.query.filter_by(name="angelcam").first()):
-        streamer = Streamer(name="angelcam")
-        db.session.add(streamer)
-        db.session.commit()
-    return streamer
+# def angelcam():
+#     if not (streamer := Streamer.query.filter_by(name="angelcam").first()):
+#         streamer = Streamer(name="angelcam")
+#         db.session.add(streamer)
+#         db.session.commit()
+#     return streamer
 
 
 def harbour_camera(user, streamer, manufacturer):
@@ -84,8 +84,8 @@ def harbour_camera(user, streamer, manufacturer):
         cam = Camera(
             name="Harbour Village Bonaire Coral Reef",
             status="RUNNING",
-            manufacturer_id=manufacturer.id,
-            streamer_id=streamer.id,
+            # manufacturer_id=manufacturer.id,
+            # streamer_id=streamer.id,
             owner_id=user.id,
             url="https://www.youtube.com/watch?v=tk-qJJbdOh4",
             resolution_x=1920,
@@ -103,8 +103,8 @@ def kaust_camera(user, streamer, manufacturer):
         cam = Camera(
             name="KAUST ViewIntoTheBlue Camera",
             status="RUNNING",
-            manufacturer_id=manufacturer.id,
-            streamer_id=streamer.id,
+            # manufacturer_id=manufacturer.id,
+            # streamer_id=streamer.id,
             owner_id=user.id,
             url="https://v.angelcam.com/iframe?v=16lb6045r4",
             latitude=22.307636,
@@ -122,8 +122,8 @@ def neom_road_camera(user, streamer, manufacturer):
         cam = Camera(
             name="NEOM ROAD CAM",
             status="RUNNING",
-            manufacturer_id=manufacturer.id,
-            streamer_id=streamer.id,
+            # manufacturer_id=manufacturer.id,
+            # streamer_id=streamer.id,
             owner_id=user.id,
             url="http://x.x.x.x",
             latitude=26.359954095563015,
@@ -163,7 +163,6 @@ def lutjanus_video(user, camera):
         note="Group of lutjanis fish",
         duration=7,
         url="../videos/lutjanis.mov",
-        thumbnail_url="../videos/lutjanis_thumbnail.jpg",
     )
     db.session.add(video)
     db.session.commit()
@@ -177,7 +176,6 @@ def vehicles_video(user, camera):
         note="Heavy traffic in highway",
         duration=29,
         url="../videos/vehicles.mp4",
-        thumbnail_url="../videos/vehicle_thumbnail.jpg",
     )
     db.session.add(video)
     db.session.commit()
@@ -270,7 +268,6 @@ def vehicle_count_workflow(user, ai_model):
             creator=user.id,
             publish_date=datetime.datetime.now(),
             aimodel_id=ai_model.id,
-            structure_file="../workflows/vehicle_count_workflow.json",
             usedfor="""
             Monitoring vehicle crowd in certain road over several time intervals to compare
             the crowd over daytime, days, weeks, months and seasons. When crossed with other
@@ -313,7 +310,6 @@ def fish_catcher_workflow(user, ai_model):
             creator=user.id,
             publish_date=datetime.datetime.now(),
             aimodel_id=ai_model.id,
-            structure_file="../workflows/fish_catcher_workflow.json",
             usedfor="""
             This model can be used to monitor and catch 43 types of common coral fish
             when the appear across the sight view of the camera. These fish have unique
@@ -351,7 +347,6 @@ def fish_counter_workflow(user, ai_model):
             creator=user.id,
             publish_date=datetime.datetime.now(),
             aimodel_id=ai_model.id,
-            structure_file="../workflows/fish_counter_workflow.json",
             usedfor="""
             Monitoring fish crowd in certain location over several time intervals to
             compare the crowd over daytime, days, weeks, months and seasons. When crossed with
@@ -452,42 +447,42 @@ def find_arabian_angelfish(user, workflow):
     return analysis
 
 
-def run():
+# def run():
 
-    fe = falcoeye()
-    kuser = kaust()
-    nuser = neom()
-    print("users added")
+#     fe = falcoeye()
+#     kuser = kaust()
+#     nuser = neom()
+#     print("users added")
 
-    yo = youtube()
-    angl = angelcam()
+#     #yo = youtube()
+#     #angl = angelcam()
 
-    vie = ViewIntoTheBlue()
-    hk = HikVision()
+#     #vie = ViewIntoTheBlue()
+#     #hk = HikVision()
 
-    harbour = harbour_camera(nuser, yo, vie)
-    kcamera = kaust_camera(kuser, angl, vie)
-    ncamera = neom_road_camera(nuser, angl, hk)
+#     harbour = harbour_camera(nuser, yo, vie)
+#     kcamera = kaust_camera(kuser, angl, vie)
+#     ncamera = neom_road_camera(nuser, angl, hk)
 
-    kaust_images(kuser, kcamera)
-    # lutjanus_video(kuser,kcamera)
-    # arabian_angelfish_video(kuser,kcamera)
-    # vehicles_video(nuser,hk)
+#     kaust_images(kuser, kcamera)
+#     # lutjanus_video(kuser,kcamera)
+#     # arabian_angelfish_video(kuser,kcamera)
+#     # vehicles_video(nuser,hk)
 
-    ds = fourtythree_dataset(fe)
+#     ds = fourtythree_dataset(fe)
 
-    vm = fourtythree_model(fe, ds)
-    fsh = fishfinder_model(fe, ds)
-    ve = vehicleseye_model(fe)
+#     vm = fourtythree_model(fe, ds)
+#     fsh = fishfinder_model(fe, ds)
+#     ve = vehicleseye_model(fe)
 
-    wf1 = vehicle_count_workflow(fe, ve)
-    wf2 = fish_catcher_workflow(fe, vm)
-    wf3 = fish_counter_workflow(fe, fsh)
+#     wf1 = vehicle_count_workflow(fe, ve)
+#     wf2 = fish_catcher_workflow(fe, vm)
+#     wf3 = fish_counter_workflow(fe, fsh)
 
-    count_fish_harbour_camera(kuser, wf3)
-    count_fish_lutjanis_video(kuser, wf3)
-    count_vehicles(nuser, wf1)
-    find_arabian_angelfish(kuser, wf2)
+#     count_fish_harbour_camera(kuser, wf3)
+#     count_fish_lutjanis_video(kuser, wf3)
+#     count_vehicles(nuser, wf1)
+#     find_arabian_angelfish(kuser, wf2)
 
 
 if __name__ == "__main__":
@@ -500,4 +495,4 @@ if __name__ == "__main__":
     db = SQLAlchemy(app)
     with app.app_context():
         db.create_all()
-        run()
+        # run()

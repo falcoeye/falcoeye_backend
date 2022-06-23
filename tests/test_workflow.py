@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 import uuid
 
@@ -13,6 +14,7 @@ def test_list_workflow(client, workflow):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/workflow/", headers=headers)
     assert resp.status_code == 200
+    logging.info(resp.json.get("workflow"))
     assert len(resp.json.get("workflow")) == 1
     assert resp.json.get("message") == "workflow data sent"
 
@@ -20,16 +22,19 @@ def test_list_workflow(client, workflow):
 def test_add_workflow(client, user, aimodel):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
+    with open(
+        f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
+        structure = json.load(f)
     data = {
         "name": "FishCounter",
         "creator": str(user.id),
         "aimodel_id": str(aimodel.id),
-        "structure_file": f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json",
+        "structure": structure,
         "usedfor": "detecting stuff",
         "consideration": "be careful",
         "assumption": "barely works",
         "results_description": "stuff",
-        "thumbnail_url": "/path/to/thumbnail.jpg",
     }
     resp = client.post(
         "/api/workflow/",

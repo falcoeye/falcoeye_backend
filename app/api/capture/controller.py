@@ -1,4 +1,5 @@
 import json
+import logging
 
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -62,6 +63,7 @@ class CaptureData(Resource):
     )
     @jwt_required()
     def post(self, registry_key):
-        server_id = get_jwt_identity()
+        admin_id = get_jwt_identity()
         data = request.get_json()
-        return CaptureService.set_capture_data(server_id, registry_key, data)
+        logging.info(f"Received new data for {registry_key} by {admin_id}")
+        return CaptureService.set_capture_data(admin_id, registry_key, data)

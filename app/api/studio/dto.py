@@ -72,7 +72,7 @@ class MediaDto:
             "name": fields.String,
             "camera_id": fields.String,
             "created_at": fields.DateTime,
-            "thumbnail_url": fields.String,
+            "media_type": fields.String,
         },
     )
     media_resp = api.model(

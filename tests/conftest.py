@@ -1,4 +1,5 @@
 """Global pytest fixtures."""
+import logging
 import os
 from datetime import datetime
 
@@ -7,13 +8,18 @@ import pytest
 from app import create_app
 from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
-from app.dbmodels.camera import Camera, CameraManufacturer
+from app.dbmodels.camera import Camera  # , CameraManufacturer
 from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
 
 from .utils import EMAIL, PASSWORD, USERNAME
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -75,20 +81,20 @@ def streaming_admin(db):
     return a
 
 
-@pytest.fixture
+"""@pytest.fixture
 def manufacturer(db):
     manufacturer = CameraManufacturer(name="DummyMaker")
     db.session.add(manufacturer)
     db.session.commit()
-    return manufacturer
+    return manufacturer"""
 
 
 @pytest.fixture
-def camera(db, user, manufacturer):
+def camera(db, user):  # manufacturer):
     camera = Camera(
         name="DummyCamera",
         status="RUNNING",
-        manufacturer_id=manufacturer.id,
+        #       manufacturer_id=manufacturer.id,
         streaming_type="StreamingServer",
         owner_id=user.id,
         url="https://test.test.com",
@@ -99,11 +105,11 @@ def camera(db, user, manufacturer):
 
 
 @pytest.fixture
-def harbour_camera(db, user, manufacturer):
+def harbour_camera(db, user):  # , manufacturer):
     harbour_camera = Camera(
         name="Harbour Village Bonaire Coral Reef",
         status="RUNNING",
-        manufacturer_id=manufacturer.id,
+        #        manufacturer_id=manufacturer.id,
         streaming_type="StreamingServer",
         owner_id=user.id,
         url="https://www.youtube.com/watch?v=tk-qJJbdOh4",
@@ -207,12 +213,10 @@ def workflow(db, user, aimodel):
         creator=user.id,
         publish_date=datetime.now(),
         aimodel_id=aimodel.id,
-        structure_file=f"{basedir}/workflows/kaust_fish_counter_threaded_async.json",
         usedfor="detecting stuff",
         consideration="be careful",
         assumption="barely works",
         results_description="stuff",
-        thumbnail_url="/path/to/thumbnail.jpg",
     )
     db.session.add(workflow)
     db.session.commit()

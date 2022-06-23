@@ -132,15 +132,17 @@ class CaptureService:
         return resp, 200
 
     @staticmethod
-    def set_capture_data(server_id, registry_key, data):
+    def set_capture_data(admin_id, registry_key, data):
 
         new_status = data.get("capture_status")
         logging.info(
-            f"Received registery status change request for {registry_key} from {server_id}: {new_status}"
+            f"Received registery status change request for {registry_key} from {admin_id}: {new_status}"
         )
-        if not (user := User.query.filter_by(id=server_id).first()):
+        if not (user := User.query.filter_by(id=admin_id).first()):
             return err_resp("User not found!", "user_404", 404)
 
+        logging.info(f"Is {user.id} admin?")
+        logging.info(f"{user.has_permission(Permission.CHANGE_CAPTURE_STATUS)}")
         # only admin is allowed
         if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
             return err_resp("Access denied", "role_403", 403)

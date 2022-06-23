@@ -12,13 +12,11 @@ class WorkflowDto:
             "usedfor": fields.String,
             "consideration": fields.String,
             "assumption": fields.String,
-            "thumbnail_url": fields.String,
-            "structure_file": fields.String,
         },
     )
 
     workflow_short = api.model(
-        "Camera list item",
+        "Workflow list item",
         {
             "id": fields.String,
             "name": fields.String,
@@ -42,12 +40,10 @@ class WorkflowDto:
             "name": fields.String,
             "creator": fields.String,
             "publish_date": fields.DateTime,
-            "aimodel_id": fields.String,
+            "aimodel_name": fields.String,
             "usedfor": fields.String,
             "consideration": fields.String,
             "assumption": fields.String,
-            "thumbnail_url": fields.String,
-            "structure_file": fields.String,
         },
     )
 

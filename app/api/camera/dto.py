@@ -19,7 +19,7 @@ class CameraDto:
             "utm_x": fields.Float,
             "utm_y": fields.Float,
             "streaming_type": fields.String,
-            "manufacturer_id": fields.String,
+            # "manufacturer_id": fields.String,
             "url": fields.Url,
             "host": fields.String,
             "port": fields.Integer,
@@ -36,7 +36,7 @@ class CameraDto:
             "utm_x": fields.Float,
             "utm_y": fields.Float,
             "streaming_type": fields.String(enum=Streamer._member_names_),
-            "manufacturer_id": fields.String,
+            # "manufacturer_id": fields.String,
             "url": fields.Url,
             "host": fields.String,
             "port": fields.Integer,
@@ -75,39 +75,39 @@ class CameraDto:
     )
 
 
-class CameraManufacturerDto:
+"""class CameraManufacturerDto:
 
-    api = Namespace(
-        "manufacturer", description="Camera manufacturer related operations."
-    )
+api = Namespace(
+    "manufacturer", description="Camera manufacturer related operations."
+)
 
-    camera_manufacturer = api.model(
-        "Camera Manufacturer Object",
-        {
-            "id": fields.String,
-            "name": fields.String,
-        },
-    )
+camera_manufacturer = api.model(
+    "Camera Manufacturer Object",
+    {
+        "id": fields.String,
+        "name": fields.String,
+    },
+)
 
-    camera_manufacturer_post = api.model(
-        "Camera Manufacturer post data",
-        {"name": fields.String},
-    )
+camera_manufacturer_post = api.model(
+    "Camera Manufacturer post data",
+    {"name": fields.String},
+)
 
-    manufacturer_resp = api.model(
-        "Camera Manufacturer get response",
-        {
-            "status": fields.Boolean,
-            "message": fields.String,
-            "manufacturer": fields.Nested(camera_manufacturer),
-        },
-    )
+manufacturer_resp = api.model(
+    "Camera Manufacturer get response",
+    {
+        "status": fields.Boolean,
+        "message": fields.String,
+        "manufacturer": fields.Nested(camera_manufacturer),
+    },
+)
 
-    manufacturer_list = api.model(
-        "Manufacturer list",
-        {
-            "status": fields.Boolean,
-            "message": fields.String,
-            "manufacturer": fields.List(fields.Nested(camera_manufacturer)),
-        },
-    )
+manufacturer_list = api.model(
+    "Manufacturer list",
+    {
+        "status": fields.Boolean,
+        "message": fields.String,
+        "manufacturer": fields.List(fields.Nested(camera_manufacturer)),
+    },
+)"""

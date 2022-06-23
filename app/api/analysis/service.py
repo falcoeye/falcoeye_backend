@@ -64,7 +64,9 @@ class AnalysisService:
             db.session.flush()
             db.session.commit()
 
-            wf_structure = load_workflow_structure(workflow.structure_file)
+            workflow_structure = f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}/structure.json'
+
+            wf_structure = load_workflow_structure(workflow_structure)
             wf_args = data.get("args", {})
             # This is where analysis output will be stored. Must be augmented here
             wf_args["prefix"] = storage_path

@@ -10,6 +10,12 @@ def get_status(registry_id):
     return registry_item.status
 
 
+def get_registry(registry_id):
+    if not (registry_item := Registry.query.filter_by(id=registry_id).first()):
+        return None
+    return registry_item
+
+
 def register(user_id, camera_id, media_type, prefix):
     try:
 
