@@ -1,6 +1,8 @@
 """Global pytest fixtures."""
+import json
 import logging
 import os
+import shutil
 from datetime import datetime
 
 import pytest
@@ -13,7 +15,7 @@ from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
 
-from .utils import EMAIL, PASSWORD, USERNAME
+from .utils import EMAIL, PASSWORD, USERNAME, mkdir
 
 logging.basicConfig(
     level=logging.INFO,
@@ -120,7 +122,7 @@ def harbour_camera(db, user):  # , manufacturer):
 
 
 @pytest.fixture
-def registry_image(db, user, camera):
+def registry_image(app, db, user, camera):
     registry = Registry(
         camera_id=str(camera.id),
         user=str(user.id),
@@ -130,11 +132,26 @@ def registry_image(db, user, camera):
     )
     db.session.add(registry)
     db.session.commit()
+
+    user_img_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{str(user.id)}/images/"
+    logging.info(f"User temp image directory: {user_img_dir}")
+    mkdir(user_img_dir)
+    logging.info(f"Directory created? {os.path.exists(user_img_dir)}")
+
+    img_filename = f"{user_img_dir}/{registry.id}.jpg"
+    logging.info(f"Copying: {basedir}/media/fish.jpg to {img_filename}")
+    shutil.copy2(f"{basedir}/media/fish.jpg", img_filename)
+
+    registry.capture_path = img_filename
+    db.session.add(registry)
+    db.session.flush()
+    db.session.commit()
+
     return registry
 
 
 @pytest.fixture
-def registry_video(db, user, camera):
+def registry_video(app, db, user, camera):
     registry = Registry(
         camera_id=str(camera.id),
         user=str(user.id),
@@ -144,6 +161,22 @@ def registry_video(db, user, camera):
     )
     db.session.add(registry)
     db.session.commit()
+
+    user_videos_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{str(user.id)}/videos/"
+    logging.info(f"User temp video directory: {user_videos_dir}")
+    mkdir(user_videos_dir)
+    logging.info(f"Directory created? {os.path.exists(user_videos_dir)}")
+
+    # Only mp4 is supported
+    video_filename = f"{user_videos_dir}/{registry.id}.mp4"
+    logging.info(f"Copying: {basedir}/media/lutjanis.mov to {video_filename}")
+    shutil.copy2(f"{basedir}/media/lutjanis.mov", video_filename)
+
+    registry.capture_path = video_filename
+    db.session.add(registry)
+    db.session.flush()
+    db.session.commit()
+
     return registry
 
 
@@ -207,8 +240,13 @@ def aimodel(db, user, dataset):
 
 
 @pytest.fixture
-def workflow(db, user, aimodel):
-    workflow = Workflow(
+def workflow(app, db, user, aimodel):
+    with open(
+        f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
+        structure = json.load(f)
+
+    nworkflow = Workflow(
         name="FishCounter",
         creator=user.id,
         publish_date=datetime.now(),
@@ -218,9 +256,18 @@ def workflow(db, user, aimodel):
         assumption="barely works",
         results_description="stuff",
     )
-    db.session.add(workflow)
+    db.session.add(nworkflow)
     db.session.commit()
-    return workflow
+
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{nworkflow.id}'
+    logging.info(f"Creating workflow directory {workflow_dir}")
+
+    mkdir(workflow_dir)
+    logging.info("Writing structure file")
+    with open(f"{workflow_dir}/structure.json", "w") as f:
+        f.write(json.dumps(structure))
+
+    return nworkflow
 
 
 @pytest.fixture

@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+import shutil
 import uuid
 
 from .utils import login_user
@@ -9,7 +10,7 @@ from .utils import login_user
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-def test_list_workflow(client, workflow):
+def test_list_workflow(app, client, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/workflow/", headers=headers)
@@ -17,9 +18,13 @@ def test_list_workflow(client, workflow):
     logging.info(resp.json.get("workflow"))
     assert len(resp.json.get("workflow")) == 1
     assert resp.json.get("message") == "workflow data sent"
+    workflow_id = str(workflow.id)
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
 
 
-def test_add_workflow(client, user, aimodel):
+def test_add_workflow(client, app, user, aimodel):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     with open(
@@ -45,11 +50,20 @@ def test_add_workflow(client, user, aimodel):
     assert resp.status_code == 201
     assert resp.json.get("message") == "Workflow has been added."
 
+    workflow_id = resp.json.get("workflow").get("id")
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
 
-def test_delete_workflow(client, workflow):
+
+def test_delete_workflow(app, client, workflow):
     resp = login_user(client)
     assert "access_token" in resp.json
     headers = {"X-API-KEY": resp.json.get("access_token")}
+    workflow_id = str(workflow.id)
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
 
     resp = client.delete(f"/api/workflow/{workflow.id}", headers=headers)
     assert resp.status_code == 200

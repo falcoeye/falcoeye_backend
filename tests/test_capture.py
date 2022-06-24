@@ -149,6 +149,11 @@ def test_capture_image(mock_post, app, client, camera, streaming_admin):
 
     assert resp.status_code == 201
 
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
+    shutil.rmtree(user_temp_dir)
+    shutil.rmtree(user_asset_dir)
+
 
 @mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
 def test_capture_video(mock_post, app, client, camera, streaming_admin):
@@ -209,3 +214,8 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
     )
 
     assert resp.status_code == 201
+
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
+    shutil.rmtree(user_temp_dir)
+    shutil.rmtree(user_asset_dir)

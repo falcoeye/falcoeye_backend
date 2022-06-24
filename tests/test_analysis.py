@@ -1,6 +1,8 @@
 import datetime
 import json
+import logging
 import os
+import shutil
 import uuid
 from unittest import mock
 
@@ -21,7 +23,7 @@ def mocked_workflow_post(*args, **kwargs):
     return MockResponse({"status": True, "message": "Analysis started"}, 200)
 
 
-def test_list_analysis(client, analysis):
+def test_list_analysis(app, client, analysis):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/analysis/", headers=headers)
@@ -29,9 +31,13 @@ def test_list_analysis(client, analysis):
     assert len(resp.json.get("analysis")) == 1
     assert resp.json.get("message") == "Analysis data sent"
 
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{analysis.workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
+
 
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
-def test_add_analysis(mock_post, client, user, workflow):
+def test_add_analysis(mock_post, app, client, user, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     data = {
@@ -55,11 +61,18 @@ def test_add_analysis(mock_post, client, user, workflow):
     assert resp.status_code == 201
     assert resp.json.get("message") == "Analysis has been added."
 
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
 
-def test_delete_analysis(client, analysis):
+
+def test_delete_analysis(app, client, analysis):
     resp = login_user(client)
     assert "access_token" in resp.json
     headers = {"X-API-KEY": resp.json.get("access_token")}
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{analysis.workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    shutil.rmtree(workflow_dir)
 
     resp = client.delete(f"/api/analysis/{analysis.id}", headers=headers)
     assert resp.status_code == 200

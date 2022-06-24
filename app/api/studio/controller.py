@@ -41,7 +41,7 @@ class StudioList(Resource):
         return StudioService.get_user_media(current_user_id)
 
 
-@api.route("/image/<media_id>/gg_<img_size>.jpg")
+@api.route("/image/<media_id>")
 @api.param("media_id", "Image ID")
 class StudioImageGet(Resource):
     @api.doc(
@@ -77,18 +77,18 @@ class StudioImageGet(Resource):
 @api.param("media_id", "Image ID")
 @api.param("img_size", "Image Resolution")
 @api.param("extension", "Image Extension")
-class StudioVideoServe(Resource):
+class StudioImageServe(Resource):
     @api.doc(
-        "Get user's video",
+        "Get user's image",
         responses={
-            200: ("Video successfully sent", video_resp),
-            404: "Video not found!",
+            200: ("Image successfully sent", video_resp),
+            404: "Image not found!",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, media_id, img_size, extension):
-        """Get user's video"""
+        """Get user's image"""
         current_user_id = get_jwt_identity()
         image_dir = (
             f'{current_app.config["USER_ASSETS"]}/{current_user_id}/images/{media_id}/'
@@ -101,7 +101,7 @@ class StudioVideoServe(Resource):
 @api.route("/image")
 class StudioImagePost(Resource):
     @api.doc(
-        "Get a user media",
+        "Post a user image",
         responses={
             200: ("Image successfully added", MediaDto.image),
             403: "Invalid registry key",
@@ -150,6 +150,25 @@ class StudioVideoGet(Resource):
         return StudioService.delete_video(current_user_id, media_id)
 
 
+@api.route("/video")
+class StudioVideoPost(Resource):
+    @api.doc(
+        "Get a user media",
+        responses={
+            200: ("Video successfully added", MediaDto.video),
+            403: "Invalid registry key",
+        },
+        security="apikey",
+    )
+    @api.expect(MediaDto.video_post, validate=False)
+    @jwt_required()
+    def post(self):
+        """Add a user's video"""
+        video_data = request.get_json()
+        user_id = get_jwt_identity()
+        return StudioService.create_video(user_id=user_id, data=video_data)
+
+
 @api.route("/video/<string:media_id>/video_<string:resolution>.mp4")
 @api.param("media_id", "Video ID")
 @api.param("resolution", "Video Resolution")
@@ -193,22 +212,3 @@ class StudioVideoServe(Resource):
         #     get_chunk(video_path, start, end), 206, headers
         # )
         return None
-
-
-@api.route("/video")
-class StudioVideoPost(Resource):
-    @api.doc(
-        "Get a user media",
-        responses={
-            200: ("Video successfully added", MediaDto.video),
-            403: "Invalid registry key",
-        },
-        security="apikey",
-    )
-    @api.expect(MediaDto.video_post, validate=False)
-    @jwt_required()
-    def post(self):
-        """Add a user's video"""
-        video_data = request.get_json()
-        user_id = get_jwt_identity()
-        return StudioService.create_video(user_id=user_id, data=video_data)

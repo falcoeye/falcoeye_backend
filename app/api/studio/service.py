@@ -32,7 +32,7 @@ class StudioService:
             for v in video_data:
                 v["media_type"] = "video"
             for i in image_data:
-                v["media_type"] = "image"
+                i["media_type"] = "image"
 
             media_data = video_data + image_data
 
@@ -62,6 +62,8 @@ class StudioService:
 
     @staticmethod
     def create_image(user_id, data):
+
+        logging.info(f"Creating image for {user_id} data: {data}")
         note = data.get("note", "")
         tags = data.get("tags", "")
         camera_id = data.get("camera_id", None)
@@ -75,8 +77,6 @@ class StudioService:
 
         if registry_item.status == "FAILED":
             return err_resp("Registry item failed", "registry_404", 404)
-
-        # TODO: camera id and workflow name, if any, should be part of the metadata of the image
 
         # user only send registry key here.
         try:
@@ -92,10 +92,16 @@ class StudioService:
             db.session.flush()
             db.session.commit()
 
+            logging.info("Image atabase object created")
+
             imgs_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{new_image.id}/'
             )
             mkdir(imgs_dir)
+
+            logging.info(
+                f"Moving image from {registry_item.capture_path} to {imgs_dir}"
+            )
 
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
             try:

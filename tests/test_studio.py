@@ -1,16 +1,20 @@
 import json
 import os
+import shutil
 import uuid
 
 from .utils import login_user
 
 
-def test_add_image(client, db, user):
+def test_list_media_1(client, image):
     resp = login_user(client)
-    assert "access_token" in resp.json
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/media/", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "User media sent"
 
 
-def test_add_image(client, user, registry_image, camera):
+def test_add_image(app, client, user, registry_image, camera):
     resp = login_user(client)
     assert "access_token" in resp.json
 
@@ -37,14 +41,10 @@ def test_add_image(client, user, registry_image, camera):
     assert resp.json.get("media")[0].get("camera_id") == str(camera.id)
     assert resp.status_code == 200
     assert resp.json.get("message") == "User media sent"
-
-
-def test_list_media_1(client, image):
-    resp = login_user(client)
-    headers = {"X-API-KEY": resp.json.get("access_token")}
-    resp = client.get("/api/media/", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json.get("message") == "User media sent"
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user.id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user.id}"
+    shutil.rmtree(user_temp_dir)
+    shutil.rmtree(user_asset_dir)
 
 
 def test_empty_media(client, user):
@@ -89,12 +89,7 @@ def test_delete_invalid_image_by_id(client, user):
     assert resp.json.get("message") == "Image not found!"
 
 
-# def test_update_image_by_id(client, camera):
-#     # TODO
-#     pass
-
-
-def test_add_video(client, user, registry_video, camera):
+def test_add_video(app, client, user, registry_video, camera):
     resp = login_user(client)
     assert "access_token" in resp.json
 
@@ -122,6 +117,11 @@ def test_add_video(client, user, registry_video, camera):
     assert resp.json.get("media")[0].get("camera_id") == str(camera.id)
     assert resp.status_code == 200
     assert resp.json.get("message") == "User media sent"
+
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user.id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user.id}"
+    shutil.rmtree(user_temp_dir)
+    shutil.rmtree(user_asset_dir)
 
 
 def test_list_media_2(client, image, video):
