@@ -20,6 +20,7 @@ users = [
     (workflow_user.strip(), workflow_password.strip(), "workflow", "workflow account"),
 ]
 
+
 db_url = os.getenv("DATABASE_URL")
 with psycopg2.connect(db_url) as conn:
     for user in users:

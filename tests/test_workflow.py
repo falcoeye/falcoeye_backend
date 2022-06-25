@@ -27,9 +27,7 @@ def test_list_workflow(app, client, workflow):
 def test_add_workflow(client, app, user, aimodel):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
-    with open(
-        f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json"
-    ) as f:
+    with open(f"{basedir}/workflows/kaust_fish_counter_threaded_async.json") as f:
         structure = json.load(f)
     data = {
         "name": "FishCounter",

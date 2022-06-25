@@ -47,10 +47,10 @@ class WorkflowService:
             if Workflow.query.filter_by(name=name).first() is not None:
                 return err_resp("Name is already being used.", "name_taken", 403)
 
-            aimodel_id = data["aimodel_id"]
-            # ai models table are assumed to be accessable by everyone here
-            if not (aimodel := AIModel.query.filter_by(id=aimodel_id).first()):
-                return err_resp("Model not found!", "camera_404", 404)
+            # aimodel_id = data["aimodel_id"]
+            # # ai models table are assumed to be accessable by everyone here
+            # if not (aimodel := AIModel.query.filter_by(id=aimodel_id).first()):
+            #     return err_resp("Model not found!", "camera_404", 404)
 
             workflow_structre = data["structure"]
 
@@ -60,7 +60,7 @@ class WorkflowService:
                 name=data["name"],
                 creator=user_id,
                 publish_date=datetime.utcnow(),
-                aimodel_id=aimodel.id,
+                # aimodel_id=aimodel.id,
                 usedfor=data["usedfor"],
                 consideration=data["consideration"],
                 assumption=data["assumption"],

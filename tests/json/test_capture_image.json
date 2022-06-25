@@ -3,6 +3,7 @@
         "name": "register",
         "pass": [
             "Email is already being used.",
+            "User has been registered.",
             "Successfully registered user."
         ],
         "args":{
@@ -23,58 +24,16 @@
     },
     "tests":[
         {
-            "name": "Adding manufacturer",
-            "req_type": "post",
-            "link": "/api/manufacturer/",
-            "pass": [
-                "Manufacturer has been added",
-                "Manufacturer already exist"
-            ],
-            "args": {
-                "name": "ViewIntoTheBlue"
-            }
-        },
-        {
-            "name": "Get manufacturer",
-            "req_type": "get",
-            "link": "/api/manufacturer",
-            "pass": [
-                "Manufacturer data sent"
-            ],
-            "store": {
-                "ViewIntoTheBlue":
-                [
-                    {
-                        "type": "dict",
-                        "key": "manufacturer",
-                        "from": "response"
-                    },
-                    {
-                        "type": "list",
-                        "condition": {
-                            "key": "name",
-                            "value":"ViewIntoTheBlue"
-                        }
-                    },
-                    {
-                        "type": "dict",
-                        "key": "id",
-                        "from": "value"
-                    }
-                ]
-            }
-        },
-        {
             "name": "Adding camera",
             "req_type": "post",
             "link": "/api/camera/",
             "pass": [
                 "Camera already exist",
+                "Camera has been added",
                 "Successfully added camera"
             ],
             "args": {
                 "name": "Harbour Village Bonaire Coral Reef 2",
-                "manufacturer_id": "$ViewIntoTheBlue",
                 "streaming_type": "StreamingServer",
                 "url": "https://www.youtube.com/watch?v=NwWgOilQuzw&t=4s",
                 "status": "RUNNING"
@@ -139,6 +98,20 @@
             "condition":{
                 "key":"capture_status",
                 "value": ["SUCCEEDED","FAILED"]
+            }
+        },
+        {
+           "name": "Posting Picture",
+            "req_type": "post",
+            "link": "/api/media/image",
+            "pass": [
+                "Image has been added"
+            ],
+            "args": {
+                "camera_id": "$harbour_id",
+                "tags": "Fish, Harbour",
+                "note": "This a fish image from harbour camera",
+                "registry_key": "$registry_key"
             }
         }
     ]

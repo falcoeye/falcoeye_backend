@@ -56,7 +56,9 @@ class AnalysisService:
                 status="new",
                 workflow_id=workflow.id,
             )
-            storage_path = f"{current_app.config['ANALYSIS_STORAGE']}/{new_analysis.id}"
+            storage_path = (
+                f"{current_app.config['USER_ASSETS']}/analysis/{new_analysis.id}"
+            )
             new_analysis.results_path = storage_path
 
             # Analysis started. create a db object
