@@ -1,3 +1,5 @@
+import logging
+
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
@@ -18,7 +20,7 @@ class AnalysisList(Resource):
         """Get a list of all analysiss""",
         responses={
             200: ("Analysis data sent", AnalysisDto.analysis_list),
-            404: "No analysiss found!",
+            404: "No analysis found",
         },
         security="apikey",
     )
@@ -41,6 +43,7 @@ class AnalysisList(Resource):
     def post(self):
         analysis_data = request.get_json()
         user_id = get_jwt_identity()
+        logging.info(f"Recevied new analysis request from {user_id}")
         return AnalysisService.create_analysis(user_id=user_id, data=analysis_data)
 
 

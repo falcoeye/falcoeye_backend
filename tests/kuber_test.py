@@ -49,7 +49,7 @@ def login(regdict):
 
 
 def calculate_store(test_name, store, respdict):
-
+    print(respdict)
     for k, cal in store.items():
         success = True
         value = None
@@ -82,17 +82,22 @@ def calculate_store(test_name, store, respdict):
             exit()
         resources[k] = value
         logging.info(f"Caluclated value for {k} {value}")
+    logging.info(f"Resources: {resources}")
 
 
 def calculate_args(test_name, args):
-    for k, v in args.items():
-        if type(v) == str and v[0] == "$":
-            try:
-                args[k] = resources[v[1:]]
-            except KeyError:
-                logging.error(
-                    "Test {test_name} failed. {k} not found when calculating args"
-                )
+    for k, v in resources.items():
+        for k2, v2 in args.items():
+            if type(v2) == str and f"${k}" in v2:
+                try:
+                    args[k2] = v2.replace(f"${k}", v)
+                    logging.info(f"New value for {k2}: {args[k2]}")
+                except KeyError:
+                    logging.error(
+                        "Test {test_name} failed. {k} not found when calculating args"
+                    )
+            elif type(v2) == dict:
+                calculate_args(test_name, v2)
 
 
 def calculate_link(link):
@@ -118,11 +123,13 @@ def run_request(testdict):
 
     link = calculate_link(link)
     calculate_args(name, args)
-
+    logging.info(f"Running {reqtype} on {URL}{link} with args {args}")
     if reqtype == "post":
         resp = requests.post(f"{URL}{link}", json=args, headers=header)
     elif reqtype == "get":
         resp = requests.get(f"{URL}{link}", json=args, headers=header)
+    elif reqtype == "delete":
+        resp = requests.delete(f"{URL}{link}", json=args, headers=header)
     resdict = resp.json()
     message = resdict["message"]
     if len(pass_msgs) > 0 and message in pass_msgs:
@@ -183,7 +190,7 @@ if __name__ == "__main__":
     with open(test_json) as f:
         test = json.load(f)
 
-    if not register(test["register"]):
+    if "register" in test and not register(test["register"]):
         exit()
 
     if not (access_token := login(test["login"])):

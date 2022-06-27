@@ -104,7 +104,7 @@
             "req_type": "get",
             "link": "/api/media",
             "pass": [
-                "Media data sent"
+                "User media sent"
             ],
             "store": {
                 "harbour_video":
@@ -117,8 +117,8 @@
                     {
                         "type": "list",
                         "condition": {
-                            "key": "name",
-                            "value":""
+                            "key": "id",
+                            "value":"9b9375b8-6d60-4c74-ba60-819e179d04da"
                         }
                     },
                     {
@@ -126,7 +126,46 @@
                         "key": "id",
                         "from": "value"
                     }
+                ],
+                "user_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "media",
+                        "from": "response"
+                    },
+                    {
+                        "type": "list",
+                        "condition": {
+                            "key": "id",
+                            "value":"9b9375b8-6d60-4c74-ba60-819e179d04da"
+                        }
+                    },
+                    {
+                        "type": "dict",
+                        "key": "user",
+                        "from": "value"
+                    }
                 ]
+            }
+        },
+        {
+            "name": "New analysis",
+            "req_type": "post",
+            "link": "/api/analysis/",
+            "pass": [
+                "Analysis has been added."
+            ],
+            "args": {
+                "name": "FishCounter_Test",
+                "workflow_id": "$fishcounter_id",
+                "status": "new",
+                "args": {
+                    "filename": "/user-assets/$user_id/videos/$harbour_video/video_original.mp4",
+                    "sample_every": 30,
+                    "min_score_thresh": 0.30,
+                    "max_boxes": 30
+                }
             }
         }
     ]

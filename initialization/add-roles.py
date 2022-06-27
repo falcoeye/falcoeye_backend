@@ -1,5 +1,8 @@
 import os
+import sys
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, f"{basedir}/../")
 from app import create_app
 from app.dbmodels import Role
 

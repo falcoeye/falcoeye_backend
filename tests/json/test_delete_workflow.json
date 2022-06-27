@@ -1,0 +1,57 @@
+{
+
+    "login": {
+        "pass": [
+            "Successfully logged in."
+        ],
+        "args":{
+            "email": "workflow@falcoeye.io",
+            "password": "LIFE_IS_BUSY"
+        }
+    },
+    "tests":[
+        {
+            "name": "Get Workflow",
+            "req_type": "get",
+            "link": "/api/workflow",
+            "pass": [
+                "Workflow data sent",
+                "Workflow not found!",
+                "workflow data sent"
+            ],
+            "store": {
+                "workflow_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "workflow",
+                        "from": "response"
+                    },
+                    {
+                        "type": "list",
+                        "condition": {
+                            "key": "name",
+                            "value":"KAUST Fish Counter"
+                        }
+                    },
+                    {
+                        "type": "dict",
+                        "key": "id",
+                        "from": "value"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Delete workflow",
+            "req_type": "delete",
+            "link": ["/api/workflow/","$workflow_id"],
+            "pass": [
+                "Workflow successfully deleted",
+                "Workflow not found!",
+                "workflow deleted"
+            ]
+        }
+
+    ]
+}

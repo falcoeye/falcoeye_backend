@@ -44,6 +44,7 @@ class VideoSchema(ma.Schema):
     class Meta:
         model_converter = GUIDConverter
         fields = (
+            "id",
             "camera_id",
             "user",
             "note",
@@ -64,6 +65,7 @@ class ImageSchema(ma.Schema):
     class Meta:
         model_converter = GUIDConverter
         fields = (
+            "id",
             "camera_id",
             "user",
             "note",

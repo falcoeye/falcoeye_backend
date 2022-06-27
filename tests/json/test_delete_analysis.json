@@ -1,0 +1,70 @@
+{
+    "register": {
+        "name": "register",
+        "pass": [
+            "Email is already being used.",
+            "User has been registered.",
+            "Successfully registered user."
+        ],
+        "args":{
+            "email": "falcoeye-test@falcoeye.io",
+            "username": "falcoeye_test",
+            "name": "falcoeye test",
+            "password": "falcoeye-test"
+        }
+    },
+    "login": {
+        "pass": [
+            "Successfully logged in."
+        ],
+        "args":{
+            "email": "falcoeye-test@falcoeye.io",
+            "password": "falcoeye-test"
+        }
+    },
+    "tests":[
+        {
+            "name": "Get Analysis",
+            "req_type": "get",
+            "link": "/api/analysis",
+            "pass": [
+                "Analysis data sent",
+                "Analysis not found!",
+                "No analysis found"
+            ],
+            "store": {
+                "analysis_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "analysis",
+                        "from": "response"
+                    },
+                    {
+                        "type": "list",
+                        "condition": {
+                            "key": "name",
+                            "value":"FishCounter_Test"
+                        }
+                    },
+                    {
+                        "type": "dict",
+                        "key": "id",
+                        "from": "value"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Delete analysis",
+            "req_type": "delete",
+            "link": ["/api/analysis/","$analysis_id"],
+            "pass": [
+                "Analysis successfully deleted",
+                "Analysis not found!",
+                "analysis deleted"
+            ]
+        }
+
+    ]
+}

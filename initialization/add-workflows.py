@@ -15,8 +15,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 URL = "http://localhost:5000"
 
-workflow_user = os.getenv("WORKFLOW_USER")
-workflow_password = os.getenv("WORKFLOW_PASSWORD")
+workflow_user = os.getenv("WORKFLOW_USER").strip()
+workflow_password = os.getenv("WORKFLOW_PASSWORD").strip()
 payload = {"email": workflow_user, "password": workflow_password}
 resp = requests.post(f"{URL}/auth/login", json=payload)
 headers = {

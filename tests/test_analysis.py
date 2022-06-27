@@ -76,7 +76,7 @@ def test_delete_analysis(app, client, analysis):
 
     resp = client.delete(f"/api/analysis/{analysis.id}", headers=headers)
     assert resp.status_code == 200
-    assert resp.json.get("message") == "analysis deleted"
+    assert resp.json.get("message") == "Analysis successfully deleted"
 
 
 def test_empty_analysiss(client, user):

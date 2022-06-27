@@ -77,6 +77,7 @@ class WorkflowService:
                 f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{new_workflow.id}'
             )
             mkdir(workflow_dir)
+            logging.info(f"Storing workflow data in {workflow_dir}")
             with open(f"{workflow_dir}/structure.json", "w") as f:
                 f.write(json.dumps(workflow_structre))
 
@@ -87,6 +88,7 @@ class WorkflowService:
                 with open(workflow_img, "wb") as f:
                     f.write(imgdata)
             else:
+                logging.info("No workflow image. Copying default")
                 shutil.copy2(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
 
             # TODO: resize and save more image sizes

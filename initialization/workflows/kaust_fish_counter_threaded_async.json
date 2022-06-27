@@ -113,7 +113,9 @@
             {
                 "name": "falcoeye_detection",
                 "type": "FalcoeyeDetectionNode",
-                "labelmap": "/Users/jalalirs/Documents/code/falcoeye/falcoeye_backbones/portofolio/fish/findfish/1/label_map.json",
+                "labelmap": {
+                    "1": "fish"
+                },
                 "min_score_thresh": "$min_score_thresh",
                 "max_boxes": "$max_boxes"
             },

@@ -102,7 +102,7 @@ class Camera(Resource):
         )
 
 
-@api_camera.route("/<camera_id>/img_<img_size>")
+@api_camera.route("/<camera_id>/img_<img_size>.jpg")
 @api_camera.param("camera_id", "Camera ID")
 @api_camera.param("img_size", "Image Size")
 class Camera(Resource):
