@@ -1,10 +1,11 @@
 import json
 import logging
+import os
 from datetime import datetime
 
 import requests
 from falcoeye_kubernetes import FalcoServingKube
-from flask import current_app
+from flask import current_app, send_from_directory
 
 from app import db
 from app.dbmodels.ai import Analysis
@@ -68,9 +69,7 @@ class AnalysisService:
             db.session.commit()
             logging.info("Database item is created")
 
-            storage_path = (
-                f"{current_app.config['USER_ASSETS']}/analysis/{new_analysis.id}"
-            )
+            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{new_analysis.id}"
             logging.info(f"Analysis results will be stored in {storage_path}")
             new_analysis.results_path = storage_path
             logging.info("Updating database item with storage path")
@@ -159,6 +158,28 @@ class AnalysisService:
             resp = message(True, "Analysis successfully deleted")
             return resp, 200
 
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def get_analysis_meta_by_id(user_id, analysis_id):
+        """Get analysis meta by ID"""
+        if not (
+            analysis := Analysis.query.filter_by(
+                creator=user_id, id=analysis_id
+            ).first()
+        ):
+            return err_resp("Analysis not found!", "analysis_404", 404)
+
+        try:
+            analysis_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
+            )
+            if os.path.exists(f"{analysis_dir}/meta.json"):
+                return send_from_directory(analysis_dir, "meta.json")
+            else:
+                return err_resp("Analysis output not yet written", "analysis_425", 425)
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

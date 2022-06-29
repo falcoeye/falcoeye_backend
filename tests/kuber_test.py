@@ -12,6 +12,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+import operator
+
+ops = {"==": operator.eq, "!=": operator.ne, "in": operator.contains}
 
 # backend_kube = FalcoServingKube("falcoeye-backend")
 # backend_server = backend_kube.get_service_address(external=True,hostname=True)
@@ -154,8 +157,8 @@ def wait_until(testdict):
     condition = testdict["condition"]
     ckey = condition["key"]
     cval = condition["value"]
-    if type(cval) == str:
-        cval = [cval]
+    copestr = condition.get("oper", "in")
+    coper = ops[copestr]
 
     logging.info(f"Running {name} test")
 
@@ -168,12 +171,32 @@ def wait_until(testdict):
     while tm < timeout:
         resp = func(f"{URL}{link}", json=args, headers=header)
         resdict = resp.json()
-        if resdict[ckey] in cval:
-            logging.info(f"Condition met {ckey} = {resdict[ckey]}")
+
+        if ckey not in resdict:
+            logging.info(f"{ckey} not in the response. Breaking...")
+            break
+
+        logging.info(f"Checking if {resdict[ckey]} {copestr} {cval}")
+        if coper(resdict[ckey], cval):
+            logging.info(f"Condition met {ckey} {copestr} {resdict[ckey]}")
             return
-        logging.info(f"Condition not yet met {ckey} = {resdict[ckey]}")
+        logging.info(f"Condition not yet met {ckey} {copestr} {resdict[ckey]}")
         time.sleep(sleep)
         tm += sleep
+
+
+def json_file(testdict):
+    name = testdict["name"]
+    link = testdict["link"]
+
+    args = testdict.get("args", {})
+    logging.info(f"Running {name} test")
+    link = calculate_link(link)
+
+    logging.info(f"Running get on {URL}{link}")
+
+    resp = requests.get(f"{URL}{link}", json=args, headers=header)
+    print(resp.content)
 
 
 def run_test(testdict):
@@ -182,6 +205,8 @@ def run_test(testdict):
         run_request(testdict)
     elif test_type == "wait_until":
         wait_until(testdict)
+    elif test_type == "json_file":
+        json_file(testdict)
 
 
 if __name__ == "__main__":

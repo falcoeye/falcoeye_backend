@@ -77,3 +77,22 @@ class Analysis(Resource):
         """Delete a analysis"""
         current_user_id = get_jwt_identity()
         return AnalysisService.delete_analysis(current_user_id, analysis_id)
+
+
+@api.route("/<analysis_id>/meta.json")
+@api.param("analysis_id", " Analysis ID")
+class Analysis(Resource):
+    @api.doc(
+        "Get user's analysis meta file by id",
+        responses={
+            200: ("Analysis meta data sent", AnalysisDto.analysis_resp),
+            404: "Analysis not found!",
+            425: "Analysis output not yet written",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, analysis_id):
+        """Get a analysis"""
+        current_user_id = get_jwt_identity()
+        return AnalysisService.get_analysis_meta_by_id(current_user_id, analysis_id)

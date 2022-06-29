@@ -166,7 +166,40 @@
                     "min_score_thresh": 0.30,
                     "max_boxes": 30
                 }
+            },
+            "store":{
+                "analysis_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "analysis",
+                        "from": "response"
+                    },
+                    {
+                        "type": "dict",
+                        "key": "id",
+                        "from": "value"
+                    }
+                ]
             }
+        },
+        {
+            "name": "Waiting for workflow",
+            "test_type": "wait_until",
+            "link": ["/api/analysis/","$analysis_id","/meta.json"],
+            "timeout": 100,
+            "sleep": 5,
+            "req_type": "get",
+            "condition":{
+                "key":"message",
+                "value": "Analysis output not yet written",
+                "oper": "!="
+            }
+        },
+        {
+            "name": "Get meta",
+            "test_type": "json_file",
+            "link": ["/api/analysis/","$analysis_id","/meta.json"]
         }
     ]
 }
