@@ -44,7 +44,7 @@
                         "type": "list",
                         "condition": {
                             "key": "name",
-                            "value":"FishCounter_Test"
+                            "value":"FishCounter_Camera_Test"
                         }
                     },
                     {

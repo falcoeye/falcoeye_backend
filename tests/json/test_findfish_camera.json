@@ -1,0 +1,157 @@
+{
+    "register": {
+        "name": "register",
+        "pass": [
+            "Email is already being used.",
+            "User has been registered.",
+            "Successfully registered user."
+        ],
+        "args":{
+            "email": "falcoeye-test@falcoeye.io",
+            "username": "falcoeye_test",
+            "name": "falcoeye test",
+            "password": "falcoeye-test"
+        }
+    },
+    "login": {
+        "pass": [
+            "Successfully logged in."
+        ],
+        "args":{
+            "email": "falcoeye-test@falcoeye.io",
+            "password": "falcoeye-test"
+        }
+    },
+    "tests":[
+        {
+            "name": "Adding camera",
+            "req_type": "post",
+            "link": "/api/camera/",
+            "pass": [
+                "Camera already exist",
+                "Camera has been added",
+                "Successfully added camera"
+            ],
+            "args": {
+                "name": "Harbour Village Bonaire Coral Reef 2",
+                "streaming_type": "StreamingServer",
+                "url": "https://www.youtube.com/watch?v=NwWgOilQuzw&t=4s",
+                "status": "RUNNING"
+            }
+        },
+        {
+            "name": "Get camera",
+            "req_type": "get",
+            "link": "/api/camera",
+            "pass": [
+                "Camera data sent"
+            ],
+            "store": {
+                "harbour_url":
+                [
+                    {
+                        "type": "dict",
+                        "key": "camera",
+                        "from": "response"
+                    },
+                    {
+                        "type": "list",
+                        "condition": {
+                            "key": "name",
+                            "value":"Harbour Village Bonaire Coral Reef 2"
+                        }
+                    },
+                    {
+                        "type": "dict",
+                        "key": "url",
+                        "from": "value"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Get workflows",
+            "req_type": "get",
+            "link": "/api/workflow",
+            "pass": [
+                "workflow data sent"
+            ],
+            "store": {
+                "fishcounter_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "workflow",
+                        "from": "response"
+                    },
+                    {
+                        "type": "list",
+                        "condition": {
+                            "key": "name",
+                            "value":"KAUST Fish Counter"
+                        }
+                    },
+                    {
+                        "type": "dict",
+                        "key": "id",
+                        "from": "value"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "New analysis",
+            "req_type": "post",
+            "link": "/api/analysis/",
+            "pass": [
+                "Analysis has been added."
+            ],
+            "args": {
+                "name": "FishCounter_Camera_Test",
+                "workflow_id": "$fishcounter_id",
+                "status": "new",
+                "args": {
+                    "url": "$harbour_url",
+                    "resolution": "720p",
+                    "sample_every": 30,
+                    "min_score_thresh": 0.30,
+                    "max_boxes": 30,
+                    "length": 3
+                }
+            },
+            "store":{
+                "analysis_id":
+                [
+                    {
+                        "type": "dict",
+                        "key": "analysis",
+                        "from": "response"
+                    },
+                    {
+                        "type": "dict",
+                        "key": "id",
+                        "from": "value"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Waiting for workflow",
+            "test_type": "wait_until",
+            "link": ["/api/analysis/","$analysis_id","/meta.json"],
+            "timeout": 100,
+            "sleep": 5,
+            "req_type": "get",
+            "condition":{
+                "key":"message",
+                "value": "Analysis output not yet written",
+                "oper": "!="
+            }
+        },
+        {
+            "name": "Get meta",
+            "test_type": "json_file",
+            "link": ["/api/analysis/","$analysis_id","/meta.json"]
+        }
+    ]
+}
