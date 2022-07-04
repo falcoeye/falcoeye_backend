@@ -20,6 +20,9 @@ def mocked_workflow_post(*args, **kwargs):
         def response(self):
             return self.json_data, self.status_code
 
+        def json(self):
+            return self.json_data
+
     return MockResponse({"status": True, "message": "Analysis started"}, 200)
 
 
@@ -29,7 +32,7 @@ def test_list_analysis(app, client, analysis):
     resp = client.get("/api/analysis/", headers=headers)
     assert resp.status_code == 200
     assert len(resp.json.get("analysis")) == 1
-    assert resp.json.get("message") == "Analysis data sent"
+    assert resp.json.get("message") == "analysis data sent"
 
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{analysis.workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
@@ -59,7 +62,7 @@ def test_add_analysis(mock_post, app, client, user, workflow):
         headers=headers,
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "Analysis has been added."
+    assert resp.json.get("message") == "analysis added"
 
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
@@ -76,7 +79,7 @@ def test_delete_analysis(app, client, analysis):
 
     resp = client.delete(f"/api/analysis/{analysis.id}", headers=headers)
     assert resp.status_code == 200
-    assert resp.json.get("message") == "Analysis successfully deleted"
+    assert resp.json.get("message") == "analysis deleted"
 
 
 def test_empty_analysiss(client, user):
@@ -91,7 +94,7 @@ def test_get_invalid_analysis_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get(f"/api/analysis/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Analysis not found!"
+    assert resp.json.get("message") == "analysis not found"
 
 
 def test_delete_invalid_analysis_by_id(client, user):
@@ -99,4 +102,4 @@ def test_delete_invalid_analysis_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/analysis/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Analysis not found!"
+    assert resp.json.get("message") == "analysis not found"

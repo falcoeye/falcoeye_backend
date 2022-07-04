@@ -33,7 +33,7 @@ def test_add_aimodel(client, user, dataset):
         headers=headers,
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "AIModel has been added."
+    assert resp.json.get("message") == "aimodel added"
 
 
 def test_delete_aimodel(client, aimodel):
@@ -58,7 +58,7 @@ def test_get_invalid_aimodel_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get(f"/api/aimodel/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "AIModel not found!"
+    assert resp.json.get("message") == "aimodel not found"
 
 
 def test_delete_invalid_aimodel_by_id(client, user):
@@ -66,4 +66,4 @@ def test_delete_invalid_aimodel_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/aimodel/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "AIModel not found!"
+    assert resp.json.get("message") == "aimodel not found"

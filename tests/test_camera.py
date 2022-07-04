@@ -29,13 +29,13 @@ def test_add_camera(client, user):  # , manufacturer):
         content_type="application/json",
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "Camera has been added"
+    assert resp.json.get("message") == "camera added"
 
     resp = client.get("/api/camera/", headers=headers)
     assert (
         resp.json.get("camera")[0].get("name") == "Harbour Village Bonaire Coral Reef"
     )
-    assert resp.json.get("message") == "Camera data sent"
+    assert resp.json.get("message") == "camera data sent"
     assert resp.status_code == 200
 
 
@@ -44,7 +44,7 @@ def test_list_cameras(client, camera):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/camera/", headers=headers)
     assert resp.status_code == 200
-    assert resp.json.get("message") == "Camera data sent"
+    assert resp.json.get("message") == "camera data sent"
 
 
 def test_empty_cameras(client, user):
@@ -60,7 +60,7 @@ def test_get_camera_by_id(client, camera):
     resp = client.get(f"/api/camera/{camera.id}", headers=headers)
     assert resp.status_code == 200
     assert resp.json.get("camera").get("name") == camera.name
-    assert resp.json.get("message") == "Camera data sent"
+    assert resp.json.get("message") == "camera data sent"
 
 
 def test_get_invalid_camera_by_id(client, user):
@@ -68,7 +68,7 @@ def test_get_invalid_camera_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get(f"/api/camera/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Camera not found!"
+    assert resp.json.get("message") == "camera not found"
 
 
 def test_delete_camera_by_id(client, camera):
@@ -76,7 +76,7 @@ def test_delete_camera_by_id(client, camera):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/camera/{camera.id}", headers=headers)
     assert resp.status_code == 200
-    assert resp.json.get("message") == "Camera deleted"
+    assert resp.json.get("message") == "camera deleted"
 
 
 def test_delete_invalid_camera_by_id(client, user):
@@ -84,7 +84,7 @@ def test_delete_invalid_camera_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/camera/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Camera not found!"
+    assert resp.json.get("message") == "camera not found"
 
 
 def test_update_camera_by_id(client, camera):
@@ -98,7 +98,7 @@ def test_update_camera_by_id(client, camera):
         content_type="application/json",
     )
     assert resp.status_code == 200
-    assert resp.json.get("message") == "Camera has been updated"
+    assert resp.json.get("message") == "camera edited"
 
     resp = client.get(f"/api/camera/{camera.id}", headers=headers)
     assert resp.status_code == 200

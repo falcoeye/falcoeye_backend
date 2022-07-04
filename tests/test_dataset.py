@@ -32,7 +32,7 @@ def test_add_dataset(client, user):
         headers=headers,
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "Dataset has been added."
+    assert resp.json.get("message") == "dataset added"
 
 
 def test_list_datasets(client, dataset):

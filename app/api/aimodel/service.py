@@ -18,7 +18,7 @@ class AIModelService:
     def get_aimodels():
         """Get a list of all aimodels"""
         if not (aimodels := AIModel.query.all()):
-            return err_resp("No aimodel founds!", "aimodel_404", 404)
+            return err_resp("no aimodel found", "aimodel_404", 404)
 
         try:
             aimodel_data = load_aimodel_data(aimodels, many=True)
@@ -36,13 +36,13 @@ class AIModelService:
         try:
             name = data["name"]
             if AIModel.query.filter_by(name=name).first() is not None:
-                return err_resp("Name is already being used.", "name_taken", 403)
+                return err_resp("aimodel name already exists", "name_taken", 403)
 
             dataset_name = data.get("dataset", "")
 
             if dataset_name:
                 if not (dataset := Dataset.query.filter_by(name=dataset_name).first()):
-                    logging.warning(f"dataset {dataset_name} is not in the database")
+                    logging.warning("dataset is not in the database")
                     dataset_id = dataset.id
             else:
                 dataset_name = ""
@@ -64,7 +64,7 @@ class AIModelService:
             db.session.commit()
 
             aimodel_info = aimodel_schema.dump(new_aimodel)
-            resp = message(True, "AIModel has been added.")
+            resp = message(True, "aimodel added")
             resp["aimodel"] = aimodel_info
             return resp, 201
         except Exception as error:
@@ -75,11 +75,11 @@ class AIModelService:
     def get_aimodel_by_id(aimodel_id):
         """Get aimodel by ID"""
         if not (aimodel := AIModel.query.filter_by(id=aimodel_id).first()):
-            return err_resp("AIModel not found!", "aimodel_404", 404)
+            return err_resp("aimodel not found", "aimodel_404", 404)
 
         try:
             aimodel_data = load_aimodel_data(aimodel)
-            resp = message(True, "AIModel data sent")
+            resp = message(True, "aimodel data sent")
             resp["aimodel"] = aimodel_data
 
             return resp, 200
@@ -95,7 +95,7 @@ class AIModelService:
             aimodel := AIModel.query.filter_by(creator=user_id, id=aimodel_id).first()
         ):
             return err_resp(
-                "AIModel not found!",
+                "aimodel not found",
                 "aimodel_404",
                 404,
             )

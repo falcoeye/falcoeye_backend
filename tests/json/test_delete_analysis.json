@@ -2,9 +2,8 @@
     "register": {
         "name": "register",
         "pass": [
-            "Email is already being used.",
-            "User has been registered.",
-            "Successfully registered user."
+            "email already exists",
+            "user registered"
         ],
         "args":{
             "email": "falcoeye-test@falcoeye.io",
@@ -15,7 +14,7 @@
     },
     "login": {
         "pass": [
-            "Successfully logged in."
+            "successfully logged in"
         ],
         "args":{
             "email": "falcoeye-test@falcoeye.io",
@@ -28,9 +27,9 @@
             "req_type": "get",
             "link": "/api/analysis",
             "pass": [
-                "Analysis data sent",
-                "Analysis not found!",
-                "No analysis found"
+                "analysis data sent",
+                "analysis not found",
+                "no analysis found"
             ],
             "store": {
                 "analysis_id":
@@ -60,8 +59,7 @@
             "req_type": "delete",
             "link": ["/api/analysis/","$analysis_id"],
             "pass": [
-                "Analysis successfully deleted",
-                "Analysis not found!",
+                "analysis not found",
                 "analysis deleted"
             ]
         }

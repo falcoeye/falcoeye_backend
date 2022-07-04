@@ -10,14 +10,14 @@ class UserService:
     def get_user_data(userid):
         """Get user data by username"""
         if not (user := User.query.filter_by(id=userid).first()):
-            return err_resp("User not found!", "user_404", 404)
+            return err_resp("user not found", "user_404", 404)
 
         from .utils import load_data
 
         try:
             user_data = load_data(user)
 
-            resp = message(True, "User data sent")
+            resp = message(True, "user data sent")
             resp["user"] = user_data
             return resp, 200
 
@@ -29,13 +29,13 @@ class UserService:
     def delete_user(username):
         """Delete user from DB by username"""
         if not (user := User.query.filter_by(username=username).first()):
-            return err_resp("User not found!", "user_404", 404)
+            return err_resp("user not found", "user_404", 404)
 
         try:
             db.session.delete(user)
             db.session.commit()
 
-            resp = message(True, "User deleted")
+            resp = message(True, "user deleted")
             return resp, 200
 
         except Exception as error:

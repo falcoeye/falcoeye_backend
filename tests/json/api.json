@@ -1,0 +1,1757 @@
+{
+    "swagger": "2.0",
+    "basePath": "/api",
+    "paths": {
+        "/aimodel/": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "operationId": "Add a new aimodel",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/AIModel%20Object"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "aimodel"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get a list of all system aimodels",
+                "operationId": "Get a list of all AI models",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "aimodel"
+                ]
+            }
+        },
+        "/aimodel/{aimodel_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " AIModel ID",
+                    "name": "aimodel_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Delete a aimodel",
+                "operationId": "Delete an AI model",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "aimodel"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get a aimodel",
+                "operationId": "Get an AI model by id",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "aimodel"
+                ]
+            }
+        },
+        "/analysis/": {
+            "post": {
+                "responses": {
+                    "201": {
+                        "description": "analysis added",
+                        "schema": {
+                            "$ref": "#/definitions/Analysis%20Data%20Response"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid workflow"
+                    },
+                    "404": {
+                        "description": "name already exists"
+                    }
+                },
+                "operationId": "Add a new analysis",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Analysis%20post%20data"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "analysis"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "analysis data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Analysis%20list"
+                        }
+                    },
+                    "404": {
+                        "description": "no analysis found"
+                    }
+                },
+                "summary": "Get a list of all system analysiss",
+                "operationId": "Get a list of all analysiss",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "analysis"
+                ]
+            }
+        },
+        "/analysis/{analysis_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " Analysis ID",
+                    "name": "analysis_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "analysis deleted"
+                    },
+                    "404": {
+                        "description": "analysis not found"
+                    }
+                },
+                "summary": "Delete a analysis",
+                "operationId": "Delete user's analysis",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "analysis"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "analysis data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Analysis%20Data%20Response"
+                        }
+                    },
+                    "404": {
+                        "description": "analysis not found"
+                    }
+                },
+                "summary": "Get a analysis",
+                "operationId": "Get user's analysis by id",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "analysis"
+                ]
+            }
+        },
+        "/analysis/{analysis_id}/meta.json": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " Analysis ID",
+                    "name": "analysis_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "404": {
+                        "description": "analysis not found"
+                    },
+                    "425": {
+                        "description": "no output yet"
+                    }
+                },
+                "summary": "Get a analysis",
+                "operationId": "Get user's analysis meta file by id",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "analysis"
+                ]
+            }
+        },
+        "/camera/": {
+            "post": {
+                "responses": {
+                    "201": {
+                        "description": "camera added",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20added%20response"
+                        }
+                    },
+                    "403": {
+                        "description": "camera already exists"
+                    },
+                    "400": {
+                        "description": "malformed data or validations failed"
+                    }
+                },
+                "operationId": "Add a new camera",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20post%20data"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "camera data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20list"
+                        }
+                    },
+                    "404": {
+                        "description": "no camera found"
+                    }
+                },
+                "summary": "Get a list of user's cameras",
+                "operationId": "Get a list of user's cameras",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            }
+        },
+        "/camera/{camera_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Camera ID",
+                    "name": "camera_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "camera deleted"
+                    },
+                    "404": {
+                        "description": "camera not found"
+                    }
+                },
+                "summary": "Delete a camera item",
+                "operationId": "Delete user's camera by ID",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "camera data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20added%20response"
+                        }
+                    },
+                    "404": {
+                        "description": "camera not found"
+                    }
+                },
+                "summary": "Get user's camera by ID",
+                "operationId": "Get user's camera by ID",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            },
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "camera edited",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20added%20response"
+                        }
+                    },
+                    "404": {
+                        "description": "camera not found"
+                    }
+                },
+                "summary": "Update user's camera",
+                "operationId": "Edit user's camera",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Camera%20post%20data"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            }
+        },
+        "/camera/{camera_id}/img_{img_size}.jpg": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Image Size",
+                    "name": "img_size",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Camera ID",
+                    "name": "camera_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get camera's thumbnail image",
+                "operationId": "Get camera's thumbnail image",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "camera"
+                ]
+            }
+        },
+        "/capture": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "capture request succeeded",
+                        "schema": {
+                            "$ref": "#/definitions/Capture%20registry%20key"
+                        }
+                    },
+                    "400": {
+                        "description": "missing camera id or capture type"
+                    },
+                    "417": {
+                        "description": "something went wrong with capturing service"
+                    },
+                    "404": {
+                        "description": "camera not found"
+                    }
+                },
+                "summary": "Initiate a caputre request",
+                "operationId": "Capture media",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Capture%20post%20data"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "capture"
+                ]
+            }
+        },
+        "/capture/{registry_key}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Registry key received from capture request",
+                    "name": "registry_key",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "capture data changed"
+                    },
+                    "400": {
+                        "description": "user not found"
+                    },
+                    "417": {
+                        "description": "request failed"
+                    },
+                    "401": {
+                        "description": "unauthorized"
+                    }
+                },
+                "operationId": "Set capture data",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "capture"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "capture data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Capture%20data"
+                        }
+                    },
+                    "403": {
+                        "description": "registry key not found"
+                    }
+                },
+                "summary": "Get a user capture data path",
+                "operationId": "Get capture data",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "capture"
+                ]
+            }
+        },
+        "/dataset/": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Create new dataset",
+                "operationId": "Add a new dataset",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Dataset%20Object"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "dataset"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get a list of all system datasets",
+                "operationId": "Get a list of all datasets",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "dataset"
+                ]
+            }
+        },
+        "/dataset/{dataset_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " Dataset ID",
+                    "name": "dataset_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Delete a dataset",
+                "operationId": "Delete a dataset",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "dataset"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "get a dataset",
+                "operationId": "Get a dataset by ID",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "dataset"
+                ]
+            }
+        },
+        "/media/": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "media data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Media%20List"
+                        }
+                    },
+                    "204": {
+                        "description": "no media found"
+                    }
+                },
+                "summary": "Get user's media",
+                "operationId": "Get user's media",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/image": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "image added",
+                        "schema": {
+                            "$ref": "#/definitions/Image%20object"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid registry key"
+                    },
+                    "417": {
+                        "description": "process failed"
+                    }
+                },
+                "summary": "Add a user's image",
+                "operationId": "Post a user image",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Image%20data%20post"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/image/{media_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Image ID",
+                    "name": "media_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "image deleted"
+                    },
+                    "404": {
+                        "description": "image not found"
+                    }
+                },
+                "summary": "Delete user's image",
+                "operationId": "Delete user's image data",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "image data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Image%20data%20response"
+                        }
+                    },
+                    "404": {
+                        "description": "image not found"
+                    }
+                },
+                "summary": "Get user's image data",
+                "operationId": "Get a user media",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/image/{media_id}/video_{img_size}.{extension}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Image Extension",
+                    "name": "extension",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Image Resolution",
+                    "name": "img_size",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Image ID",
+                    "name": "media_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get user's image",
+                "operationId": "Get user's image",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/video": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "video added",
+                        "schema": {
+                            "$ref": "#/definitions/Vidoe%20object"
+                        }
+                    },
+                    "403": {
+                        "description": "invalid registry key"
+                    },
+                    "417": {
+                        "description": "process failed"
+                    }
+                },
+                "summary": "Add user's video",
+                "operationId": "Post user's video",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Vidoe%20data%20post"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/video/{media_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Video ID",
+                    "name": "media_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "video deleted"
+                    },
+                    "404": {
+                        "description": "video not found"
+                    }
+                },
+                "summary": "Delete user's video",
+                "operationId": "Delete user's video",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "video data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Video%20data%20response"
+                        }
+                    },
+                    "404": {
+                        "description": "video not found"
+                    }
+                },
+                "summary": "Get user's video data",
+                "operationId": "Get user's video data",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/media/video/{media_id}/video_{resolution}.mp4": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Video Resolution",
+                    "name": "resolution",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Video ID",
+                    "name": "media_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get user's video",
+                "operationId": "Get user's video",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "media"
+                ]
+            }
+        },
+        "/user/profile": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "user data sent",
+                        "schema": {
+                            "$ref": "#/definitions/User%20Data%20Response"
+                        }
+                    },
+                    "404": {
+                        "description": "user not found"
+                    }
+                },
+                "summary": "Get a specific user's data by their username",
+                "operationId": "Get a specific user",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "user"
+                ]
+            }
+        },
+        "/workflow/": {
+            "post": {
+                "responses": {
+                    "201": {
+                        "description": "workflow added",
+                        "schema": {
+                            "$ref": "#/definitions/Workflow%20Data%20Response"
+                        }
+                    },
+                    "403": {
+                        "description": "name already exists"
+                    },
+                    "400": {
+                        "description": "malformed data or validations failed"
+                    }
+                },
+                "operationId": "Add a new workflow",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Workflow%20post%20data"
+                        }
+                    }
+                ],
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "workflow"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "workflow data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Workflow%20list"
+                        }
+                    },
+                    "404": {
+                        "description": "no workflows found"
+                    }
+                },
+                "summary": "Get a list of all system workflows",
+                "operationId": "Get a list of all workflows",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "workflow"
+                ]
+            }
+        },
+        "/workflow/{workflow_id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " Workflow ID",
+                    "name": "workflow_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "workflow deleted"
+                    },
+                    "404": {
+                        "description": "workflow not found"
+                    }
+                },
+                "summary": "Delete a workflow",
+                "operationId": "Delete a workflow",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "workflow"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "workflow data sent",
+                        "schema": {
+                            "$ref": "#/definitions/Workflow%20Data%20Response"
+                        }
+                    },
+                    "404": {
+                        "description": "workflow not found"
+                    }
+                },
+                "summary": "Get a workflow",
+                "operationId": "Get worfklow's data",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "workflow"
+                ]
+            }
+        },
+        "/workflow/{workflow_id}/img_{img_size}.jpg": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": " Image Size",
+                    "name": "img_size",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": " Workflow ID",
+                    "name": "workflow_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "Get worfklow's thumbnail image",
+                "operationId": "Get worfklow's thumbnail image",
+                "security": [
+                    {
+                        "apikey": []
+                    }
+                ],
+                "tags": [
+                    "workflow"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "API",
+        "version": "1.0",
+        "description": "Main routes."
+    },
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "apikey": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-KEY"
+        }
+    },
+    "tags": [
+        {
+            "name": "user",
+            "description": "User related operations."
+        },
+        {
+            "name": "media",
+            "description": "Media related operations."
+        },
+        {
+            "name": "camera",
+            "description": "Camera related operations."
+        },
+        {
+            "name": "capture",
+            "description": "Capture related operations."
+        },
+        {
+            "name": "workflow",
+            "description": "Workflow related operations."
+        },
+        {
+            "name": "dataset",
+            "description": "Dataset related operations."
+        },
+        {
+            "name": "aimodel",
+            "description": "AIModel related operations."
+        },
+        {
+            "name": "analysis",
+            "description": "Analysis related operations."
+        }
+    ],
+    "definitions": {
+        "User Data Response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/User object"
+                }
+            },
+            "type": "object"
+        },
+        "User object": {
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "joined_date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "role_id": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "Media List": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Meida list item"
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "Meida list item": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "camera_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "media_type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Image data response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "image": {
+                    "$ref": "#/definitions/Image object"
+                }
+            },
+            "type": "object"
+        },
+        "Image object": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "camera_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Image data post": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "registry_key": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Video data response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "video": {
+                    "$ref": "#/definitions/Vidoe object"
+                }
+            },
+            "type": "object"
+        },
+        "Vidoe object": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "camera_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "Vidoe data post": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                },
+                "registry_key": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Camera post data": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "utm_x": {
+                    "type": "number"
+                },
+                "utm_y": {
+                    "type": "number"
+                },
+                "streaming_type": {
+                    "type": "string",
+                    "example": "RTSP",
+                    "enum": [
+                        "RTSP",
+                        "StreamingServer"
+                    ]
+                },
+                "url": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Camera added response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "camera": {
+                    "$ref": "#/definitions/Camera object"
+                }
+            },
+            "type": "object"
+        },
+        "Camera object": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "utm_x": {
+                    "type": "number"
+                },
+                "utm_y": {
+                    "type": "number"
+                },
+                "streaming_type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        },
+        "Camera list": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "camera": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Camera list item"
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "Camera list item": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "utm_x": {
+                    "type": "number"
+                },
+                "utm_y": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        },
+        "Capture post data": {
+            "properties": {
+                "camera_id": {
+                    "type": "string"
+                },
+                "capture_type": {
+                    "type": "string"
+                },
+                "length": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "Capture registry key": {
+            "properties": {
+                "capture_status": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "registry_key": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Capture data": {
+            "properties": {
+                "registry_key": {
+                    "type": "string"
+                },
+                "capture_status": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "capture_path": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Workflow post data": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "aimodel_id": {
+                    "type": "string"
+                },
+                "usedfor": {
+                    "type": "string"
+                },
+                "consideration": {
+                    "type": "string"
+                },
+                "assumption": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Workflow Data Response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "workflow": {
+                    "$ref": "#/definitions/Workflow Object"
+                }
+            },
+            "type": "object"
+        },
+        "Workflow Object": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "publish_date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "aimodel_name": {
+                    "type": "string"
+                },
+                "usedfor": {
+                    "type": "string"
+                },
+                "consideration": {
+                    "type": "string"
+                },
+                "assumption": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Workflow list": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "workflow": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workflow list item"
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "Workflow list item": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "publish_date": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        },
+        "Dataset Object": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "annotation_type": {
+                    "type": "string"
+                },
+                "image_width": {
+                    "type": "integer"
+                },
+                "image_height": {
+                    "type": "integer"
+                },
+                "size_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        },
+        "AIModel Object": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "publish_date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "archeticture": {
+                    "type": "string"
+                },
+                "backbone": {
+                    "type": "string"
+                },
+                "dataset_id": {
+                    "type": "string"
+                },
+                "technology": {
+                    "type": "string"
+                },
+                "speed": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "type": "object"
+        },
+        "Analysis post data": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "workflow_params": {
+                    "type": "number"
+                }
+            },
+            "type": "object"
+        },
+        "Analysis Data Response": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "analysis": {
+                    "$ref": "#/definitions/Analysis Object"
+                }
+            },
+            "type": "object"
+        },
+        "Analysis Object": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "creator": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "results_path": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "Analysis list": {
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "analysis": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Analysis short"
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "Analysis short": {
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "responses": {
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        },
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        },
+        "NoAuthorizationError": {}
+    }
+}

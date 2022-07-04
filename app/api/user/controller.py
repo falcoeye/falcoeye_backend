@@ -13,8 +13,8 @@ class UserGet(Resource):
     @api.doc(
         "Get a specific user",
         responses={
-            200: ("User data successfully sent", data_resp),
-            404: "User not found!",
+            200: ("user data sent", data_resp),
+            404: "user not found",
         },
         security="apikey",
     )

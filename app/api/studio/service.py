@@ -22,7 +22,7 @@ class StudioService:
         videos = Video.query.filter_by(user=user_id).all()
         images = Image.query.filter_by(user=user_id).all()
         if not videos and not images:
-            resp = message(True, "No media found!")
+            resp = message(True, "no media found")
             return resp, 204
 
         try:
@@ -36,7 +36,7 @@ class StudioService:
 
             media_data = video_data + image_data
 
-            resp = message(True, "User media sent")
+            resp = message(True, "media data sent")
             resp["media"] = media_data
             return resp, 200
 
@@ -49,11 +49,11 @@ class StudioService:
     def get_image(user_id, media_id):
 
         if not (image := Image.query.filter_by(user=user_id, id=media_id).first()):
-            return err_resp("Image not found!", "image_404", 404)
+            return err_resp("image not found", "image_404", 404)
         try:
             # TODO: Add image link
             image_data = load_image_data(image)
-            resp = message(True, "Image data sent")
+            resp = message(True, "image data sent")
             resp["image"] = image_data
             return resp, 200
         except Exception as error:
@@ -73,10 +73,10 @@ class StudioService:
         if not registry_key or not (
             registry_item := registry.get_registry(registry_key)
         ):
-            return err_resp("Invalid registry key", "registry_404", 404)
+            return err_resp("invalid registry key", "registry_403", 403)
 
         if registry_item.status == "FAILED":
-            return err_resp("Registry item failed", "registry_404", 404)
+            return message("process failed", "registry_417", 417)
 
         # user only send registry key here.
         try:
@@ -92,7 +92,7 @@ class StudioService:
             db.session.flush()
             db.session.commit()
 
-            logging.info("Image atabase object created")
+            logging.info("Image database object created")
 
             imgs_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{new_image.id}/'
@@ -109,14 +109,13 @@ class StudioService:
                     registry_item.capture_path, f"{imgs_dir}/img_original.{extension}"
                 )
             except Exception as error:
-                return err_resp("Failed to move item", "move_404", 404)
+                return err_resp("process failed", "move_417", 417)
 
             img_info = load_image_data(new_image)
-            resp = message(True, "Image has been added")
+            resp = message(True, "image added")
             resp["image"] = img_info
             return resp, 201
         except Exception as error:
-            raise
             current_app.logger.error(error)
             return internal_err_resp()
 
@@ -124,13 +123,13 @@ class StudioService:
     def delete_image(user_id, media_id):
 
         if (img := Image.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Image not found!", "image_404", 404)
+            return err_resp("image not found", "image_404", 404)
         try:
             db.session.delete(img)
             db.session.flush()
             db.session.commit()
 
-            resp = message(True, "Image deleted")
+            resp = message(True, "image deleted")
 
             return resp, 200
         except Exception as error:
@@ -140,10 +139,10 @@ class StudioService:
     @staticmethod
     def get_video(user_id, media_id):
         if not (video := Video.query.filter_by(user=user_id, id=media_id).first()):
-            return err_resp("Video not found!", "video_404", 404)
+            return err_resp("video not found", "video_404", 404)
         try:
             video_data = load_video_data(video)
-            resp = message(True, "Video data sent")
+            resp = message(True, "video data sent")
             resp["video"] = video_data
             return resp, 200
         except Exception as error:
@@ -164,10 +163,10 @@ class StudioService:
         if not registry_key or not (
             registry_item := registry.get_registry(registry_key)
         ):
-            return err_resp("Invalid registry key", "registry_404", 404)
+            return err_resp("invalid registry key", "registry_403", 403)
 
         if registry_item.status == "FAILED":
-            return err_resp("Registry item failed", "registry_404", 404)
+            return err_resp("process failed", "registry_417", 417)
 
         try:
             new_video = Video(
@@ -195,10 +194,10 @@ class StudioService:
                     f"{video_dir}/video_original.{extension}",
                 )
             except Exception as error:
-                return err_resp("Failed to move item", "move_404", 404)
+                return err_resp("process failed", "move_417", 417)
 
             video_info = load_video_data(new_video)
-            resp = message(True, "Video has been added")
+            resp = message(True, "video added")
             resp["video"] = video_info
             return resp, 201
         except Exception as error:
@@ -208,13 +207,13 @@ class StudioService:
     @staticmethod
     def delete_video(user_id, media_id):
         if (video := Video.query.filter_by(user=user_id, id=media_id).first()) is None:
-            return err_resp("Video not found!", "video_404", 404)
+            return err_resp("video not found", "video_404", 404)
         try:
             db.session.delete(video)
             db.session.flush()
             db.session.commit()
 
-            resp = message(True, "Video deleted")
+            resp = message(True, "video deleted")
 
             return resp, 200
         except Exception as error:

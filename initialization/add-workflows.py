@@ -44,5 +44,5 @@ for wf in workflows:
     resp = requests.post(f"{URL}/api/workflow/", json=data, headers=headers)
     logging.info(resp.json())
     assert resp.status_code == 201
-    assert resp.json().get("message") == "Workflow has been added."
+    assert resp.json().get("message") == "Workflow added."
     logging.info(f"{wkflowdict['name']} added")

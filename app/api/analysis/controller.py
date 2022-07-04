@@ -19,8 +19,8 @@ class AnalysisList(Resource):
     @api.doc(
         """Get a list of all analysiss""",
         responses={
-            200: ("Analysis data sent", AnalysisDto.analysis_list),
-            404: "No analysis found",
+            200: ("analysis data sent", AnalysisDto.analysis_list),
+            404: "no analysis found",
         },
         security="apikey",
     )
@@ -32,9 +32,9 @@ class AnalysisList(Resource):
     @api.doc(
         "Add a new analysis",
         responses={
-            201: ("Successfully added analysis", AnalysisDto.analysis_resp),
-            403: "Invalid data.",
-            404: "Invalid data. Name already exists",
+            201: ("analysis added", AnalysisDto.analysis_resp),
+            403: "invalid workflow",
+            404: "name already exists",
         },
         security="apikey",
     )
@@ -53,8 +53,8 @@ class Analysis(Resource):
     @api.doc(
         "Get user's analysis by id",
         responses={
-            200: ("Analysis data sent", AnalysisDto.analysis_resp),
-            404: "Analysis not found!",
+            200: ("analysis data sent", AnalysisDto.analysis_resp),
+            404: "analysis not found",
         },
         security="apikey",
     )
@@ -67,8 +67,8 @@ class Analysis(Resource):
     @api.doc(
         "Delete user's analysis",
         responses={
-            200: ("Analysis successfully deleted"),
-            404: "Analysis not found!",
+            200: ("analysis deleted"),
+            404: "analysis not found",
         },
         security="apikey",
     )
@@ -85,9 +85,8 @@ class Analysis(Resource):
     @api.doc(
         "Get user's analysis meta file by id",
         responses={
-            200: ("Analysis meta data sent", AnalysisDto.analysis_resp),
-            404: "Analysis not found!",
-            425: "Analysis output not yet written",
+            404: "analysis not found",
+            425: "no output yet",
         },
         security="apikey",
     )

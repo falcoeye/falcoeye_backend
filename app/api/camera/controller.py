@@ -21,8 +21,8 @@ class CameraList(Resource):
     @api_camera.doc(
         "Get a list of user's cameras",
         responses={
-            200: ("Camera data successfully sent", CameraDto.camera_list),
-            404: "No cameras found!",
+            200: ("camera data sent", CameraDto.camera_list),
+            404: "no camera found",
         },
         security="apikey",
     )
@@ -35,9 +35,9 @@ class CameraList(Resource):
     @api_camera.doc(
         "Add a new camera",
         responses={
-            201: ("Successfully added camera", CameraDto.camera_resp),
-            403: ("Camera already exists or Manufacturer is not registered"),
-            400: "Malformed data or validations failed.",
+            201: ("camera added", CameraDto.camera_resp),
+            403: ("camera already exists"),
+            400: "malformed data or validations failed",
         },
         security="apikey",
     )
@@ -56,24 +56,24 @@ class CameraList(Resource):
 @api_camera.param("camera_id", "Camera ID")
 class Camera(Resource):
     @api_camera.doc(
-        "Show a camera item",
+        "Get user's camera by ID",
         responses={
-            200: ("Camera data successfully sent", CameraDto.camera_resp),
-            404: "No cameras found!",
+            200: ("camera data sent", CameraDto.camera_resp),
+            404: "camera not found",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, camera_id):
-        """Show a camera item"""
+        """Get user's camera by ID"""
         current_user_id = get_jwt_identity()
         return CameraService.get_camera_by_id(current_user_id, camera_id)
 
     @api_camera.doc(
-        "Delete a user camera",
+        "Delete user's camera by ID",
         responses={
-            200: ("Camera successfully deleted"),
-            404: "Camera not found!",
+            200: ("camera deleted"),
+            404: "camera not found",
         },
         security="apikey",
     )
@@ -84,17 +84,17 @@ class Camera(Resource):
         return CameraService.delete_camera(current_user_id, camera_id)
 
     @api_camera.doc(
-        "Edit a user camera",
+        "Edit user's camera",
         responses={
-            200: ("Camera successfully edited", CameraDto.camera_resp),
-            404: "Camera not found!",
+            200: ("camera edited", CameraDto.camera_resp),
+            404: "camera not found",
         },
         security="apikey",
     )
     @api_camera.expect(CameraDto.camera_post, validate=False)
     @jwt_required()
     def put(self, camera_id):
-        """Update a camera item"""
+        """Update user's camera"""
         camera_data = request.get_json()
         current_user_id = get_jwt_identity()
         return CameraService.update_camera_by_id(
@@ -107,16 +107,12 @@ class Camera(Resource):
 @api_camera.param("img_size", "Image Size")
 class Camera(Resource):
     @api_camera.doc(
-        "Show a camera item",
-        responses={
-            200: ("Camera data successfully sent", CameraDto.camera_resp),
-            404: "No cameras found!",
-        },
+        "Get camera's thumbnail image",
         security="apikey",
     )
     @jwt_required()
     def get(self, camera_id, img_size):
-        """Show a camera item"""
+        """Get camera's thumbnail image"""
         user_id = get_jwt_identity()
         return send_from_directory(
             f'{current_app.config["USER_ASSETS"]}/{user_id}/{camera_id}',

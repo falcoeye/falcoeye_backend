@@ -17,7 +17,7 @@ class DatasetService:
     def get_datasets():
         """Get a list of all datasets"""
         if not (datasets := Dataset.query.all()):
-            return err_resp("No datasets founds!", "dataset_404", 404)
+            return err_resp("no datasets found", "dataset_404", 404)
 
         try:
             dataset_data = load_dataset_data(datasets, many=True)
@@ -35,7 +35,7 @@ class DatasetService:
         try:
             name = data["name"]
             if Dataset.query.filter_by(name=name).first() is not None:
-                return err_resp("Name is already being used.", "name_taken", 403)
+                return err_resp("name already exists", "name_taken", 403)
             new_dataset = Dataset(
                 name=data["name"],
                 creator=user_id,
@@ -49,7 +49,7 @@ class DatasetService:
             db.session.commit()
 
             dataset_info = dataset_schema.dump(new_dataset)
-            resp = message(True, "Dataset has been added.")
+            resp = message(True, "dataset added")
             resp["dataset"] = dataset_info
             return resp, 201
         except Exception as error:
@@ -63,7 +63,7 @@ class DatasetService:
             dataset := Dataset.query.filter_by(creator=user_id, id=dataset_id).first()
         ):
             return err_resp(
-                "Dataset not found or belongs to a different owner",
+                "dataset not found",
                 "dataset_404",
                 404,
             )
@@ -83,11 +83,11 @@ class DatasetService:
     def get_dataset_by_id(dataset_id):
         """Get dataset by ID"""
         if not (dataset := Dataset.query.filter_by(id=dataset_id).first()):
-            return err_resp("Dataset not found!", "dataset_404", 404)
+            return err_resp("dataset not found", "dataset_404", 404)
 
         try:
             dataset_data = load_dataset_data(dataset)
-            resp = message(True, "Dataset data sent")
+            resp = message(True, "dataset data sent")
             resp["dataset"] = dataset_data
 
             return resp, 200

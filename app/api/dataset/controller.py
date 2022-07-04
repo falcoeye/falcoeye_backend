@@ -16,11 +16,12 @@ dataset_schema = DatasetSchema()
 
 @api.route("/")
 class DatasetList(Resource):
+    # TODO: fix dataset_resp, must return a list
     @api.doc(
         """Get a list of all datasets""",
         response={
-            200: ("Dataset data succesffuly sent", dataset_resp),
-            404: "No datasets found",
+            200: ("dataset data sent", dataset_resp),
+            404: "no datasets found",
         },
         security="apikey",
     )
@@ -32,8 +33,9 @@ class DatasetList(Resource):
     @api.doc(
         "Add a new dataset",
         response={
-            201: ("Successfully added dataset", dataset_resp),
-            400: "Malformed data or validations failed.",
+            201: ("dataset added", dataset_resp),
+            403: ("name already exists"),
+            400: "malformed data or validations failed",
         },
         security="apikey",
     )
@@ -53,6 +55,12 @@ class DatasetList(Resource):
 @api.param("dataset_id", " Dataset ID")
 class Dataset(Resource):
     @api.doc(
+        "Delete a dataset",
+        response={
+            200: ("dataset deleted"),
+            404: ("dataset not found"),
+            400: "malformed data or validations failed",
+        },
         security="apikey",
     )
     @jwt_required()
@@ -62,6 +70,12 @@ class Dataset(Resource):
         return DatasetService.delete_dataset(current_user_id, dataset_id)
 
     @api.doc(
+        "Get a dataset by ID",
+        response={
+            200: ("dataset data sent", dataset_resp),
+            404: ("dataset not found"),
+            400: "malformed data or validations failed",
+        },
         security="apikey",
     )
     @jwt_required()

@@ -2,7 +2,7 @@
 
     "login": {
         "pass": [
-            "Successfully logged in."
+            "successfully logged in"
         ],
         "args":{
             "email": "workflow@falcoeye.io",
@@ -15,9 +15,8 @@
             "req_type": "get",
             "link": "/api/workflow",
             "pass": [
-                "Workflow data sent",
-                "Workflow not found!",
-                "workflow data sent"
+                "workflow data sent",
+                "workflow not found"
             ],
             "store": {
                 "workflow_id":
@@ -47,8 +46,7 @@
             "req_type": "delete",
             "link": ["/api/workflow/","$workflow_id"],
             "pass": [
-                "Workflow successfully deleted",
-                "Workflow not found!",
+                "Workflow not found",
                 "workflow deleted"
             ]
         }

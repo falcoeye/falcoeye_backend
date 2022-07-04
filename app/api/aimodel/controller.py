@@ -17,10 +17,10 @@ aimodel_schema = AIModelSchema()
 @api.route("/")
 class AIModelList(Resource):
     @api.doc(
-        """Get a list of all aimodels""",
+        """Get a list of all AI models""",
         response={
-            200: ("AIModel data succesffuly sent", aimodel_resp),
-            404: "No aimodels found",
+            200: ("aimodel data sent", aimodel_resp),
+            404: "no aimodel found",
         },
         security="apikey",
     )
@@ -32,8 +32,9 @@ class AIModelList(Resource):
     @api.doc(
         "Add a new aimodel",
         response={
-            201: ("Successfully added aimodel", aimodel_resp),
-            400: "Malformed data or validations failed.",
+            201: ("aimodel added", aimodel_resp),
+            400: "malformed data or validations failed.",
+            403: "aimodel name already exists",
         },
         security="apikey",
     )
@@ -52,6 +53,11 @@ class AIModelList(Resource):
 @api.param("aimodel_id", " AIModel ID")
 class AIModel(Resource):
     @api.doc(
+        """Get an AI model by id""",
+        response={
+            200: ("aimodel data sent", aimodel_resp),
+            404: "aimodel not found",
+        },
         security="apikey",
     )
     @jwt_required()
@@ -61,6 +67,11 @@ class AIModel(Resource):
         return AIModelService.get_aimodel_by_id(aimodel_id)
 
     @api.doc(
+        """Delete an AI model""",
+        response={
+            200: ("aimodel deleted", aimodel_resp),
+            404: "aimodel not found",
+        },
         security="apikey",
     )
     @jwt_required()

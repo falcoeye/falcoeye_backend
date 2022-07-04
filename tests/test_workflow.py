@@ -46,7 +46,7 @@ def test_add_workflow(client, app, user, aimodel):
         headers=headers,
     )
     assert resp.status_code == 201
-    assert resp.json.get("message") == "Workflow has been added."
+    assert resp.json.get("message") == "workflow added"
 
     workflow_id = resp.json.get("workflow").get("id")
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
@@ -80,7 +80,7 @@ def test_get_invalid_workflow_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get(f"/api/workflow/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Workflow not found!"
+    assert resp.json.get("message") == "workflow not found"
 
 
 def test_delete_invalid_workflow_by_id(client, user):
@@ -88,4 +88,4 @@ def test_delete_invalid_workflow_by_id(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/workflow/{uuid.uuid4()}", headers=headers)
     assert resp.status_code == 404
-    assert resp.json.get("message") == "Workflow not found!"
+    assert resp.json.get("message") == "workflow not found"

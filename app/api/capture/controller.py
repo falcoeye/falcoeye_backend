@@ -19,10 +19,10 @@ class Capture(Resource):
         "Capture media",
         # TODO: Check the other errors
         responses={
-            200: ("Capture request succeeded", CaptureDto.capture_registry_key),
-            400: ("Missing data: Camera id and capture type must be provided"),
-            403: ("Something went wrong. Couldn't initialize capturing request"),
-            404: ("Camera not found!"),
+            200: ("capture request succeeded", CaptureDto.capture_registry_key),
+            400: ("missing camera id or capture type"),
+            417: ("something went wrong with capturing service"),
+            404: ("camera not found"),
         },
         security="apikey",
     )
@@ -39,10 +39,10 @@ class Capture(Resource):
 @api.param("registry_key", "Registry key received from capture request")
 class CaptureData(Resource):
     @api.doc(
-        "Get a user capture data path",
+        "Get capture data",
         responses={
-            200: ("Capture data sent", CaptureDto.capture_data),
-            403: ("Registry key not found"),
+            200: ("capture data sent", CaptureDto.capture_data),
+            403: ("registry key not found"),
         },
         security="apikey",
     )
@@ -53,11 +53,12 @@ class CaptureData(Resource):
         return CaptureService.get_capture_data(current_user_id, registry_key)
 
     @api.doc(
-        "Post a user capture data status",
+        "Set capture data",
         responses={
-            200: ("Change capture data been handled"),
-            400: ("Capture data is not ready"),
-            403: ("Registry key not found"),
+            200: ("capture data changed"),
+            400: ("user not found"),
+            417: ("request failed"),
+            401: ("unauthorized"),
         },
         security="apikey",
     )

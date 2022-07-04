@@ -20,8 +20,8 @@ class WorkflowList(Resource):
     @api.doc(
         """Get a list of all workflows""",
         responses={
-            200: ("Workflow data succesffuly sent", WorkflowDto.workflow_list),
-            404: "No workflows found",
+            200: ("workflow data sent", WorkflowDto.workflow_list),
+            404: "no workflows found",
         },
         security="apikey",
     )
@@ -33,8 +33,9 @@ class WorkflowList(Resource):
     @api.doc(
         "Add a new workflow",
         responses={
-            201: ("Successfully added workflow", WorkflowDto.workflow_resp),
-            400: "Malformed data or validations failed.",
+            201: ("workflow added", WorkflowDto.workflow_resp),
+            403: "name already exists",
+            400: "malformed data or validations failed",
         },
         security="apikey",
     )
@@ -54,10 +55,10 @@ class WorkflowList(Resource):
 @api.param("workflow_id", " Workflow ID")
 class Workflow(Resource):
     @api.doc(
-        "Show a worfklow item",
+        "Get worfklow's data",
         responses={
-            200: ("Workflow data successfully sent", WorkflowDto.workflow_resp),
-            404: "No workflow found!",
+            200: ("workflow data sent", WorkflowDto.workflow_resp),
+            404: "workflow not found",
         },
         security="apikey",
     )
@@ -70,8 +71,8 @@ class Workflow(Resource):
     @api.doc(
         "Delete a workflow",
         responses={
-            200: ("Workflow successfully deleted"),
-            404: "Workflow not found!",
+            200: ("workflow deleted"),
+            404: "workflow not found",
         },
         security="apikey",
     )
@@ -87,16 +88,12 @@ class Workflow(Resource):
 @api.param("img_size", " Image Size")
 class Workflow(Resource):
     @api.doc(
-        "Show a worfklow item",
-        responses={
-            200: ("Workflow data successfully sent", WorkflowDto.workflow_resp),
-            404: "No workflow found!",
-        },
+        "Get worfklow's thumbnail image",
         security="apikey",
     )
     @jwt_required()
     def get(self, workflow_id, img_size):
-        """Get a workflow"""
+        """Get worfklow's thumbnail image"""
         # current_user_id = get_jwt_identity()
         return send_from_directory(
             f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',

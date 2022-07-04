@@ -27,10 +27,10 @@ video_schema = VideoSchema()
 @api.route("/")
 class StudioList(Resource):
     @api.doc(
-        "Get a user media",
+        "Get user's media",
         responses={
-            200: ("User media successfully sent", media_resp),
-            204: "No medias found!",
+            200: ("media data sent", media_resp),
+            204: "no media found",
         },
         security="apikey",
     )
@@ -47,22 +47,22 @@ class StudioImageGet(Resource):
     @api.doc(
         "Get a user media",
         responses={
-            200: ("Image successfully sent", image_resp),
-            404: "Image not found!",
+            200: ("image data sent", image_resp),
+            404: "image not found",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, media_id):
-        """Get user's image"""
+        """Get user's image data"""
         current_user_id = get_jwt_identity()
         return StudioService.get_image(current_user_id, media_id)
 
     @api.doc(
-        "Delete a user image",
+        "Delete user's image data",
         responses={
-            200: ("Image successfully deleted"),
-            404: "Image not found!",
+            200: ("image deleted"),
+            404: "image not found",
         },
         security="apikey",
     )
@@ -80,10 +80,7 @@ class StudioImageGet(Resource):
 class StudioImageServe(Resource):
     @api.doc(
         "Get user's image",
-        responses={
-            200: ("Image successfully sent", video_resp),
-            404: "Image not found!",
-        },
+        responses={},
         security="apikey",
     )
     @jwt_required()
@@ -103,8 +100,9 @@ class StudioImagePost(Resource):
     @api.doc(
         "Post a user image",
         responses={
-            200: ("Image successfully added", MediaDto.image),
-            403: "Invalid registry key",
+            200: ("image added", MediaDto.image),
+            403: "invalid registry key",
+            417: "process failed",
         },
         security="apikey",
     )
@@ -122,24 +120,24 @@ class StudioImagePost(Resource):
 @api.param("media_id", "Video ID")
 class StudioVideoGet(Resource):
     @api.doc(
-        "Get user's video",
+        "Get user's video data",
         responses={
-            200: ("Video successfully sent", video_resp),
-            404: "Video not found!",
+            200: ("video data sent", video_resp),
+            404: "video not found",
         },
         security="apikey",
     )
     @jwt_required()
     def get(self, media_id):
-        """Get user's video"""
+        """Get user's video data"""
         current_user_id = get_jwt_identity()
         return StudioService.get_video(current_user_id, media_id)
 
     @api.doc(
         "Delete user's video",
         responses={
-            200: ("Video successfully deleted"),
-            404: "Video not found!",
+            200: ("video deleted"),
+            404: "video not found",
         },
         security="apikey",
     )
@@ -153,17 +151,18 @@ class StudioVideoGet(Resource):
 @api.route("/video")
 class StudioVideoPost(Resource):
     @api.doc(
-        "Get a user media",
+        "Post user's video",
         responses={
-            200: ("Video successfully added", MediaDto.video),
-            403: "Invalid registry key",
+            200: ("video added", MediaDto.video),
+            403: "invalid registry key",
+            417: "process failed",
         },
         security="apikey",
     )
     @api.expect(MediaDto.video_post, validate=False)
     @jwt_required()
     def post(self):
-        """Add a user's video"""
+        """Add user's video"""
         video_data = request.get_json()
         user_id = get_jwt_identity()
         return StudioService.create_video(user_id=user_id, data=video_data)
@@ -175,10 +174,6 @@ class StudioVideoPost(Resource):
 class StudioVideoServe(Resource):
     @api.doc(
         "Get user's video",
-        responses={
-            200: ("Video successfully sent", video_resp),
-            404: "Video not found!",
-        },
         security="apikey",
     )
     @jwt_required()

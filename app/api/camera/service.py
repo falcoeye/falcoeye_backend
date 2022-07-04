@@ -24,11 +24,11 @@ class CameraService:
     def get_user_cameras(user_id):
         """Get a list of cameras"""
         if not (cameras := Camera.query.filter_by(owner_id=user_id).all()):
-            return err_resp("No camera founds!", "camera_404", 404)
+            return err_resp("no camera found", "camera_404", 404)
 
         try:
             camera_data = load_camera_data(cameras, many=True)
-            resp = message(True, "Camera data sent")
+            resp = message(True, "camera data sent")
             resp["camera"] = camera_data
 
             return resp, 200
@@ -43,11 +43,11 @@ class CameraService:
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
-            return err_resp("Camera not found!", "camera_404", 404)
+            return err_resp("camera not found", "camera_404", 404)
 
         try:
             camera_data = load_camera_data(camera)
-            resp = message(True, "Camera data sent")
+            resp = message(True, "camera data sent")
             resp["camera"] = camera_data
 
             return resp, 200
@@ -62,13 +62,13 @@ class CameraService:
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
-            return err_resp("Camera not found!", "camera_404", 404)
+            return err_resp("camera not found", "camera_404", 404)
 
         try:
             db.session.delete(camera)
             db.session.commit()
 
-            resp = message(True, "Camera deleted")
+            resp = message(True, "camera deleted")
             return resp, 200
 
         except Exception as error:
@@ -96,7 +96,7 @@ class CameraService:
 
         # check if camera exists
         if Camera.query.filter_by(owner_id=user_id, name=name).first():
-            return err_resp("Camera already exist", "existing_camera", 403)
+            return err_resp("camera already exists", "existing_camera", 403)
 
         # check if manufacturer exists
         """if not (
@@ -146,7 +146,7 @@ class CameraService:
             camera_info = camera_schema.dump(new_camera)
             db.session.commit()
 
-            resp = message(True, "Camera has been added")
+            resp = message(True, "camera added")
             resp["camera"] = camera_info
 
             return resp, 201
@@ -161,7 +161,7 @@ class CameraService:
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
-            return err_resp("Camera not found!", "camera_404", 404)
+            return err_resp("camera not found", "camera_404", 404)
 
         name = data.get("name", camera.name)
         # manufacturer_id = data.get("manufacturer_id", camera.manufacturer_id)
@@ -205,7 +205,7 @@ class CameraService:
             camera = updated_camera
             db.session.commit()
 
-            resp = message(True, "Camera has been updated")
+            resp = message(True, "camera edited")
 
             return resp, 200
 

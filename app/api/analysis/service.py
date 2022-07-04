@@ -25,11 +25,11 @@ class AnalysisService:
     def get_analysiss():
         """Get a list of all analysiss"""
         if not (analysiss := Analysis.query.all()):
-            return err_resp("No analysis found", "analysis_404", 404)
+            return err_resp("no analysis found", "analysis_404", 404)
 
         try:
             analysis_data = load_analysis_data(analysiss, many=True)
-            resp = message(True, "Analysis data sent")
+            resp = message(True, "analysis data sent")
             resp["analysis"] = analysis_data
 
             return resp, 200
@@ -46,7 +46,7 @@ class AnalysisService:
             logging.info(f"Creating analysis with name {name}")
             if Analysis.query.filter_by(name=name).first() is not None:
                 logging.error(f"Analysis with name {name} already exists")
-                return err_resp("Invalid data. Name already exists", "name_404", 404)
+                return err_resp("name already exists", "name_404", 404)
 
             workflow_id = data.get("workflow_id", None)
             logging.info(f"Analysis uses the following workflow {workflow_id}")
@@ -54,7 +54,7 @@ class AnalysisService:
             if not workflow_id or not (
                 workflow := Workflow.query.filter_by(id=workflow_id).first()
             ):
-                return err_resp("Invalid data.", "workflow_404", 404)
+                return err_resp("invalid workflow", "workflow_404", 404)
 
             new_analysis = Analysis(
                 name=name,
@@ -101,7 +101,7 @@ class AnalysisService:
 
             if wf_resp.status_code == 200:
                 analysis_info = analysis_schema.dump(new_analysis)
-                resp = message(True, "Analysis has been added.")
+                resp = message(True, "analysis added")
                 resp["analysis"] = analysis_info
                 return resp, 201
             else:
@@ -125,11 +125,11 @@ class AnalysisService:
                 creator=user_id, id=analysis_id
             ).first()
         ):
-            return err_resp("Analysis not found!", "analysis_404", 404)
+            return err_resp("analysis not found", "analysis_404", 404)
 
         try:
             analysis_data = load_analysis_data(analysis)
-            resp = message(True, "Analysis data sent")
+            resp = message(True, "analysis data sent")
             resp["analysis"] = analysis_data
 
             return resp, 200
@@ -146,7 +146,7 @@ class AnalysisService:
             ).first()
         ):
             return err_resp(
-                "Analysis not found!",
+                "analysis not found",
                 "analysis_404",
                 404,
             )
@@ -155,7 +155,7 @@ class AnalysisService:
             db.session.delete(analysis)
             db.session.commit()
 
-            resp = message(True, "Analysis successfully deleted")
+            resp = message(True, "analysis deleted")
             return resp, 200
 
         except Exception as error:
@@ -170,7 +170,7 @@ class AnalysisService:
                 creator=user_id, id=analysis_id
             ).first()
         ):
-            return err_resp("Analysis not found!", "analysis_404", 404)
+            return err_resp("analysis not found", "analysis_404", 404)
 
         try:
             analysis_dir = (
@@ -179,7 +179,7 @@ class AnalysisService:
             if os.path.exists(f"{analysis_dir}/meta.json"):
                 return send_from_directory(analysis_dir, "meta.json")
             else:
-                return err_resp("Analysis output not yet written", "analysis_425", 425)
+                return err_resp("no output yet", "analysis_425", 425)
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

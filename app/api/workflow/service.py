@@ -25,7 +25,7 @@ class WorkflowService:
     def get_workflows():
         """Get a list of all workflows"""
         if not (workflows := Workflow.query.all()):
-            return err_resp("No workflow founds!", "workflow_404", 404)
+            return err_resp("no workflow found", "workflow_404", 404)
 
         try:
             workflow_data = load_workflow_data(workflows, many=True)
@@ -45,7 +45,7 @@ class WorkflowService:
             name = data["name"]
             logging.info(f"Received new workflow {name}")
             if Workflow.query.filter_by(name=name).first() is not None:
-                return err_resp("Name is already being used.", "name_taken", 403)
+                return err_resp("name already exists", "name_taken", 403)
 
             # aimodel_id = data["aimodel_id"]
             # # ai models table are assumed to be accessable by everyone here
@@ -94,7 +94,7 @@ class WorkflowService:
             # TODO: resize and save more image sizes
 
             workflow_info = workflow_schema.dump(new_workflow)
-            resp = message(True, "Workflow has been added.")
+            resp = message(True, "workflow added")
             resp["workflow"] = workflow_info
             return resp, 201
         except Exception as error:
@@ -105,7 +105,7 @@ class WorkflowService:
     def get_workflow_by_id(workflow_id):
         """Get workflow by ID"""
         if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
-            return err_resp("Workflow not found!", "workflow_404", 404)
+            return err_resp("workflow not found", "workflow_404", 404)
 
         ai_model_name = None
         if workflow.aimodel_id:
@@ -122,7 +122,7 @@ class WorkflowService:
                 "consideration": workflow.consideration,
                 "assumption": workflow.assumption,
             }
-            resp = message(True, "Workflow data sent")
+            resp = message(True, "workflow data sent")
             resp["workflow"] = workflow_data
 
             return resp, 200
@@ -140,7 +140,7 @@ class WorkflowService:
             ).first()
         ):
             return err_resp(
-                "Workflow not found!",
+                "workflow not found",
                 "workflow_404",
                 404,
             )

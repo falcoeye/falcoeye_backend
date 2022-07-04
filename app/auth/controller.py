@@ -27,10 +27,10 @@ class AuthLogin(Resource):
     @api.doc(
         "Auth login",
         responses={
-            200: ("Logged in", auth_success),
-            400: "Validations failed.",
-            403: "Incorrect password or incomplete credentials.",
-            404: "Email does not match any account.",
+            200: ("successfully logged in", auth_success),
+            400: "validations failed",
+            401: "incorrect username or password",
+            404: "email not found",
         },
     )
     @api.expect(auth_login, validate=False)
@@ -56,9 +56,9 @@ class AuthRegister(Resource):
     @api.doc(
         "Auth registration",
         responses={
-            201: ("Successfully registered user.", auth_success),
-            400: "Malformed data or validations failed.",
-            403: "Email is already being used.",
+            201: ("successfully registered", auth_success),
+            400: "malformed data or validations failed",
+            403: "email or username already exists",
         },
     )
     @api.expect(auth_register, validate=False)

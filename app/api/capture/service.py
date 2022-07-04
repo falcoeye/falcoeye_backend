@@ -23,7 +23,7 @@ class CaptureService:
 
         if not camera_id or not capture_type:
             return err_resp(
-                "Missing data: Camera id and capture type must be provided",
+                "missing camera id or capture type",
                 "media_400",
                 400,
             )
@@ -40,7 +40,7 @@ class CaptureService:
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
-            return err_resp("Camera not found!", "camera_404", 404)
+            return err_resp("camera not found", "camera_404", 404)
 
         try:
             # preparing storing information
@@ -59,18 +59,18 @@ class CaptureService:
             logging.info(f"Response from streaming received {resp.status_code}")
 
             if resp.status_code == 200:
-                resp = message(True, "Capture request succeeded")
+                resp = message(True, "capture request succeeded")
                 resp["registry_key"] = str(registry_object.id)
                 return resp, 200
             else:
                 # setting registry status to capturing
                 change_status(str(registry_object.id), "FAILED")
                 err_resp(
-                    "Something went wrong. Couldn't initialize capturing request",
-                    "capture_403",
-                    403,
+                    "something went wrong with capturing service",
+                    "capture_417",
+                    417,
                 )
-                return err_resp, 403
+                return err_resp, 417
 
         except Exception as error:
             current_app.logger.error(error)
@@ -81,7 +81,7 @@ class CaptureService:
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
         ):
-            return err_resp("Camera not found!", "camera_404", 404)
+            return err_resp("camera not found", "camera_404", 404)
 
         try:
 
@@ -101,14 +101,14 @@ class CaptureService:
             )
 
             if resp.status_code == 200:
-                resp = message(True, "Capture request succeeded")
+                resp = message(True, "capture request succeeded")
                 resp["registry_key"] = str(registry_object.id)
                 return resp, 200
             else:
                 # setting registry status to capturing
                 change_status(str(registry_object.id), "FAILED")
                 err_resp(
-                    "Something went wrong. Couldn't initialize capturing request",
+                    "something went wrong with capturing service",
                     "capture_404",
                     404,
                 )
@@ -122,9 +122,9 @@ class CaptureService:
     def get_capture_data(user_id, registry_key):
         if not (registry_item := Registry.query.filter_by(id=registry_key).first()):
             # TODO: check on the numbers 403, and 404
-            return err_resp("Registry key not found", "not_found_403", 403)
+            return err_resp("registry key not found", "not_found_403", 403)
 
-        resp = message(True, "Capture data sent")
+        resp = message(True, "capture data sent")
         resp["capture_path"] = registry_item.capture_path
         resp["capture_status"] = registry_item.status
         resp["registry_key"] = str(registry_item.id)
@@ -139,13 +139,16 @@ class CaptureService:
             f"Received registery status change request for {registry_key} from {admin_id}: {new_status}"
         )
         if not (user := User.query.filter_by(id=admin_id).first()):
-            return err_resp("User not found!", "user_404", 404)
+            return err_resp("user not found", "user_400", 400)
 
         logging.info(f"Is {user.id} admin?")
         logging.info(f"{user.has_permission(Permission.CHANGE_CAPTURE_STATUS)}")
         # only admin is allowed
         if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
-            return err_resp("Access denied", "role_403", 403)
+            return err_resp("unauthorized", "role_401", 401)
 
-        change_status(registry_key, new_status)
-        return message(True, "Change capture data been handled"), 200
+        status = change_status(registry_key, new_status)
+        if not status:
+            return err_resp("request failed", "role_417", 417)
+
+        return message(True, "capture data changed"), 200

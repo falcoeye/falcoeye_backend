@@ -2,9 +2,8 @@
     "register": {
         "name": "register",
         "pass": [
-            "Email is already being used.",
-            "User has been registered.",
-            "Successfully registered user."
+            "email already exists",
+            "user registered"
         ],
         "args":{
             "email": "falcoeye-test@falcoeye.io",
@@ -15,7 +14,7 @@
     },
     "login": {
         "pass": [
-            "Successfully logged in."
+            "successfully logged in"
         ],
         "args":{
             "email": "falcoeye-test@falcoeye.io",
@@ -28,9 +27,8 @@
             "req_type": "post",
             "link": "/api/camera/",
             "pass": [
-                "Camera already exist",
-                "Camera has been added",
-                "Successfully added camera"
+                "camera already exists",
+                "camera added"
             ],
             "args": {
                 "name": "Harbour Village Bonaire Coral Reef 2",
@@ -44,7 +42,7 @@
             "req_type": "get",
             "link": "/api/camera",
             "pass": [
-                "Camera data sent"
+                "camera data sent"
             ],
             "store": {
                 "harbour_url":
@@ -104,7 +102,7 @@
             "req_type": "post",
             "link": "/api/analysis/",
             "pass": [
-                "Analysis has been added."
+                "analysis added"
             ],
             "args": {
                 "name": "FishCounter_Camera_Test",
