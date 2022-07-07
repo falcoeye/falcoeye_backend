@@ -10,6 +10,7 @@ from .camera.controller import api_camera as camera_ns
 from .capture.controller import api as capture_ns
 from .dataset.controller import api as dataset_ns
 from .studio.controller import api as studio_ns
+from .upload.controller import api as upload_ns
 from .user.controller import api as user_ns
 from .workflow.controller import api as workflow_ns
 
@@ -32,6 +33,7 @@ api.add_namespace(workflow_ns)
 api.add_namespace(dataset_ns)
 api.add_namespace(aimodel_ns)
 api.add_namespace(analysis_ns)
+api.add_namespace(upload_ns)
 # api.add_namespace(aimodel_ns)
 # api.add_namespace(analysis_ns)
 
