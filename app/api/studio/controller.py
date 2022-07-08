@@ -63,6 +63,8 @@ class StudioImageGet(Resource):
         responses={
             200: ("image deleted"),
             404: "image not found",
+            204: "content not found",
+            417: "deletion partially failed",
         },
         security="apikey",
     )
@@ -138,6 +140,8 @@ class StudioVideoGet(Resource):
         responses={
             200: ("video deleted"),
             404: "video not found",
+            204: "content not found",
+            417: "deletion partially failed",
         },
         security="apikey",
     )

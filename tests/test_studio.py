@@ -153,6 +153,7 @@ def test_delete_video_by_id(client, user, video):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.delete(f"/api/media/video/{video.id}", headers=headers)
+    # 204 because in this test no real video added
     assert resp.status_code == 200
     assert resp.json.get("message") == "video deleted"
 

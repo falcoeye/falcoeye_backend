@@ -23,6 +23,7 @@ headers = {
     "X-API-KEY": resp.json().get("access_token"),
     "content_type": "application/json",
 }
+user_id = resp.json().get("user").get("id")
 workflows = glob.glob(f"{basedir}/workflows/*.json")
 
 for wf in workflows:
@@ -33,7 +34,7 @@ for wf in workflows:
     logging.info(f"Adding workflow {wkflowdict['name']}")
     data = {
         "name": wkflowdict["name"],
-        "creator": resp.json().get("user").get("id"),
+        "creator": user_id,
         "structure": wkflowdict["structure"],
         "usedfor": wkflowdict["usedfor"],
         "consideration": wkflowdict["consideration"],

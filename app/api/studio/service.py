@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 from datetime import datetime
 
@@ -35,7 +36,7 @@ class StudioService:
                 i["media_type"] = "image"
 
             media_data = video_data + image_data
-
+            logging.info(f"Number of media: {len(media_data)}")
             resp = message(True, "media data sent")
             resp["media"] = media_data
             return resp, 200
@@ -129,9 +130,19 @@ class StudioService:
             db.session.flush()
             db.session.commit()
 
-            resp = message(True, "image deleted")
-
-            return resp, 200
+            image_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{media_id}/'
+            )
+            if not os.path.exists(image_dir):
+                resp = message(True, "image deleted")
+                return resp, 200
+            try:
+                os.rmdir(image_dir)
+                resp = message(True, "image deleted")
+                return resp, 200
+            except Exception as error:
+                resp = message(True, "deletion partially failed")
+                return resp, 417
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()
@@ -186,13 +197,17 @@ class StudioService:
             )
             logging.info(f"Creating user video directory {video_dir}")
             mkdir(video_dir)
-            logging.info(f"Moving video from {registry_item.capture_path}")
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
+            target_file = f"{video_dir}/video_original.{extension}"
+            logging.info(
+                f"Moving video from {registry_item.capture_path} to {target_file}"
+            )
             try:
                 shutil.move(
                     registry_item.capture_path,
-                    f"{video_dir}/video_original.{extension}",
+                    target_file,
                 )
+                logging.info("Moving video succeeded")
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)
 
@@ -212,10 +227,18 @@ class StudioService:
             db.session.delete(video)
             db.session.flush()
             db.session.commit()
-
-            resp = message(True, "video deleted")
-
-            return resp, 200
+            video_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{media_id}/'
+            )
+            if not os.path.exists(video_dir):
+                return message(True, "video deleted"), 200
+            try:
+                os.rmdir(video_dir)
+                resp = message(True, "video deleted")
+                return resp, 200
+            except Exception as error:
+                resp = message(True, "deletion partially failed")
+                return resp, 417
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

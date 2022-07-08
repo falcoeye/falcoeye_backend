@@ -37,7 +37,9 @@ class Upload(Resource):
     def post(self):
         """Initiate a caputre request"""
         user_id = get_jwt_identity()
+        logging.info(f"Received upload request {request.files}")
         if "file" not in request.files:
+            logging.info("No file, missing file in request.files")
             return err_resp(
                 "missing file",
                 "file_400",
@@ -46,6 +48,7 @@ class Upload(Resource):
 
         file = request.files["file"]
         if not file or file.filename == "":
+            logging.info("file is None or no filename")
             return err_resp(
                 "missing file",
                 "file_400",
@@ -59,6 +62,7 @@ class Upload(Resource):
             )
         else:
             extension = file.filename.rsplit(".", 1)[1].lower()
+            logging.info(f"Image or Video? {extension}")
             if extension == "jpg" or extension == "jpeg":
                 return UploadService.upload_image(user_id, file)
             elif extension == "mp4":
