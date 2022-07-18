@@ -233,12 +233,10 @@ def aimodel(db, user, dataset):
 
 @pytest.fixture
 def workflow(app, db, user, aimodel):
-    with open(
-        f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json"
-    ) as f:
+    with open(f"{basedir}/workflows/kaust_fish_counter_threaded_async.json") as f:
         structure = json.load(f)
 
-    nworkflow = Workflow(
+    workflow = Workflow(
         name="FishCounter",
         creator=user.id,
         publish_date=datetime.now(),
@@ -248,10 +246,10 @@ def workflow(app, db, user, aimodel):
         assumption="barely works",
         results_description="stuff",
     )
-    db.session.add(nworkflow)
+    db.session.add(workflow)
     db.session.commit()
 
-    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{nworkflow.id}'
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
     logging.info(f"Creating workflow directory {workflow_dir}")
 
     mkdir(workflow_dir)
@@ -259,7 +257,7 @@ def workflow(app, db, user, aimodel):
     with open(f"{workflow_dir}/structure.json", "w") as f:
         f.write(json.dumps(structure))
 
-    return nworkflow
+    return workflow
 
 
 @pytest.fixture
