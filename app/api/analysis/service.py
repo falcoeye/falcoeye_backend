@@ -1,11 +1,9 @@
-import json
 import logging
-import os
 from datetime import datetime
+from io import BytesIO
 
 import requests
-from falcoeye_kubernetes import FalcoServingKube
-from flask import current_app, send_from_directory
+from flask import current_app, send_file
 
 from app import db
 from app.dbmodels.ai import Analysis
@@ -15,27 +13,27 @@ from app.utils import err_resp, internal_err_resp, message
 
 from .utils import load_analysis_data, load_workflow_structure
 
+logger = logging.getLogger(__name__)
+
 analysis_schema = AnalysisSchema()
 
 
 class AnalysisService:
-    workflow_kube = FalcoServingKube("falcoeye-workflow")
-
     @staticmethod
-    def get_analysiss():
-        """Get a list of all analysiss"""
-        if not (analysiss := Analysis.query.all()):
+    def get_analysis():
+        """Get a list of all analysis"""
+        if not (analysis := Analysis.query.all()):
             return err_resp("no analysis found", "analysis_404", 404)
 
         try:
-            analysis_data = load_analysis_data(analysiss, many=True)
+            analysis_data = load_analysis_data(analysis, many=True)
             resp = message(True, "analysis data sent")
             resp["analysis"] = analysis_data
 
             return resp, 200
 
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -43,14 +41,14 @@ class AnalysisService:
         try:
 
             name = data["name"]
-            logging.info(f"Creating analysis with name {name}")
+            logger.info(f"Creating analysis with name {name}")
             if Analysis.query.filter_by(name=name).first() is not None:
-                logging.error(f"Analysis with name {name} already exists")
+                logger.error(f"Analysis with name {name} already exists")
                 return err_resp("name already exists", "name_404", 404)
 
             workflow_id = data.get("workflow_id", None)
-            logging.info(f"Analysis uses the following workflow {workflow_id}")
-            # workflows are assumed to be accessable by everyone here
+            logger.info(f"Analysis uses the following workflow {workflow_id}")
+            # workflows are assumed to be accessible by everyone here
             if not workflow_id or not (
                 workflow := Workflow.query.filter_by(id=workflow_id).first()
             ):
@@ -67,19 +65,19 @@ class AnalysisService:
             db.session.add(new_analysis)
             db.session.flush()
             db.session.commit()
-            logging.info("Database item is created")
+            logger.info("Database item is created")
 
-            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{new_analysis.id}"
-            logging.info(f"Analysis results will be stored in {storage_path}")
+            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{new_analysis.id}/"
+            logger.info(f"Analysis results will be stored in {storage_path}")
             new_analysis.results_path = storage_path
-            logging.info("Updating database item with storage path")
+            logger.info("Updating database item with storage path")
             # Analysis started. create a db object
             db.session.add(new_analysis)
             db.session.flush()
             db.session.commit()
 
             workflow_structure = f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}/structure.json'
-            logging.info(f"Loading workflow structure from {workflow_structure}")
+            logger.info(f"Loading workflow structure from {workflow_structure}")
             wf_structure = load_workflow_structure(workflow_structure)
 
             wf_args = data.get("args", {})
@@ -89,15 +87,15 @@ class AnalysisService:
                 "analysis": {"id": str(new_analysis.id), "args": wf_args},
                 "workflow": wf_structure,
             }
-            workflow_server = AnalysisService.workflow_kube.get_service_address()
-            logging.info(
-                f"Sending request to workflow server on http://{workflow_server}/api/analysis"
+            workflow_service = current_app.config["WORKFLOW_HOST"]
+            logger.info(
+                f"Sending request to workflow server on {workflow_service}/api/analysis"
             )
             headers = {"accept": "application/json", "Content-Type": "application/json"}
             wf_resp = requests.post(
-                f"http://{workflow_server}/api/analysis", json=data, headers=headers
+                f"{workflow_service}/api/analysis", json=data, headers=headers
             )
-            logging.info(f"Response received {wf_resp.json()}")
+            logger.info(f"Response received {wf_resp.json()}")
 
             if wf_resp.status_code == 200:
                 analysis_info = analysis_schema.dump(new_analysis)
@@ -113,8 +111,7 @@ class AnalysisService:
                 return err_resp, 403
 
         except Exception as error:
-            raise
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -134,7 +131,7 @@ class AnalysisService:
 
             return resp, 200
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -159,7 +156,7 @@ class AnalysisService:
             return resp, 200
 
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -174,12 +171,16 @@ class AnalysisService:
 
         try:
             analysis_dir = (
-                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}/'
             )
-            if os.path.exists(f"{analysis_dir}/meta.json"):
-                return send_from_directory(analysis_dir, "meta.json")
+            if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
+                with current_app.config["FS_OBJ"].open(
+                    f"{analysis_dir}/meta.json"
+                ) as f:
+                    data = f.read()
+                return send_file(BytesIO(data), mimetype="application/json")
             else:
                 return err_resp("no output yet", "analysis_425", 425)
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()

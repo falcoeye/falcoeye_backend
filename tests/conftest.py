@@ -10,7 +10,7 @@ import pytest
 from app import create_app
 from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
-from app.dbmodels.camera import Camera  # , CameraManufacturer
+from app.dbmodels.camera import Camera
 from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
@@ -81,14 +81,6 @@ def streaming_admin(db):
     db.session.add(user)
     db.session.commit()
     return a
-
-
-"""@pytest.fixture
-def manufacturer(db):
-    manufacturer = CameraManufacturer(name="DummyMaker")
-    db.session.add(manufacturer)
-    db.session.commit()
-    return manufacturer"""
 
 
 @pytest.fixture

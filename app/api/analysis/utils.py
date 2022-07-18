@@ -18,7 +18,7 @@ def load_analysis_data(analysis_db_obj, many=False):
 
 
 def load_workflow_structure(structure_file):
-    with open(structure_file) as f:
-        structure = json.load(f)
+    with current_app.config["FS_OBJ"].open(structure_file) as f:
+        structure = json.loads(f.read().decode("utf-8"))
 
     return structure

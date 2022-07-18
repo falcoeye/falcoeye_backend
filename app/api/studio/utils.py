@@ -1,12 +1,3 @@
-import os
-
-
-def mkdir(path):
-    if os.path.exists(path):
-        return
-    os.makedirs(path)
-
-
 def load_video_data(video_db_obj, many=False):
     """Load short video's data
 

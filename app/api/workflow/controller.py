@@ -1,14 +1,17 @@
 import logging
+import os
+from io import BytesIO
 
-from flask import current_app, request, send_from_directory
+from flask import current_app, request, send_file
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
 from app.dbmodels.schemas import WorkflowSchema
-from app.utils import validation_error
 
 from .dto import WorkflowDto
 from .service import WorkflowService
+
+logger = logging.getLogger(__name__)
 
 api = WorkflowDto.api
 
@@ -44,7 +47,7 @@ class WorkflowList(Resource):
     def post(self):
         workflow_data = request.get_json()
         user_id = get_jwt_identity()
-        logging.info(f"Received new workflow from {user_id}")
+        logger.info(f"Received new workflow from {user_id}")
         # if errors := workflow_schema.validate(workflow_data):
         #     return validation_error(False, errors), 400
 
@@ -55,7 +58,7 @@ class WorkflowList(Resource):
 @api.param("workflow_id", " Workflow ID")
 class Workflow(Resource):
     @api.doc(
-        "Get worfklow's data",
+        "Get workflow's data",
         responses={
             200: ("workflow data sent", WorkflowDto.workflow_resp),
             404: "workflow not found",
@@ -71,7 +74,7 @@ class Workflow(Resource):
     @api.doc(
         "Delete a workflow",
         responses={
-            200: ("workflow deleted"),
+            200: "workflow deleted",
             404: "workflow not found",
         },
         security="apikey",
@@ -88,15 +91,20 @@ class Workflow(Resource):
 @api.param("img_size", " Image Size")
 class Workflow(Resource):
     @api.doc(
-        "Get worfklow's thumbnail image",
+        "Get workflow's thumbnail image",
         security="apikey",
     )
     @jwt_required()
     def get(self, workflow_id, img_size):
-        """Get worfklow's thumbnail image"""
+        """Get workflow's thumbnail image"""
         # current_user_id = get_jwt_identity()
-        return send_from_directory(
-            f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',
-            f"img_{img_size}.jpg",
-            mimetype="image/jpg",
-        )
+
+        with current_app.config["FS_OBJ"].open(
+            os.path.join(
+                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',
+                f"img_{img_size}.jpg",
+            )
+        ) as f:
+            img = f.read()
+
+        return send_file(BytesIO(img), mimetype="image/jpg")

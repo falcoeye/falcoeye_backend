@@ -1,3 +1,6 @@
+from flask import current_app
+
+
 def message(status, message):
     response_object = {"status": status, "message": message}
     return response_object
@@ -19,3 +22,12 @@ def internal_err_resp():
     err = message(False, "Something went wrong during the process!")
     err["error_reason"] = "server_error"
     return err, 500
+
+
+def mkdir(path):
+    if current_app.config["FS_OBJ"].isdir(path):
+        return
+    if current_app.config["FS_IS_REMOTE"]:
+        current_app.config["FS_OBJ"].touch(path)
+    else:
+        current_app.config["FS_OBJ"].makedirs(path)

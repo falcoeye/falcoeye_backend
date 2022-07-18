@@ -1,17 +1,17 @@
-import json
 import logging
 import os
-import re
+from io import BytesIO
 
-from flask import current_app, request, send_from_directory
+from flask import current_app, request, send_file
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
 from app.dbmodels.schemas import ImageSchema, VideoSchema
-from app.utils import internal_err_resp, validation_error
 
 from .dto import MediaDto
 from .service import StudioService
+
+logger = logging.getLogger(__name__)
 
 api = MediaDto.api
 video_resp = MediaDto.video_resp
@@ -92,9 +92,13 @@ class StudioImageServe(Resource):
         image_dir = (
             f'{current_app.config["USER_ASSETS"]}/{current_user_id}/images/{media_id}/'
         )
-        return send_from_directory(
-            image_dir, f"img_{img_size}.{extension}", mimetype="image/jpg"
-        )
+
+        with current_app.config["FS_OBJ"].open(
+            os.path.join(image_dir, f"img_{img_size}.{extension}")
+        ) as f:
+            img = f.read()
+
+        return send_file(BytesIO(img), mimetype="image/jpg")
 
 
 @api.route("/image")
@@ -114,7 +118,7 @@ class StudioImagePost(Resource):
         """Add a user's image"""
         image_data = request.get_json()
         user_id = get_jwt_identity()
-        logging.info(f"Received new image from {user_id} with data {image_data}")
+        logger.info(f"Received new image from {user_id} with data {image_data}")
         return StudioService.create_image(user_id=user_id, data=image_data)
 
 
