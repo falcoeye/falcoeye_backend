@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import current_app
 
@@ -23,12 +24,17 @@ class UploadService:
         logger.info(f"Registry created {str(registry_object.id)}")
         # Create capturing request
         try:
-            img_file.save(registry_object.capture_path)
+            with current_app.config["FS_OBJ"].open(
+                os.path.relpath(registry_object.capture_path), "wb"
+            ) as f:
+                f.write(img_file.stream.read())
+
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:
+            logger.error(error)
             # setting registry status to capturing
             change_status(str(registry_object.id), "FAILED")
             err_resp(
@@ -51,12 +57,17 @@ class UploadService:
         logger.info(f"Registry created {str(registry_object.id)}")
         # Create capturing request
         try:
-            video_file.save(registry_object.capture_path)
+            with current_app.config["FS_OBJ"].open(
+                os.path.relpath(registry_object.capture_path), "wb"
+            ) as f:
+                f.write(video_file.stream.read())
+
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:
+            logger.error(error)
             # setting registry status to capturing
             change_status(str(registry_object.id), "FAILED")
             err_resp(

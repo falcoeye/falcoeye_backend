@@ -1,9 +1,9 @@
-import datetime
 import json
 import logging
 import os
-import shutil
 import uuid
+
+from app.utils import rmtree
 
 from .utils import login_user
 
@@ -21,7 +21,8 @@ def test_list_workflow(app, client, workflow):
     workflow_id = str(workflow.id)
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+
+    rmtree(workflow_dir)
 
 
 def test_add_workflow(client, app, user, aimodel):
@@ -51,7 +52,7 @@ def test_add_workflow(client, app, user, aimodel):
     workflow_id = resp.json.get("workflow").get("id")
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+    rmtree(workflow_dir)
 
 
 def test_delete_workflow(app, client, workflow):
@@ -61,7 +62,8 @@ def test_delete_workflow(app, client, workflow):
     workflow_id = str(workflow.id)
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+
+    rmtree(workflow_dir)
 
     resp = client.delete(f"/api/workflow/{workflow.id}", headers=headers)
     assert resp.status_code == 200

@@ -1,6 +1,5 @@
 import logging
 import os
-import shutil
 from datetime import datetime
 
 from flask import current_app
@@ -9,7 +8,7 @@ from app import db
 from app.api import registry
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
-from app.utils import err_resp, internal_err_resp, message, mkdir
+from app.utils import err_resp, internal_err_resp, message, mkdir, move
 
 from .utils import load_image_data, load_video_data
 
@@ -103,9 +102,7 @@ class StudioService:
 
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
             try:
-                shutil.move(
-                    registry_item.capture_path, f"{imgs_dir}/img_original.{extension}"
-                )
+                move(registry_item.capture_path, f"{imgs_dir}/img_original.{extension}")
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)
 
@@ -200,7 +197,7 @@ class StudioService:
                 f"Moving video from {registry_item.capture_path} to {target_file}"
             )
             try:
-                shutil.move(
+                move(
                     registry_item.capture_path,
                     target_file,
                 )

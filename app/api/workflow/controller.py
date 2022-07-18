@@ -100,9 +100,11 @@ class Workflow(Resource):
         # current_user_id = get_jwt_identity()
 
         with current_app.config["FS_OBJ"].open(
-            os.path.join(
-                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',
-                f"img_{img_size}.jpg",
+            os.path.relpath(
+                os.path.join(
+                    f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}',
+                    f"img_{img_size}.jpg",
+                )
             )
         ) as f:
             img = f.read()

@@ -1,6 +1,5 @@
 import base64
 import os
-import shutil
 from datetime import datetime
 
 from flask import current_app
@@ -8,7 +7,7 @@ from flask import current_app
 from app import db
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import CameraSchema
-from app.utils import err_resp, internal_err_resp, message, mkdir
+from app.utils import err_resp, internal_err_resp, message, mkdir, put
 
 from .utils import load_camera_data
 
@@ -127,7 +126,7 @@ class CameraService:
                 with open(camera_img, "wb") as f:
                     f.write(imgdata)
             else:
-                shutil.copy2(f"{basedir}/assets/default_camera_img.jpg", camera_img)
+                put(f"{basedir}/assets/default_camera_img.jpg", camera_img)
 
             camera_info = camera_schema.dump(new_camera)
             db.session.commit()

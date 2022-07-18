@@ -117,9 +117,11 @@ class Camera(Resource):
         user_id = get_jwt_identity()
 
         with current_app.config["FS_OBJ"].open(
-            os.path.join(
-                f'{current_app.config["USER_ASSETS"]}/{user_id}/{camera_id}',
-                f"img_{img_size}.jpg",
+            os.path.relpath(
+                os.path.join(
+                    f'{current_app.config["USER_ASSETS"]}/{user_id}/{camera_id}',
+                    f"img_{img_size}.jpg",
+                )
             )
         ) as f:
             img = f.read()

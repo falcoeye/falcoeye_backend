@@ -2,7 +2,6 @@ import base64
 import json
 import logging
 import os
-import shutil
 from datetime import datetime
 
 from flask import current_app
@@ -10,7 +9,7 @@ from flask import current_app
 from app import db
 from app.dbmodels.ai import AIModel, Workflow
 from app.dbmodels.schemas import WorkflowSchema
-from app.utils import err_resp, internal_err_resp, message, mkdir
+from app.utils import err_resp, internal_err_resp, message, mkdir, put
 
 from .utils import load_workflow_data
 
@@ -73,7 +72,9 @@ class WorkflowService:
             )
             mkdir(workflow_dir)
             logger.info(f"Storing workflow data in {workflow_dir}")
-            with open(f"{workflow_dir}/structure.json", "w") as f:
+            with current_app.config["FS_OBJ"].open(
+                os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+            ) as f:
                 f.write(json.dumps(workflow_structure))
 
             base64_img = data.get("image", None)
@@ -84,7 +85,7 @@ class WorkflowService:
                     f.write(imgdata)
             else:
                 logger.info("No workflow image. Copying default")
-                shutil.copy2(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
+                put(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
 
             # TODO: resize and save more image sizes
 

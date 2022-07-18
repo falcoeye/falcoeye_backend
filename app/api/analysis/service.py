@@ -1,4 +1,5 @@
 import logging
+import os.path
 from datetime import datetime
 from io import BytesIO
 
@@ -67,7 +68,7 @@ class AnalysisService:
             db.session.commit()
             logger.info("Database item is created")
 
-            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{new_analysis.id}/"
+            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{str(new_analysis.id)}/"
             logger.info(f"Analysis results will be stored in {storage_path}")
             new_analysis.results_path = storage_path
             logger.info("Updating database item with storage path")
@@ -175,7 +176,7 @@ class AnalysisService:
             )
             if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
                 with current_app.config["FS_OBJ"].open(
-                    f"{analysis_dir}/meta.json"
+                    os.path.relpath(f"{analysis_dir}/meta.json")
                 ) as f:
                     data = f.read()
                 return send_file(BytesIO(data), mimetype="application/json")

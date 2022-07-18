@@ -2,10 +2,10 @@
 import json
 import logging
 import os
-import shutil
 from datetime import datetime
 
 import pytest
+from flask import current_app
 
 from app import create_app
 from app import db as database
@@ -14,8 +14,9 @@ from app.dbmodels.camera import Camera
 from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
+from app.utils import mkdir, put
 
-from .utils import EMAIL, PASSWORD, USERNAME, mkdir
+from .utils import EMAIL, PASSWORD, USERNAME
 
 logging.basicConfig(
     level=logging.INFO,
@@ -132,7 +133,7 @@ def registry_image(app, db, user, camera):
 
     img_filename = f"{user_img_dir}/{registry.id}.jpg"
     logging.info(f"Copying: {basedir}/media/fish.jpg to {img_filename}")
-    shutil.copy2(f"{basedir}/media/fish.jpg", img_filename)
+    put(f"{basedir}/media/fish.jpg", img_filename)
 
     registry.capture_path = img_filename
     db.session.add(registry)
@@ -162,7 +163,7 @@ def registry_video(app, db, user, camera):
     # Only mp4 is supported
     video_filename = f"{user_videos_dir}/{registry.id}.mp4"
     logging.info(f"Copying: {basedir}/media/lutjanis.mov to {video_filename}")
-    shutil.copy2(f"{basedir}/media/lutjanis.mov", video_filename)
+    put(f"{basedir}/media/lutjanis.mov", video_filename)
 
     registry.capture_path = video_filename
     db.session.add(registry)
@@ -249,12 +250,14 @@ def workflow(app, db, user, aimodel):
     db.session.add(workflow)
     db.session.commit()
 
-    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}/'
     logging.info(f"Creating workflow directory {workflow_dir}")
 
     mkdir(workflow_dir)
     logging.info("Writing structure file")
-    with open(f"{workflow_dir}/structure.json", "w") as f:
+    with current_app.config["FS_OBJ"].open(
+        os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+    ) as f:
         f.write(json.dumps(structure))
 
     return workflow

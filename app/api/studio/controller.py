@@ -94,7 +94,7 @@ class StudioImageServe(Resource):
         )
 
         with current_app.config["FS_OBJ"].open(
-            os.path.join(image_dir, f"img_{img_size}.{extension}")
+            os.path.relpath(os.path.join(image_dir, f"img_{img_size}.{extension}"))
         ) as f:
             img = f.read()
 
