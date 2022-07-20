@@ -20,6 +20,7 @@ class CaptureDto:
             "status": fields.Boolean,
             "message": fields.String,
             "registry_key": fields.String,
+            "temporary_path": fields.String,
         },
     )
 

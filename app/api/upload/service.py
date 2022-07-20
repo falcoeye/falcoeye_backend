@@ -28,6 +28,7 @@ class UploadService:
             img_file.save(registry_object.capture_path)
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
+            resp["temporary_path"] = registry_object.capture_path
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:
@@ -56,6 +57,7 @@ class UploadService:
             video_file.save(registry_object.capture_path)
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
+            resp["temporary_path"] = registry_object.capture_path
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:
