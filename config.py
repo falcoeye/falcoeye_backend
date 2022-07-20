@@ -1,6 +1,8 @@
 import os
 from datetime import timedelta
 
+import fsspec
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -25,14 +27,45 @@ class Config:
     STREAMER_HOST = os.environ.get("STREAMER_HOST", "http://127.0.0.1:5000")
     WORKFLOW_HOST = os.environ.get("WORKFLOW_HOST", "http://127.0.0.1:7000")
 
-    TEMPORARY_DATA_PATH = os.environ.get(
-        "TEMPORARY_DATA_PATH", f"{basedir}/tests/falcoeye-temp/data/"
-    )
-    FALCOEYE_ASSETS = os.environ.get(
-        "FALCOEYE_ASSETS", f"{basedir}/tests/falcoeye-assets/"
-    )
-    USER_ASSETS = os.environ.get("USER_ASSETS", f"{basedir}/tests/user-assets/")
+    # admin
     FLASK_ADMIN = "FALCOEYE_STREAMING@falcoeye.ai"
+
+    # file system interface
+    FS_PROTOCOL = os.environ.get("FS_PROTOCOL", "file")
+    FS_BUCKET = os.environ.get("FS_BUCKET", "")
+    FS_PROJECT = os.environ.get("FS_PROJECT", "falcoeye")
+
+    if FS_PROTOCOL in ("gs", "gcs"):
+        import gcsfs
+
+        FS_OBJ = gcsfs.GCSFileSystem(
+            project=FS_PROJECT,
+            token=os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "cloud"),
+        )
+        FS_IS_REMOTE = True
+
+        TEMPORARY_DATA_PATH = os.environ.get(
+            "TEMPORARY_DATA_PATH", f"{FS_BUCKET}/falcoeye-temp/data/"
+        )
+        FALCOEYE_ASSETS = os.environ.get(
+            "FALCOEYE_ASSETS", f"{FS_BUCKET}/falcoeye-assets/"
+        )
+        USER_ASSETS = os.environ.get("USER_ASSETS", f"{FS_BUCKET}/user-assets/")
+
+    elif FS_PROTOCOL == "file":
+        FS_OBJ = fsspec.filesystem(FS_PROTOCOL)
+        FS_IS_REMOTE = False
+
+        TEMPORARY_DATA_PATH = os.environ.get(
+            "TEMPORARY_DATA_PATH", f"{basedir}/tests/falcoeye-temp/data/"
+        )
+        FALCOEYE_ASSETS = os.environ.get(
+            "FALCOEYE_ASSETS", f"{basedir}/tests/falcoeye-assets/"
+        )
+        USER_ASSETS = os.environ.get("USER_ASSETS", f"{basedir}/tests/user-assets/")
+
+    else:
+        raise SystemError(f"support for {FS_PROTOCOL} has not been added yet")
 
 
 class DevelopmentConfig(Config):
@@ -41,10 +74,6 @@ class DevelopmentConfig(Config):
         "DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # temp directory for data
-
-    # Add logger
 
 
 class TestingConfig(Config):

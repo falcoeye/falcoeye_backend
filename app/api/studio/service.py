@@ -1,19 +1,18 @@
 import logging
 import os
-import shutil
 from datetime import datetime
 
 from flask import current_app
 
 from app import db
 from app.api import registry
-from app.dbmodels.camera import Camera
-from app.dbmodels.schemas import ImageSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
-from app.utils import err_resp, internal_err_resp, message
+from app.utils import err_resp, internal_err_resp, message, mkdir, move
 
-from .utils import load_image_data, load_video_data, mkdir
+from .utils import load_image_data, load_video_data
+
+logger = logging.getLogger(__name__)
 
 
 class StudioService:
@@ -36,14 +35,13 @@ class StudioService:
                 i["media_type"] = "image"
 
             media_data = video_data + image_data
-            logging.info(f"Number of media: {len(media_data)}")
+            logger.info(f"Number of media: {len(media_data)}")
             resp = message(True, "media data sent")
             resp["media"] = media_data
             return resp, 200
 
         except Exception as error:
-            raise
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -58,13 +56,13 @@ class StudioService:
             resp["image"] = image_data
             return resp, 200
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
     def create_image(user_id, data):
 
-        logging.info(f"Creating image for {user_id} data: {data}")
+        logger.info(f"Creating image for {user_id} data: {data}")
         note = data.get("note", "")
         tags = data.get("tags", "")
         camera_id = data.get("camera_id", None)
@@ -93,22 +91,18 @@ class StudioService:
             db.session.flush()
             db.session.commit()
 
-            logging.info("Image database object created")
+            logger.info("Image database object created")
 
             imgs_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{new_image.id}/'
             )
             mkdir(imgs_dir)
 
-            logging.info(
-                f"Moving image from {registry_item.capture_path} to {imgs_dir}"
-            )
+            logger.info(f"Moving image from {registry_item.capture_path} to {imgs_dir}")
 
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
             try:
-                shutil.move(
-                    registry_item.capture_path, f"{imgs_dir}/img_original.{extension}"
-                )
+                move(registry_item.capture_path, f"{imgs_dir}/img_original.{extension}")
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)
 
@@ -144,7 +138,7 @@ class StudioService:
                 resp = message(True, "deletion partially failed")
                 return resp, 417
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -168,7 +162,7 @@ class StudioService:
         workflow_id = data.get("workflow_id", None)
         registry_key = data.get("registry_key", None)
 
-        logging.info(
+        logger.info(
             f"Creating new video item for {user_id} using registry {registry_key}"
         )
         if not registry_key or not (
@@ -195,19 +189,19 @@ class StudioService:
             video_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{new_video.id}/'
             )
-            logging.info(f"Creating user video directory {video_dir}")
+            logger.info(f"Creating user video directory {video_dir}")
             mkdir(video_dir)
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
             target_file = f"{video_dir}/video_original.{extension}"
-            logging.info(
+            logger.info(
                 f"Moving video from {registry_item.capture_path} to {target_file}"
             )
             try:
-                shutil.move(
+                move(
                     registry_item.capture_path,
                     target_file,
                 )
-                logging.info("Moving video succeeded")
+                logger.info("Moving video succeeded")
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)
 

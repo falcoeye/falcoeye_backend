@@ -14,10 +14,13 @@ api = AnalysisDto.api
 analysis_schema = AnalysisSchema()
 
 
+logger = logging.getLogger(__name__)
+
+
 @api.route("/")
 class AnalysisList(Resource):
     @api.doc(
-        """Get a list of all analysiss""",
+        """Get a list of all analysis""",
         responses={
             200: ("analysis data sent", AnalysisDto.analysis_list),
             404: "no analysis found",
@@ -26,8 +29,8 @@ class AnalysisList(Resource):
     )
     @jwt_required()
     def get(self):
-        """Get a list of all system analysiss"""
-        return AnalysisService.get_analysiss()
+        """Get a list of all system analysis"""
+        return AnalysisService.get_analysis()
 
     @api.doc(
         "Add a new analysis",
@@ -43,7 +46,7 @@ class AnalysisList(Resource):
     def post(self):
         analysis_data = request.get_json()
         user_id = get_jwt_identity()
-        logging.info(f"Recevied new analysis request from {user_id}")
+        logger.info(f"Received new analysis request from {user_id}")
         return AnalysisService.create_analysis(user_id=user_id, data=analysis_data)
 
 
@@ -60,21 +63,21 @@ class Analysis(Resource):
     )
     @jwt_required()
     def get(self, analysis_id):
-        """Get a analysis"""
+        """Get an analysis"""
         current_user_id = get_jwt_identity()
         return AnalysisService.get_analysis_by_id(current_user_id, analysis_id)
 
     @api.doc(
         "Delete user's analysis",
         responses={
-            200: ("analysis deleted"),
+            200: "analysis deleted",
             404: "analysis not found",
         },
         security="apikey",
     )
     @jwt_required()
     def delete(self, analysis_id):
-        """Delete a analysis"""
+        """Delete an analysis"""
         current_user_id = get_jwt_identity()
         return AnalysisService.delete_analysis(current_user_id, analysis_id)
 
@@ -92,6 +95,6 @@ class Analysis(Resource):
     )
     @jwt_required()
     def get(self, analysis_id):
-        """Get a analysis"""
+        """Get an analysis"""
         current_user_id = get_jwt_identity()
         return AnalysisService.get_analysis_meta_by_id(current_user_id, analysis_id)

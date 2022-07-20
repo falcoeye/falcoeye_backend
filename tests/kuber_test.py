@@ -4,7 +4,6 @@ import sys
 import time
 
 import requests
-from falcoeye_kubernetes import FalcoServingKube
 
 logging.basicConfig(
     level=logging.INFO,

@@ -2,15 +2,15 @@ import logging
 
 from flask import current_app
 
-from app import db
-from app.api.registry import change_status, get_status, register
+from app.api.registry import change_status, register
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.registry import Registry
-from app.dbmodels.user import Permission, Role, User
-from app.utils import err_resp, internal_err_resp, message
+from app.dbmodels.user import Permission, User
+from app.utils import err_resp, internal_err_resp, message, mkdir
 
 from .streamer import Streamer
-from .utils import mkdir
+
+logger = logging.getLogger(__name__)
 
 
 class CaptureService:
@@ -19,7 +19,7 @@ class CaptureService:
         """Capture media"""
         camera_id = data.get("camera_id", None)
         capture_type = data.get("capture_type", None)
-        logging.info(f"Capture request {camera_id} {capture_type} from {user_id}")
+        logger.info(f"Capture request {camera_id} {capture_type} from {user_id}")
 
         if not camera_id or not capture_type:
             return err_resp(
@@ -44,19 +44,19 @@ class CaptureService:
 
         try:
             # preparing storing information
-            logging.info(f"Capture image request {camera_id} from {user_id}")
+            logger.info(f"Capture image request {camera_id} from {user_id}")
             user_image_data = (
-                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/images/'
             )
 
             # creating a new registry item
             registry_object = register(user_id, camera_id, "image", user_image_data)
-            logging.info(f"Registry created {str(registry_object.id)}")
+            logger.info(f"Registry created {str(registry_object.id)}")
             # Create capturing request
             resp = Streamer.capture_image(
                 str(registry_object.id), camera, registry_object.capture_path
             )
-            logging.info(f"Response from streaming received {resp.status_code}")
+            logger.info(f"Response from streaming received {resp.status_code}")
 
             if resp.status_code == 200:
                 resp = message(True, "capture request succeeded")
@@ -88,7 +88,7 @@ class CaptureService:
 
             # preparing storing information
             user_video_data = (
-                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos'
+                f'{current_app.config["TEMPORARY_DATA_PATH"]}/{user_id}/videos/'
             )
             mkdir(user_video_data)
 
@@ -137,14 +137,14 @@ class CaptureService:
     def set_capture_data(admin_id, registry_key, data):
 
         new_status = data.get("capture_status")
-        logging.info(
+        logger.info(
             f"Received registery status change request for {registry_key} from {admin_id}: {new_status}"
         )
         if not (user := User.query.filter_by(id=admin_id).first()):
             return err_resp("user not found", "user_400", 400)
 
-        logging.info(f"Is {user.id} admin?")
-        logging.info(f"{user.has_permission(Permission.CHANGE_CAPTURE_STATUS)}")
+        logger.info(f"Is {user.id} admin?")
+        logger.info(f"{user.has_permission(Permission.CHANGE_CAPTURE_STATUS)}")
         # only admin is allowed
         if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
             return err_resp("unauthorized", "role_401", 401)

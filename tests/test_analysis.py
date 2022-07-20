@@ -1,10 +1,10 @@
-import datetime
 import json
 import logging
 import os
-import shutil
 import uuid
 from unittest import mock
+
+from app.utils import rmtree
 
 from .utils import login_user
 
@@ -36,7 +36,7 @@ def test_list_analysis(app, client, analysis):
 
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{analysis.workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+    rmtree(workflow_dir)
 
 
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
@@ -66,7 +66,7 @@ def test_add_analysis(mock_post, app, client, user, workflow):
 
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+    rmtree(workflow_dir)
 
 
 def test_delete_analysis(app, client, analysis):
@@ -75,7 +75,7 @@ def test_delete_analysis(app, client, analysis):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{analysis.workflow_id}'
     logging.info(f"Removing workflow directory {workflow_dir}")
-    shutil.rmtree(workflow_dir)
+    rmtree(workflow_dir)
 
     resp = client.delete(f"/api/analysis/{analysis.id}", headers=headers)
     assert resp.status_code == 200
