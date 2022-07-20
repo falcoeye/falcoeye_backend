@@ -2,20 +2,21 @@
 import json
 import logging
 import os
-import shutil
 from datetime import datetime
 
 import pytest
+from flask import current_app
 
 from app import create_app
 from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
-from app.dbmodels.camera import Camera  # , CameraManufacturer
+from app.dbmodels.camera import Camera
 from app.dbmodels.registry import Registry
 from app.dbmodels.studio import Image, Video
 from app.dbmodels.user import Role, User
+from app.utils import mkdir, put
 
-from .utils import EMAIL, PASSWORD, USERNAME, mkdir
+from .utils import EMAIL, PASSWORD, USERNAME
 
 logging.basicConfig(
     level=logging.INFO,
@@ -83,14 +84,6 @@ def streaming_admin(db):
     return a
 
 
-"""@pytest.fixture
-def manufacturer(db):
-    manufacturer = CameraManufacturer(name="DummyMaker")
-    db.session.add(manufacturer)
-    db.session.commit()
-    return manufacturer"""
-
-
 @pytest.fixture
 def camera(db, user):  # manufacturer):
     camera = Camera(
@@ -140,7 +133,7 @@ def registry_image(app, db, user, camera):
 
     img_filename = f"{user_img_dir}/{registry.id}.jpg"
     logging.info(f"Copying: {basedir}/media/fish.jpg to {img_filename}")
-    shutil.copy2(f"{basedir}/media/fish.jpg", img_filename)
+    put(f"{basedir}/media/fish.jpg", img_filename)
 
     registry.capture_path = img_filename
     db.session.add(registry)
@@ -170,7 +163,7 @@ def registry_video(app, db, user, camera):
     # Only mp4 is supported
     video_filename = f"{user_videos_dir}/{registry.id}.mp4"
     logging.info(f"Copying: {basedir}/media/lutjanis.mov to {video_filename}")
-    shutil.copy2(f"{basedir}/media/lutjanis.mov", video_filename)
+    put(f"{basedir}/media/lutjanis.mov", video_filename)
 
     registry.capture_path = video_filename
     db.session.add(registry)
@@ -241,12 +234,10 @@ def aimodel(db, user, dataset):
 
 @pytest.fixture
 def workflow(app, db, user, aimodel):
-    with open(
-        f"{basedir}/../../falcoeye_workflow/workflows/kaust_fish_counter_threaded_async.json"
-    ) as f:
+    with open(f"{basedir}/workflows/kaust_fish_counter_threaded_async.json") as f:
         structure = json.load(f)
 
-    nworkflow = Workflow(
+    workflow = Workflow(
         name="FishCounter",
         creator=user.id,
         publish_date=datetime.now(),
@@ -256,18 +247,20 @@ def workflow(app, db, user, aimodel):
         assumption="barely works",
         results_description="stuff",
     )
-    db.session.add(nworkflow)
+    db.session.add(workflow)
     db.session.commit()
 
-    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{nworkflow.id}'
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}/'
     logging.info(f"Creating workflow directory {workflow_dir}")
 
     mkdir(workflow_dir)
     logging.info("Writing structure file")
-    with open(f"{workflow_dir}/structure.json", "w") as f:
+    with current_app.config["FS_OBJ"].open(
+        os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+    ) as f:
         f.write(json.dumps(structure))
 
-    return nworkflow
+    return workflow
 
 
 @pytest.fixture

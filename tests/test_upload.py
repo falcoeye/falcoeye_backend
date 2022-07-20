@@ -1,10 +1,10 @@
 import json
 import logging
 import os
-import shutil
-import time
 
-from .utils import login_user, mkdir
+from app.utils import rmtree
+
+from .utils import login_user
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -58,8 +58,8 @@ def test_upload_video(app, client, user):
     assert resp.status_code == 201
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)
 
 
 def test_upload_image(app, client, user):
@@ -102,5 +102,5 @@ def test_upload_image(app, client, user):
     assert resp.status_code == 201
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)

@@ -2,18 +2,18 @@ import base64
 import json
 import logging
 import os
-import shutil
 from datetime import datetime
 
 from flask import current_app
-from PIL import Image
 
 from app import db
 from app.dbmodels.ai import AIModel, Workflow
 from app.dbmodels.schemas import WorkflowSchema
-from app.utils import err_resp, internal_err_resp, message
+from app.utils import err_resp, internal_err_resp, message, mkdir, put
 
-from .utils import load_workflow_data, mkdir
+from .utils import load_workflow_data
+
+logger = logging.getLogger(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -29,30 +29,25 @@ class WorkflowService:
 
         try:
             workflow_data = load_workflow_data(workflows, many=True)
-            logging.info(workflow_data)
+            logger.info(workflow_data)
             resp = message(True, "workflow data sent")
             resp["workflow"] = workflow_data
 
             return resp, 200
 
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
     def create_workflow(user_id, data):
         try:
             name = data["name"]
-            logging.info(f"Received new workflow {name}")
+            logger.info(f"Received new workflow {name}")
             if Workflow.query.filter_by(name=name).first() is not None:
                 return err_resp("name already exists", "name_taken", 403)
 
-            # aimodel_id = data["aimodel_id"]
-            # # ai models table are assumed to be accessable by everyone here
-            # if not (aimodel := AIModel.query.filter_by(id=aimodel_id).first()):
-            #     return err_resp("Model not found!", "camera_404", 404)
-
-            workflow_structre = data["structure"]
+            workflow_structure = data["structure"]
 
             # TODO: creation date vs publish date (which one)
             # TODO: no need for structure file anymore
@@ -60,7 +55,6 @@ class WorkflowService:
                 name=data["name"],
                 creator=user_id,
                 publish_date=datetime.utcnow(),
-                # aimodel_id=aimodel.id,
                 usedfor=data["usedfor"],
                 consideration=data["consideration"],
                 assumption=data["assumption"],
@@ -71,15 +65,17 @@ class WorkflowService:
             db.session.flush()
             db.session.commit()
 
-            logging.info("Workflow added to the database")
+            logger.info("Workflow added to the database")
 
             workflow_dir = (
-                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{new_workflow.id}'
+                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{new_workflow.id}/'
             )
             mkdir(workflow_dir)
-            logging.info(f"Storing workflow data in {workflow_dir}")
-            with open(f"{workflow_dir}/structure.json", "w") as f:
-                f.write(json.dumps(workflow_structre))
+            logger.info(f"Storing workflow data in {workflow_dir}")
+            with current_app.config["FS_OBJ"].open(
+                os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+            ) as f:
+                f.write(json.dumps(workflow_structure))
 
             base64_img = data.get("image", None)
             workflow_img = f"{workflow_dir}/img_original.jpg"
@@ -88,8 +84,8 @@ class WorkflowService:
                 with open(workflow_img, "wb") as f:
                     f.write(imgdata)
             else:
-                logging.info("No workflow image. Copying default")
-                shutil.copy2(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
+                logger.info("No workflow image. Copying default")
+                put(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
 
             # TODO: resize and save more image sizes
 
@@ -98,7 +94,7 @@ class WorkflowService:
             resp["workflow"] = workflow_info
             return resp, 201
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -128,7 +124,7 @@ class WorkflowService:
             return resp, 200
 
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()
 
     @staticmethod
@@ -153,5 +149,5 @@ class WorkflowService:
             return resp, 200
 
         except Exception as error:
-            current_app.logger.error(error)
+            logger.error(error)
             return internal_err_resp()

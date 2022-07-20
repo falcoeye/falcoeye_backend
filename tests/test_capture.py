@@ -1,12 +1,13 @@
 import json
 import logging
 import os
-import shutil
 import threading
 import time
 from unittest import mock
 
-from .utils import login_user, mkdir
+from app.utils import mkdir, put, rmtree
+
+from .utils import login_user
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -136,7 +137,7 @@ def test_capture_image(mock_post, app, client, camera, streaming_admin):
         f"Copying: {basedir}/media/fish.jpg to {user_img_dir}/{registry_key}.jpg"
     )
 
-    shutil.copy2(f"{basedir}/media/fish.jpg", f"{user_img_dir}/{registry_key}.jpg")
+    put(f"{basedir}/media/fish.jpg", f"{user_img_dir}/{registry_key}.jpg")
 
     resp = client.post(
         "/api/media/image",
@@ -151,8 +152,8 @@ def test_capture_image(mock_post, app, client, camera, streaming_admin):
 
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)
 
 
 @mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
@@ -202,7 +203,7 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
     )
 
     # Currently only supporting mp4
-    shutil.copy2(f"{basedir}/media/lutjanis.mov", f"{user_vid_dir}/{registry_key}.mp4")
+    put(f"{basedir}/media/lutjanis.mov", f"{user_vid_dir}/{registry_key}.mp4")
 
     resp = client.post(
         "/api/media/video",
@@ -217,5 +218,5 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
 
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)

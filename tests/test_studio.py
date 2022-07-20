@@ -1,7 +1,7 @@
 import json
-import os
-import shutil
 import uuid
+
+from app.utils import rmtree
 
 from .utils import login_user
 
@@ -43,8 +43,8 @@ def test_add_image(app, client, user, registry_image, camera):
     assert resp.json.get("message") == "media data sent"
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user.id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user.id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)
 
 
 def test_empty_media(client, user):
@@ -120,8 +120,8 @@ def test_add_video(app, client, user, registry_video, camera):
 
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user.id}"
     user_asset_dir = f"{app.config['USER_ASSETS']}/{user.id}"
-    shutil.rmtree(user_temp_dir)
-    shutil.rmtree(user_asset_dir)
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)
 
 
 def test_list_media_2(client, image, video):

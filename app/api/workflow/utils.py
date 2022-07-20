@@ -1,12 +1,3 @@
-import os
-
-
-def mkdir(path):
-    if os.path.exists(path):
-        return
-    os.makedirs(path)
-
-
 def load_workflow_data(workflow_db_obj, many=False):
     """Load workflow's data
 
