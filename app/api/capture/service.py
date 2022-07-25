@@ -6,7 +6,13 @@ from app.api.registry import change_status, register
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.registry import Registry
 from app.dbmodels.user import Permission, User
-from app.utils import err_resp, internal_err_resp, message, mkdir
+from app.utils import (
+    err_resp,
+    generate_download_signed_url_v4,
+    internal_err_resp,
+    message,
+    mkdir,
+)
 
 from .streamer import Streamer
 
@@ -66,12 +72,12 @@ class CaptureService:
             else:
                 # setting registry status to capturing
                 change_status(str(registry_object.id), "FAILED")
-                err_resp(
+                response = err_resp(
                     "something went wrong with capturing service",
                     "capture_417",
                     417,
                 )
-                return err_resp, 417
+                return response, 417
 
         except Exception as error:
             current_app.logger.error(error)
@@ -109,12 +115,12 @@ class CaptureService:
             else:
                 # setting registry status to capturing
                 change_status(str(registry_object.id), "FAILED")
-                err_resp(
+                response = err_resp(
                     "something went wrong with capturing service",
                     "capture_404",
                     404,
                 )
-                return err_resp, 404
+                return response, 404
 
         except Exception as error:
             current_app.logger.error(error)
@@ -127,9 +133,18 @@ class CaptureService:
             return err_resp("registry key not found", "not_found_403", 403)
 
         resp = message(True, "capture data sent")
-        resp["capture_path"] = registry_item.capture_path
         resp["capture_status"] = registry_item.status
         resp["registry_key"] = str(registry_item.id)
+        if registry_item.status == "SUCCEEDED":
+            bucket = current_app.config["FS_BUCKET"]
+            blob_path = registry_item.capture_path.replace(bucket, "")
+            logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
+            resp["capture_path"] = generate_download_signed_url_v4(
+                bucket, blob_path, 15
+            )
+            logging.info(f'generated link: {resp["temporary_path"]}')
+        else:
+            resp["capture_path"] = None
 
         return resp, 200
 

@@ -1,9 +1,13 @@
 import os
+import sys
 
 import psycopg2
 import requests
 
-URL = "http://localhost:5000"
+basedir = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, f"{basedir}/../")
+from app import create_app
+from app.dbmodels import User
 
 streaming_user = os.getenv("STREAMING_USER")
 streaming_password = os.getenv("STREAMING_PASSWORD")
@@ -20,9 +24,11 @@ users = [
     (workflow_user.strip(), workflow_password.strip(), "workflow", "workflow account"),
 ]
 
+print(os.getenv("FLASK_CONFIG"))
+app = create_app(os.getenv("FLASK_CONFIG") or "default")
 
-db_url = os.getenv("DATABASE_URL")
-with psycopg2.connect(db_url) as conn:
+with app.app_context():
+    print("registering service users...")
     for user in users:
         payload = {
             "email": user[0],
@@ -30,12 +36,22 @@ with psycopg2.connect(db_url) as conn:
             "username": user[2],
             "name": user[3],
         }
-        r = requests.post(f"{URL}/auth/register", json=payload)
-        with conn.cursor() as curs:
-            curs.execute("select id from public.roles where name='Admin'")
-            role_id = curs.fetchone()[0]
-            curs.execute(
-                "UPDATE public.user SET role_id = %s WHERE email = %s",
-                (role_id, user[0]),
-            )
-        conn.commit()
+        User.register_as_service_account(payload)
+
+
+# URL = "http://localhost:5000"
+
+# db_url = os.getenv("DATABASE_URL")
+# with psycopg2.connect(db_url) as conn:
+
+# r = requests.post(f"{URL}/auth/register", json=payload)
+
+
+# with conn.cursor() as curs:
+#     curs.execute("select id from public.roles where name='Admin'")
+#     role_id = curs.fetchone()[0]
+#     curs.execute(
+#         "UPDATE public.user SET role_id = %s WHERE email = %s",
+#         (role_id, user[0]),
+#     )
+# conn.commit()

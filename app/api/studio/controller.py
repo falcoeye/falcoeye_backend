@@ -7,6 +7,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
 from app.dbmodels.schemas import ImageSchema, VideoSchema
+from app.utils import generate_download_signed_url_v4
 
 from .dto import MediaDto
 from .service import StudioService
@@ -75,7 +76,7 @@ class StudioImageGet(Resource):
         return StudioService.delete_image(current_user_id, media_id)
 
 
-@api.route("/image/<string:media_id>/video_<string:img_size>.<extension>")
+@api.route("/image/<string:media_id>/img_<string:img_size>.<extension>")
 @api.param("media_id", "Image ID")
 @api.param("img_size", "Image Resolution")
 @api.param("extension", "Image Extension")
@@ -188,30 +189,12 @@ class StudioVideoServe(Resource):
     def get(self, media_id, resolution):
         """Get user's video"""
         current_user_id = get_jwt_identity()
+
         video_path = f'{current_app.config["USER_ASSETS"]}/{current_user_id}/videos/{media_id}/video_{resolution}.mp4'
+        bucket = current_app.config["FS_BUCKET"]
+        blob_path = video_path.replace(bucket, "")
+        logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
+        url = generate_download_signed_url_v4(bucket, blob_path, 15)
+        logging.info(f"generated link: {url}")
 
-        # size = os.stat(video_path)
-        # size = size.st_size
-        # chunk_size = 10**3
-        # start = int(re.sub("\D", "", headers["range"]))
-        # end = min(start + chunk_size, size - 1)
-
-        # content_lenght = end - start + 1
-
-        # def get_chunk(video_path, start, end):
-        #     with open(video_path, "rb") as f:
-        #         f.seek(start)
-        #         chunk = f.read(end)
-        #     return chunk
-
-        # headers = {
-        #     "Content-Range": f"bytes {start}-{end}/{size}",
-        #     "Accept-Ranges": "bytes",
-        #     "Content-Length": content_lenght,
-        #     "Content-Type": "video/mp4",
-        # }
-
-        # return current_app.response_class(
-        #     get_chunk(video_path, start, end), 206, headers
-        # )
-        return None
+        return url

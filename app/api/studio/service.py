@@ -8,7 +8,7 @@ from app import db
 from app.api import registry
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
-from app.utils import err_resp, internal_err_resp, message, mkdir, move
+from app.utils import err_resp, internal_err_resp, message, mkdir, move, rmtree
 
 from .utils import load_image_data, load_video_data
 
@@ -227,7 +227,7 @@ class StudioService:
             if not os.path.exists(video_dir):
                 return message(True, "video deleted"), 200
             try:
-                os.rmdir(video_dir)
+                rmtree(video_dir)
                 resp = message(True, "video deleted")
                 return resp, 200
             except Exception as error:

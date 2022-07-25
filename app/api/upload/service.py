@@ -4,7 +4,7 @@ import os
 from flask import current_app
 
 from app.api.registry import change_status, register
-from app.utils import err_resp, message, mkdir
+from app.utils import err_resp, generate_download_signed_url_v4, message, mkdir
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,15 @@ class UploadService:
 
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
-            resp["temporary_path"] = registry_object.capture_path
+
+            bucket = current_app.config["FS_BUCKET"]
+            blob_path = registry_object.capture_path.replace(bucket, "")
+            logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
+            resp["temporary_path"] = generate_download_signed_url_v4(
+                bucket, blob_path, 15
+            )
+            logging.info(f'generated link: {resp["temporary_path"]}')
+
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:
@@ -65,7 +73,13 @@ class UploadService:
 
             resp = message(True, "upload request succeeded")
             resp["registry_key"] = str(registry_object.id)
-            resp["temporary_path"] = registry_object.capture_path
+            bucket = current_app.config["FS_BUCKET"]
+            blob_path = registry_object.capture_path.replace(bucket, "")
+            logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
+            resp["temporary_path"] = generate_download_signed_url_v4(
+                bucket, blob_path, 15
+            )
+            logging.info(f'generated link: {resp["temporary_path"]}')
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
         except Exception as error:

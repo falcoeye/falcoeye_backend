@@ -1,7 +1,14 @@
+import logging
+import os
 import os.path
 import shutil
+from datetime import datetime, timedelta
 
+import google.auth
 from flask import current_app
+from google.auth import compute_engine
+from google.auth.transport import requests as grequests
+from google.cloud import storage
 
 
 def message(status, message):
@@ -69,3 +76,39 @@ def put(f_from, f_to):
         current_app.config["FS_OBJ"].put(f_from, f_to)
     else:
         shutil.copy2(f_from, f_to)
+
+
+def generate_download_signed_url_v4(bucket_name, blob_name, expiration):
+    if bucket_name is None or bucket_name.strip() == "":
+        # running localy
+        return blob_name
+
+    # multiple // in the blob will not generate a correct link
+    if blob_name[0] == "/":
+        blob_name = blob_name[1:]
+    blob_name = blob_name.replace("//", "/")
+    bucket_name = bucket_name.strip("/")
+
+    credentials, project_id = google.auth.default()
+    r = grequests.Request()
+    credentials.refresh(r)
+
+    storage_client = storage.Client()
+    logging.info("Storage client created")
+
+    bucket = storage_client.get_bucket(bucket_name)
+
+    blob = bucket.blob(blob_name)
+    expires = datetime.now() + timedelta(seconds=expiration * 60)
+
+    service_account_email = credentials.service_account_email
+    logging.info(
+        f"Generating signed url with {service_account_email} account for blob {blob_name} and bucket {bucket}"
+    )
+
+    url = blob.generate_signed_url(
+        expiration=expires,
+        service_account_email=service_account_email,
+        access_token=credentials.token,
+    )
+    return url

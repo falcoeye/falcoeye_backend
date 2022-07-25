@@ -132,3 +132,20 @@ class User(Model):
         role = Role.query.filter_by(id=self.role_id).first()
         logging.info(f"User role: {role.name}")
         return role.has_permission(permission)
+
+    @staticmethod
+    def register_as_service_account(info):
+        user = User.query.filter_by(email=info["email"]).first()
+        if user is None:
+            admin = Role.query.filter_by(name="Admin").first()
+            user = User(
+                name=info["name"],
+                email=info["email"],
+                username=info["username"],
+                password=info["password"],
+            )
+            user.role = Role.query.filter_by(name="Admin").first()
+        else:
+            user.role = Role.query.filter_by(name="Admin").first()
+        db.session.add(user)
+        db.session.commit()

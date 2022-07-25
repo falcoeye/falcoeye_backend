@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import timedelta
 
@@ -34,14 +35,16 @@ class Config:
     FS_PROTOCOL = os.environ.get("FS_PROTOCOL", "file")
     FS_BUCKET = os.environ.get("FS_BUCKET", "")
     FS_PROJECT = os.environ.get("FS_PROJECT", "falcoeye")
+    FS_TOKEN = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "cloud")
+    if FS_TOKEN != "cloud":
+        # running localy
+        with open(FS_TOKEN) as f:
+            FS_TOKEN = json.load(f)
 
     if FS_PROTOCOL in ("gs", "gcs"):
         import gcsfs
 
-        FS_OBJ = gcsfs.GCSFileSystem(
-            project=FS_PROJECT,
-            token=os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "cloud"),
-        )
+        FS_OBJ = gcsfs.GCSFileSystem(project=FS_PROJECT, token=FS_TOKEN)
         FS_IS_REMOTE = True
 
         TEMPORARY_DATA_PATH = os.environ.get(
