@@ -199,11 +199,14 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
     mkdir(user_vid_dir)
     logging.info(f"Directory created? {os.path.exists(user_vid_dir)}")
     logging.info(
-        f"Copying: {basedir}/media/lutjanis.mov to {user_vid_dir}/{registry_key}.mp4"
+        f"Copying: {basedir}/media/arabian_angelfish_short.mp4 to {user_vid_dir}/{registry_key}.mp4"
     )
 
     # Currently only supporting mp4
-    put(f"{basedir}/media/lutjanis.mov", f"{user_vid_dir}/{registry_key}.mp4")
+    put(
+        f"{basedir}/media/arabian_angelfish_short.mp4",
+        f"{user_vid_dir}/{registry_key}.mp4",
+    )
 
     resp = client.post(
         "/api/media/video",

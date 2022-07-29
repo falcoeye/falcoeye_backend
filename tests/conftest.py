@@ -162,8 +162,10 @@ def registry_video(app, db, user, camera):
 
     # Only mp4 is supported
     video_filename = f"{user_videos_dir}/{registry.id}.mp4"
-    logging.info(f"Copying: {basedir}/media/lutjanis.mov to {video_filename}")
-    put(f"{basedir}/media/lutjanis.mov", video_filename)
+    logging.info(
+        f"Copying: {basedir}/media/arabian_angelfish_short.mp4 to {video_filename}"
+    )
+    put(f"{basedir}/media/arabian_angelfish_short.mp4", video_filename)
 
     registry.capture_path = video_filename
     db.session.add(registry)

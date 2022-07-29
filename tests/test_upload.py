@@ -23,7 +23,7 @@ def test_upload_video(app, client, user):
     assert "access_token" in resp.json
     access_token = resp.json.get("access_token")
 
-    filename = f"{basedir}/media/cam_04.mp4"
+    filename = f"{basedir}/media/arabian_angelfish_short.mp4"
     files = {"file": open(filename, "rb")}
 
     resp = client.post(

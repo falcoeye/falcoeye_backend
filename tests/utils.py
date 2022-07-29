@@ -42,14 +42,24 @@ def login_user(test_client, email=EMAIL, password=PASSWORD):
         )
         response_data = json.loads(resp.content.decode("utf-8"))
         # access token
-        access_token = response_data["access_token"]
+        access_token = f'JWT {response_data["access_token"]}'
         return access_token
     else:
-        return test_client.post(
+
+        resp = test_client.post(
             "/auth/login",
             data=json.dumps(dict(email=email, password=password)),
             content_type="application/json",
         )
+
+        # to avoid lots of re-factoring in the moment
+        class Resp:
+            def __init__(self, resp):
+                self.json = resp.json
+                self.status_code = resp.status_code
+                self.json["access_token"] = f'JWT {self.json["access_token"]}'
+
+        return Resp(resp)
 
 
 def get_user(test_client, access_token):
