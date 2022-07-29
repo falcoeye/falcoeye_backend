@@ -16,8 +16,8 @@ class CameraDto:
         {
             "id": fields.String,
             "name": fields.String,
-            "utm_x": fields.Float,
-            "utm_y": fields.Float,
+            "latitude": fields.Float,
+            "longitude": fields.Float,
             "streaming_type": fields.String,
             # "manufacturer_id": fields.String,
             "url": fields.Url,
@@ -33,8 +33,8 @@ class CameraDto:
         "Camera post data",
         {
             "name": fields.String,
-            "utm_x": fields.Float,
-            "utm_y": fields.Float,
+            "latitude": fields.Float,
+            "longitude": fields.Float,
             "streaming_type": fields.String(enum=Streamer._member_names_),
             # "manufacturer_id": fields.String,
             "url": fields.Url,
@@ -50,8 +50,8 @@ class CameraDto:
         {
             "id": fields.String,
             "name": fields.String,
-            "utm_x": fields.Float,
-            "utm_y": fields.Float,
+            "latitude": fields.Float,
+            "longitude": fields.Float,
             "created_at": fields.DateTime,
         },
     )

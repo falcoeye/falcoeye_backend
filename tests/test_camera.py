@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 
 from app.dbmodels.schemas import CameraSchema
@@ -101,6 +102,7 @@ def test_update_camera_by_id(client, camera):
     assert resp.json.get("message") == "camera edited"
 
     resp = client.get(f"/api/camera/{camera.id}", headers=headers)
+    logging.info(resp.json)
     assert resp.status_code == 200
     assert resp.json.get("camera").get("name") == "UpdatedCamera"
 

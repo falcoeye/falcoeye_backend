@@ -30,7 +30,10 @@ class AuthService:
             elif user and user.verify_password(password):
                 user_info = user_schema.dump(user)
 
-                access_token = create_access_token(identity=user.id)
+                access_token = create_access_token(
+                    identity=user.id,
+                    expires_delta=current_app.config["JWT_ACCESS_TOKEN_EXPIRES"],
+                )
 
                 resp = message(True, "successfully logged in")
                 resp["access_token"] = access_token

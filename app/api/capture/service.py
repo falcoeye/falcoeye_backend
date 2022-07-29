@@ -106,7 +106,7 @@ class CaptureService:
             resp = Streamer.record_video(
                 str(registry_object.id), camera, length, registry_object.capture_path
             )
-
+            logger.info(f"Response from streaming received {resp.status_code}")
             if resp.status_code == 200:
                 resp = message(True, "capture request succeeded")
                 resp["registry_key"] = str(registry_object.id)
@@ -139,12 +139,12 @@ class CaptureService:
             bucket = current_app.config["FS_BUCKET"]
             blob_path = registry_item.capture_path.replace(bucket, "")
             logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
-            resp["capture_path"] = generate_download_signed_url_v4(
+            resp["temporary_path"] = generate_download_signed_url_v4(
                 bucket, blob_path, 15
             )
             logging.info(f'generated link: {resp["temporary_path"]}')
         else:
-            resp["capture_path"] = None
+            resp["temporary_path"] = None
 
         return resp, 200
 

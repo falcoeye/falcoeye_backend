@@ -158,27 +158,40 @@ class CameraService:
         latitude = data.get("latitude", camera.latitude)
         longitude = data.get("longitude", camera.longitude)
         status = data.get("status", camera.status)
-        created_at = camera.created_at
 
         try:
-            updated_camera = Camera(
-                name=name,
-                url=url,
-                host=host,
-                port=port,
-                username=username,
-                password=password,
-                owner_id=user_id,
-                streaming_type=streaming_type,
-                latitude=latitude,
-                longitude=longitude,
-                status=status,
-                created_at=created_at,
-            )
-            camera = updated_camera
+            # updated_camera = Camera(
+            #     name=name,
+            #     url=url,
+            #     host=host,
+            #     port=port,
+            #     username=username,
+            #     password=password,
+            #     owner_id=user_id,
+            #     streaming_type=streaming_type,
+            #     latitude=latitude,
+            #     longitude=longitude,
+            #     status=status,
+            #     created_at=created_at,
+            # )
+            camera.name = name
+            camera.url = url
+            camera.host = host
+            camera.port = port
+            camera.username = username
+            camera.password = password
+            camera.owner_id = user_id
+            camera.streaming_type = streaming_type
+            camera.latitude = latitude
+            camera.longitude = longitude
+            camera.status = status
+
+            db.session.flush()
             db.session.commit()
+            camera_data = load_camera_data(camera)
 
             resp = message(True, "camera edited")
+            resp["camera"] = camera_data
 
             return resp, 200
 
