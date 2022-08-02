@@ -1,3 +1,4 @@
+import base64
 import glob
 import json
 import logging
@@ -13,25 +14,54 @@ logging.basicConfig(
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-URL = "http://localhost:5000"
+# URL = "http://localhost:5000"
+URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
 
 workflow_user = os.getenv("WORKFLOW_USER").strip()
 workflow_password = os.getenv("WORKFLOW_PASSWORD").strip()
 payload = {"email": workflow_user, "password": workflow_password}
 resp = requests.post(f"{URL}/auth/login", json=payload)
 headers = {
-    "X-API-KEY": resp.json().get("access_token"),
+    "X-API-KEY": f'JWT {resp.json().get("access_token")}',
     "content_type": "application/json",
 }
 user_id = resp.json().get("user").get("id")
 workflows = glob.glob(f"{basedir}/workflows/*.json")
 
-for wf in workflows:
 
+def update(wfid, data):
+
+    resp = requests.put(f"{URL}/api/workflow/{wfid}", headers=headers, json=data)
+    logging.info(resp.json())
+
+
+def get_base64img(imgfile):
+    with open(imgfile, "rb") as image_file:
+        data = base64.b64encode(image_file.read())
+    return data.decode("utf-8")
+
+
+resp = requests.get(f"{URL}/api/workflow/", headers=headers)
+s_workflows = resp.json()["workflow"]
+logging.info(s_workflows)
+
+
+def add(data):
+    resp = requests.post(f"{URL}/api/workflow/", json=data, headers=headers)
+    logging.info(resp.json())
+    assert resp.status_code == 201
+
+
+for wf in workflows:
+    logging.info(f"Loading {wf}")
     with open(wf) as f:
         wkflowdict = json.load(f)
 
+    # if wkflowdict["name"] == "Arabian Angelfish Monitor":
+    #     delete(wkflowdict)
+
     logging.info(f"Adding workflow {wkflowdict['name']}")
+
     data = {
         "name": wkflowdict["name"],
         "creator": user_id,
@@ -41,9 +71,19 @@ for wf in workflows:
         "assumption": wkflowdict["assumption"],
         "results_description": wkflowdict["results_description"],
     }
+    if os.path.exists(wf.replace(".json", ".jpg")):
+        base64img = get_base64img(wf.replace(".json", ".jpg"))
+        data["image"] = base64img
 
-    resp = requests.post(f"{URL}/api/workflow/", json=data, headers=headers)
-    logging.info(resp.json())
-    assert resp.status_code == 201 or resp.status_code == 403
-    # assert resp.json().get("message") == "workflow added"
-    logging.info(f"{wkflowdict['name']} added")
+    done = False
+    for sw in s_workflows:
+        if sw["name"] == wkflowdict["name"]:
+            logging.info("Workflow exists. Updating")
+            update(sw["id"], data)
+            logging.info(f"{wkflowdict['name']} updated")
+            done = True
+            break
+
+    if not done:
+        add(data)
+        logging.info(f"{wkflowdict['name']} added")

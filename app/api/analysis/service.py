@@ -10,7 +10,12 @@ from app import db
 from app.dbmodels.ai import Analysis
 from app.dbmodels.ai import Workflow as Workflow
 from app.dbmodels.schemas import AnalysisSchema
-from app.utils import err_resp, internal_err_resp, message
+from app.utils import (
+    err_resp,
+    generate_download_signed_url_v4,
+    internal_err_resp,
+    message,
+)
 
 from .utils import load_analysis_data, load_workflow_structure
 
@@ -93,9 +98,11 @@ class AnalysisService:
                 f"Sending request to workflow server on {workflow_service}/api/analysis"
             )
             headers = {"accept": "application/json", "Content-Type": "application/json"}
+
             wf_resp = requests.post(
-                f"{workflow_service}/api/analysis", json=data, headers=headers
+                f"{workflow_service}/api/analysis/", json=data, headers=headers
             )
+
             logger.info(f"Response received {wf_resp.json()}")
 
             if wf_resp.status_code == 200:
@@ -172,14 +179,53 @@ class AnalysisService:
 
         try:
             analysis_dir = (
-                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}/'
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
             )
+            logging.info(f"checking if meta exists {analysis_dir}/meta.json")
             if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
                 with current_app.config["FS_OBJ"].open(
                     os.path.relpath(f"{analysis_dir}/meta.json")
                 ) as f:
                     data = f.read()
                 return send_file(BytesIO(data), mimetype="application/json")
+            else:
+                return err_resp("no output yet", "analysis_425", 425)
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def get_analysis_file_by_id(user_id, analysis_id, file_name, ext):
+        """Get analysis file by ID"""
+        if not (
+            analysis := Analysis.query.filter_by(
+                creator=user_id, id=analysis_id
+            ).first()
+        ):
+            return err_resp("analysis not found", "analysis_404", 404)
+
+        try:
+            analysis_dir = (
+                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
+            )
+
+            full_name = f"{analysis_dir}/{file_name}.{ext}"
+            logging.info(f"checking if file exists {full_name}")
+            if current_app.config["FS_OBJ"].isfile(full_name):
+                if ext == "csv":
+                    with current_app.config["FS_OBJ"].open(full_name) as f:
+                        data = f.read()
+                    return send_file(BytesIO(data), mimetype="application/csv")
+                elif ext == "mp4":
+                    bucket = current_app.config["FS_BUCKET"]
+                    blob_path = full_name.replace(bucket, "")
+                    logging.info(
+                        f"generating 15 minutes signed url for {bucket} {blob_path}"
+                    )
+                    url = generate_download_signed_url_v4(bucket, blob_path, 15)
+                    return url
+                else:
+                    return err_resp("not implemented", "analysis_501", 501)
             else:
                 return err_resp("no output yet", "analysis_425", 425)
         except Exception as error:

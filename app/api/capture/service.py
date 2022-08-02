@@ -67,7 +67,7 @@ class CaptureService:
             if resp.status_code == 200:
                 resp = message(True, "capture request succeeded")
                 resp["registry_key"] = str(registry_object.id)
-                resp["temporary_path"] = registry_object.capture_path
+                # resp["temporary_path"] = registry_object.capture_path
                 return resp, 200
             else:
                 # setting registry status to capturing

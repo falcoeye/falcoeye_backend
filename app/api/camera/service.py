@@ -160,20 +160,6 @@ class CameraService:
         status = data.get("status", camera.status)
 
         try:
-            # updated_camera = Camera(
-            #     name=name,
-            #     url=url,
-            #     host=host,
-            #     port=port,
-            #     username=username,
-            #     password=password,
-            #     owner_id=user_id,
-            #     streaming_type=streaming_type,
-            #     latitude=latitude,
-            #     longitude=longitude,
-            #     status=status,
-            #     created_at=created_at,
-            # )
             camera.name = name
             camera.url = url
             camera.host = host

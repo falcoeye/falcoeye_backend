@@ -85,6 +85,24 @@ class Workflow(Resource):
         current_user_id = get_jwt_identity()
         return WorkflowService.delete_workflow(current_user_id, workflow_id)
 
+    @api.doc(
+        "Edit user's workflow",
+        responses={
+            200: ("workflow edited", WorkflowDto.workflow_resp),
+            404: "workflow not found",
+        },
+        security="apikey",
+    )
+    @api.expect(WorkflowDto.workflow_post_data, validate=False)
+    @jwt_required()
+    def put(self, workflow_id):
+        """Update user's workflow"""
+        workflow_data = request.get_json()
+        current_user_id = get_jwt_identity()
+        return WorkflowService.update_workflow_by_id(
+            current_user_id, workflow_id, workflow_data
+        )
+
 
 @api.route("/<workflow_id>/img_<img_size>.jpg")
 @api.param("workflow_id", " Workflow ID")
@@ -110,3 +128,21 @@ class Workflow(Resource):
             img = f.read()
 
         return send_file(BytesIO(img), mimetype="image/jpg")
+
+
+@api.route("/<workflow_id>/params")
+@api.param("workflow_id", " Workflow ID")
+class Workflow(Resource):
+    @api.doc(
+        "Get workflow's params",
+        security="apikey",
+        responses={
+            200: ("workflow params", WorkflowDto.workflow_params),
+            404: "workflow not found",
+        },
+    )
+    @jwt_required()
+    def get(self, workflow_id):
+        """Get workflow's params"""
+        # current_user_id = get_jwt_identity()
+        return WorkflowService.get_workflow_params_by_id(workflow_id)

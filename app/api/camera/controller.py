@@ -47,8 +47,6 @@ class CameraList(Resource):
     def post(self):
         camera_data = request.get_json()
         user_id = get_jwt_identity()
-        if errors := camera_schema.validate(camera_data):
-            return validation_error(False, errors), 400
 
         return CameraService.create_camera(user_id=user_id, data=camera_data)
 

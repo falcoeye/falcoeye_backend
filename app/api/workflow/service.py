@@ -81,7 +81,9 @@ class WorkflowService:
             workflow_img = f"{workflow_dir}/img_original.jpg"
             if base64_img:
                 imgdata = base64.b64decode(base64_img)
-                with open(workflow_img, "wb") as f:
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(workflow_img), "wb"
+                ) as f:
                     f.write(imgdata)
             else:
                 logger.info("No workflow image. Copying default")
@@ -128,6 +130,30 @@ class WorkflowService:
             return internal_err_resp()
 
     @staticmethod
+    def get_workflow_params_by_id(workflow_id):
+        """Get workflow by ID"""
+        try:
+            if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
+                return err_resp("workflow not found", "workflow_404", 404)
+
+            workflow_dir = (
+                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}/'
+            )
+
+            with current_app.config["FS_OBJ"].open(
+                os.path.relpath(f"{workflow_dir}/structure.json"), "r"
+            ) as f:
+                workflow_structure = json.load(f)
+
+            resp = message(True, "workflow added")
+            resp["workflow_params"] = workflow_structure["args"]
+            return resp, 200
+
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
     def delete_workflow(user_id, workflow_id):
         """Delete a workflow from DB by name and user id"""
         if not (
@@ -150,4 +176,68 @@ class WorkflowService:
 
         except Exception as error:
             logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def update_workflow_by_id(user_id, workflow_id, data):
+
+        if not (
+            workflow := Workflow.query.filter_by(
+                creator=user_id, id=workflow_id
+            ).first()
+        ):
+            return err_resp("workflow not found", "workflow_404", 404)
+
+        logger.info(f"Modifying workflow {workflow.name}")
+        name = data.get("name", workflow.name)
+        usedfor = data.get("usedfor", workflow.usedfor)
+        consideration = data.get("consideration", workflow.consideration)
+        results_description = data.get(
+            "results_description", workflow.results_description
+        )
+        assumption = data.get("assumption", workflow.assumption)
+        structure = data.get("structure", None)
+        base64_img = data.get("image", None)
+
+        try:
+            logging.info("Updating workflow meta data in db")
+            workflow.name = name
+            workflow.usedfor = usedfor
+            workflow.consideration = consideration
+            workflow.results_description = results_description
+            workflow.assumption = assumption
+
+            db.session.flush()
+            db.session.commit()
+            workflow_data = load_workflow_data(workflow)
+
+            workflow_dir = (
+                f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}/'
+            )
+            logger.info(f"Updating workflow data in {workflow_dir}")
+
+            if structure:
+                logging.info("Updating workflow structure")
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+                ) as f:
+                    f.write(json.dumps(structure))
+
+            if base64_img:
+                logging.info("Updating workflow image")
+                workflow_img = f"{workflow_dir}/img_original.jpg"
+                if base64_img:
+                    imgdata = base64.b64decode(base64_img)
+                    with current_app.config["FS_OBJ"].open(
+                        os.path.relpath(workflow_img), "wb"
+                    ) as f:
+                        f.write(imgdata)
+
+            resp = message(True, "workflow edited")
+            resp["workflow"] = workflow_data
+
+            return resp, 200
+
+        except Exception as error:
+            current_app.logger.error(error)
             return internal_err_resp()

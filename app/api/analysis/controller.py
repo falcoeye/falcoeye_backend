@@ -98,3 +98,26 @@ class Analysis(Resource):
         """Get an analysis"""
         current_user_id = get_jwt_identity()
         return AnalysisService.get_analysis_meta_by_id(current_user_id, analysis_id)
+
+
+@api.route("/<analysis_id>/<file_name>.<ext>")
+@api.param("analysis_id", "Analysis ID")
+@api.param("file_name", "File name without extension")
+@api.param("ext", "File extension")
+class Analysis(Resource):
+    @api.doc(
+        "Get user's analysis meta file by id",
+        responses={
+            404: "analysis not found",
+            425: "no output yet",
+            501: "not implemented",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, analysis_id, file_name, ext):
+        """Get an analysis"""
+        current_user_id = get_jwt_identity()
+        return AnalysisService.get_analysis_file_by_id(
+            current_user_id, analysis_id, file_name, ext
+        )

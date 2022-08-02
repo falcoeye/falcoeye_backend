@@ -13,7 +13,7 @@ class Config:
     DEBUG = False
 
     # JWT Extended config
-    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", os.urandom(24))
+    JWT_SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(24))
 
     JWT_HEADER_NAME = os.environ.get("JWT_HEADER_NAME", "X-API-KEY")
     JWT_HEADER_TYPE = os.environ.get("JWT_HEADER_TYPE", "JWT")
@@ -54,7 +54,7 @@ class Config:
         FALCOEYE_ASSETS = os.environ.get(
             "FALCOEYE_ASSETS", f"{FS_BUCKET}/falcoeye-assets/"
         )
-        USER_ASSETS = os.environ.get("USER_ASSETS", f"{FS_BUCKET}/user-assets/")
+        USER_ASSETS = os.environ.get("USER_ASSETS", f"{FS_BUCKET}/user-assets")
 
     elif FS_PROTOCOL == "file":
         FS_OBJ = fsspec.filesystem(FS_PROTOCOL)

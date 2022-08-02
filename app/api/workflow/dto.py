@@ -8,10 +8,21 @@ class WorkflowDto:
         "Workflow post data",
         {
             "name": fields.String,
-            "aimodel_id": fields.String,
             "usedfor": fields.String,
             "consideration": fields.String,
             "assumption": fields.String,
+            "results_description": fields.String,
+            "structure": fields.Raw,
+            "base64_img": fields.String,
+        },
+    )
+
+    workflow_params = api.model(
+        "Workflow params",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "workflow_params": fields.Raw,
         },
     )
 

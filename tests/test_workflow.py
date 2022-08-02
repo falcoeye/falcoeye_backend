@@ -55,6 +55,47 @@ def test_add_workflow(client, app, user, aimodel):
     rmtree(workflow_dir)
 
 
+def test_workflow_params(client, app, workflow):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    workflow_id = str(workflow.id)
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    resp = client.get(
+        f"/api/workflow/{workflow_id}/params",
+        content_type="application/json",
+        headers=headers,
+    )
+    logging.info(resp.json)
+    rmtree(workflow_dir)
+
+
+def test_update_workflow(client, app, workflow):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    workflow_id = str(workflow.id)
+
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+
+    data = {
+        "name": "new name",
+        "structure": {"nodes": [], "edges": []},
+        "base64_img": "asdfasdfasdg",
+    }
+    resp = client.put(
+        f"/api/workflow/{workflow.id}",
+        content_type="application/json",
+        headers=headers,
+        data=json.dumps(data),
+    )
+
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    rmtree(workflow_dir)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "workflow edited"
+
+
 def test_delete_workflow(app, client, workflow):
     resp = login_user(client)
     assert "access_token" in resp.json
