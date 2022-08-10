@@ -1,8 +1,11 @@
 import base64
+import io
+import logging
 import os
 from datetime import datetime
 
 from flask import current_app
+from PIL import Image
 
 from app import db
 from app.dbmodels.camera import Camera
@@ -86,7 +89,7 @@ class CameraService:
         url = data.get("url", None)
         latitude = data.get("latitude", None)
         longitude = data.get("longitude", None)
-        status = data.get("status", "stopped")
+        status = data.get("status", "running")
         created_at = datetime.utcnow()
         image = data.get("image", None)
 
@@ -121,12 +124,25 @@ class CameraService:
 
             base64_img = data.get("image", None)
             camera_img = f"{camera_dir}/img_original.jpg"
+            thumbnail_img = f"{camera_dir}/img_260.jpg"
             if base64_img:
                 imgdata = base64.b64decode(base64_img)
                 with open(camera_img, "wb") as f:
                     f.write(imgdata)
+
+                logging.info("Adding camera thumbnail")
+                buffer = io.BytesIO()
+                img = Image.open(io.BytesIO(imgdata))
+                img.thumbnail((260, 260))
+                img.save(buffer, format="JPEG")
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(thumbnail_img), "wb"
+                ) as f:
+                    f.write(buffer.getbuffer())
             else:
+                logging.info("No camera image. Copying default")
                 put(f"{basedir}/assets/default_camera_img.jpg", camera_img)
+                put(f"{basedir}/assets/default_camera_img_260.jpg", thumbnail_img)
 
             camera_info = camera_schema.dump(new_camera)
             db.session.commit()

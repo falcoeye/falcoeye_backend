@@ -88,7 +88,10 @@ class AuthService:
             db.session.commit()
 
             # Create an access token
-            access_token = create_access_token(identity=new_user.id)
+            access_token = create_access_token(
+                identity=new_user.id,
+                expires_delta=current_app.config["JWT_ACCESS_TOKEN_EXPIRES"],
+            )
 
             resp = message(True, "successfully registered")
             resp["access_token"] = access_token

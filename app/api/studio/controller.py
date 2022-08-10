@@ -102,6 +102,32 @@ class StudioImageServe(Resource):
         return send_file(BytesIO(img), mimetype="image/jpg")
 
 
+@api.route("/image/<string:media_id>/img_<int:img_size>.<extension>")
+@api.param("media_id", "Image ID")
+@api.param("img_size", "Image Resolution")
+@api.param("extension", "Image Extension")
+class StudioImageServe(Resource):
+    @api.doc(
+        "Get user's image",
+        responses={},
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, media_id, img_size, extension):
+        """Get user's image"""
+        current_user_id = get_jwt_identity()
+        image_dir = (
+            f'{current_app.config["USER_ASSETS"]}/{current_user_id}/images/{media_id}/'
+        )
+
+        with current_app.config["FS_OBJ"].open(
+            os.path.relpath(os.path.join(image_dir, f"img_{img_size}.{extension}"))
+        ) as f:
+            img = f.read()
+
+        return send_file(BytesIO(img), mimetype="image/jpg")
+
+
 @api.route("/image")
 class StudioImagePost(Resource):
     @api.doc(
@@ -198,3 +224,28 @@ class StudioVideoServe(Resource):
         logging.info(f"generated link: {url}")
 
         return url
+
+
+@api.route("/video/<string:media_id>/video_<int:img_size>.jpg")
+@api.param("media_id", "Video ID")
+@api.param("img_size", "Image Resolution")
+class StudioVideoThumbnailServe(Resource):
+    @api.doc(
+        "Get user's video's thumbnail",
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self, media_id, img_size):
+        """Get user's video thumbnail"""
+
+        current_user_id = get_jwt_identity()
+        video_dir = (
+            f'{current_app.config["USER_ASSETS"]}/{current_user_id}/videos/{media_id}/'
+        )
+
+        with current_app.config["FS_OBJ"].open(
+            os.path.relpath(os.path.join(video_dir, f"video_{img_size}.jpg"))
+        ) as f:
+            img = f.read()
+
+        return send_file(BytesIO(img), mimetype="image/jpg")

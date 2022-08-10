@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import os
@@ -6,6 +7,13 @@ import uuid
 from app.utils import rmtree
 
 from .utils import login_user
+
+
+def get_base64img(imgfile):
+    with open(imgfile, "rb") as image_file:
+        data = base64.b64encode(image_file.read())
+    return data.decode("utf-8")
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,21 +33,65 @@ def test_list_workflow(app, client, workflow):
     rmtree(workflow_dir)
 
 
-def test_add_workflow(client, app, user, aimodel):
+def test_get_workflow_by_id(app, client, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
-    with open(f"{basedir}/workflows/kaust_fish_counter_threaded_async.json") as f:
+    resp = client.get(f"/api/workflow/{workflow.id}", headers=headers)
+    assert resp.status_code == 200
+    logging.info(resp.json.get("workflow"))
+
+
+def test_add_workflow_with_img(client, app, user):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    with open(
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
         structure = json.load(f)
     data = {
         "name": "FishCounter",
         "creator": str(user.id),
-        "aimodel_id": str(aimodel.id),
         "structure": structure,
         "usedfor": "detecting stuff",
         "consideration": "be careful",
         "assumption": "barely works",
         "results_description": "stuff",
     }
+    base64img = get_base64img(f"{basedir}/media/fish.jpg")
+    data["image"] = base64img
+
+    resp = client.post(
+        "/api/workflow/",
+        data=json.dumps(data),
+        content_type="application/json",
+        headers=headers,
+    )
+    assert resp.status_code == 201
+    assert resp.json.get("message") == "workflow added"
+
+    workflow_id = resp.json.get("workflow").get("id")
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    rmtree(workflow_dir)
+
+
+def test_add_workflow(client, app, user):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    with open(
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
+        structure = json.load(f)
+    data = {
+        "name": "FishCounter",
+        "creator": str(user.id),
+        "structure": structure,
+        "usedfor": "detecting stuff",
+        "consideration": "be careful",
+        "assumption": "barely works",
+        "results_description": "stuff",
+    }
+
     resp = client.post(
         "/api/workflow/",
         data=json.dumps(data),

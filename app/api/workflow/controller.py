@@ -137,7 +137,7 @@ class Workflow(Resource):
         "Get workflow's params",
         security="apikey",
         responses={
-            200: ("workflow params", WorkflowDto.workflow_params),
+            200: ("params sent", WorkflowDto.workflow_params),
             404: "workflow not found",
         },
     )

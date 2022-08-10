@@ -1,5 +1,7 @@
+import base64
 import json
 import logging
+import os
 import uuid
 
 from app.dbmodels.schemas import CameraSchema
@@ -7,6 +9,15 @@ from app.dbmodels.schemas import CameraSchema
 from .utils import login_user
 
 camera_schema = CameraSchema()
+
+
+def get_base64img(imgfile):
+    with open(imgfile, "rb") as image_file:
+        data = base64.b64encode(image_file.read())
+    return data.decode("utf-8")
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 def test_add_camera(client, user):  # , manufacturer):
@@ -23,6 +34,39 @@ def test_add_camera(client, user):  # , manufacturer):
         "url": "https://www.youtube.com/watch?v=tk-qJJbdOh4",
         "status": "RUNNING",
     }
+    resp = client.post(
+        "/api/camera/",
+        headers=headers,
+        data=json.dumps(data),
+        content_type="application/json",
+    )
+    assert resp.status_code == 201
+    assert resp.json.get("message") == "camera added"
+
+    resp = client.get("/api/camera/", headers=headers)
+    assert (
+        resp.json.get("camera")[0].get("name") == "Harbour Village Bonaire Coral Reef"
+    )
+    assert resp.json.get("message") == "camera data sent"
+    assert resp.status_code == 200
+
+
+def test_add_camera_with_img(client, user):  # , manufacturer):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+
+    access_token = resp.json.get("access_token")
+    headers = {"X-API-KEY": access_token}
+
+    data = {
+        "name": "Harbour Village Bonaire Coral Reef",
+        # "manufacturer_id": str(manufacturer.id),
+        "streaming_type": "StreamingServer",
+        "url": "https://www.youtube.com/watch?v=tk-qJJbdOh4",
+        "status": "RUNNING",
+    }
+    base64img = get_base64img(f"{basedir}/media/fish.jpg")
+    data["image"] = base64img
     resp = client.post(
         "/api/camera/",
         headers=headers,

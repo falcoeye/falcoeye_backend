@@ -236,8 +236,10 @@ def aimodel(db, user, dataset):
 
 @pytest.fixture
 def workflow(app, db, user, aimodel):
-    with open(f"{basedir}/workflows/kaust_fish_counter_threaded_async.json") as f:
-        structure = json.load(f)
+    with open(
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
+        workflow_json = json.load(f)
 
     workflow = Workflow(
         name="FishCounter",
@@ -260,7 +262,7 @@ def workflow(app, db, user, aimodel):
     with current_app.config["FS_OBJ"].open(
         os.path.relpath(f"{workflow_dir}/structure.json"), "w"
     ) as f:
-        f.write(json.dumps(structure))
+        f.write(json.dumps(workflow_json["structure"]))
 
     return workflow
 

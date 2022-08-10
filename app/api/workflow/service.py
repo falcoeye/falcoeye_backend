@@ -1,10 +1,12 @@
 import base64
+import io
 import json
 import logging
 import os
 from datetime import datetime
 
 from flask import current_app
+from PIL import Image
 
 from app import db
 from app.dbmodels.ai import AIModel, Workflow
@@ -79,15 +81,28 @@ class WorkflowService:
 
             base64_img = data.get("image", None)
             workflow_img = f"{workflow_dir}/img_original.jpg"
+            thumbnail_img = f"{workflow_dir}/img_260.jpg"
             if base64_img:
                 imgdata = base64.b64decode(base64_img)
                 with current_app.config["FS_OBJ"].open(
                     os.path.relpath(workflow_img), "wb"
                 ) as f:
                     f.write(imgdata)
+
+                logging.info("Adding workflow thumbnail")
+                buffer = io.BytesIO()
+                img = Image.open(io.BytesIO(imgdata))
+                img.thumbnail((260, 260))
+                img.save(buffer, format="JPEG")
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(thumbnail_img), "wb"
+                ) as f:
+                    f.write(buffer.getbuffer())
+
             else:
                 logger.info("No workflow image. Copying default")
                 put(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
+                put(f"{basedir}/assets/default_workflow_img_260.jpg", thumbnail_img)
 
             # TODO: resize and save more image sizes
 
@@ -102,20 +117,18 @@ class WorkflowService:
     @staticmethod
     def get_workflow_by_id(workflow_id):
         """Get workflow by ID"""
+
         if not (workflow := Workflow.query.filter_by(id=workflow_id).first()):
             return err_resp("workflow not found", "workflow_404", 404)
 
-        ai_model_name = None
-        if workflow.aimodel_id:
-            ai_model_name = AIModel.query.filter_by(id=workflow.aimodel_id).first().name
+        logging.info(f"Requesting workflow {workflow_id} name {workflow.name}")
 
         try:
             workflow_data = {
-                "id": workflow.id,
+                "id": str(workflow.id),
                 "name": workflow.name,
-                "creator": workflow.creator,
-                "publish_date": workflow.publish_date,
-                "aimodel_name": ai_model_name,
+                "creator": str(workflow.creator),
+                "publish_date": workflow.publish_date.strftime("%m/%d/%Y, %H:%M:%S"),
                 "usedfor": workflow.usedfor,
                 "consideration": workflow.consideration,
                 "assumption": workflow.assumption,
@@ -145,8 +158,8 @@ class WorkflowService:
             ) as f:
                 workflow_structure = json.load(f)
 
-            resp = message(True, "workflow added")
-            resp["workflow_params"] = workflow_structure["args"]
+            resp = message(True, "params sent")
+            resp["workflow_params"] = workflow_structure["feeds"]
             return resp, 200
 
         except Exception as error:
@@ -226,12 +239,22 @@ class WorkflowService:
             if base64_img:
                 logging.info("Updating workflow image")
                 workflow_img = f"{workflow_dir}/img_original.jpg"
-                if base64_img:
-                    imgdata = base64.b64decode(base64_img)
-                    with current_app.config["FS_OBJ"].open(
-                        os.path.relpath(workflow_img), "wb"
-                    ) as f:
-                        f.write(imgdata)
+                imgdata = base64.b64decode(base64_img)
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(workflow_img), "wb"
+                ) as f:
+                    f.write(imgdata)
+
+                logging.info("Adding workflow thumbnail")
+                buffer = io.BytesIO()
+                img = Image.open(io.BytesIO(imgdata))
+                img.thumbnail((260, 260))
+                img.save(buffer, format="JPEG")
+                thumbnail_img = f"{workflow_dir}/img_260.jpg"
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(thumbnail_img), "wb"
+                ) as f:
+                    f.write(buffer.getbuffer())
 
             resp = message(True, "workflow edited")
             resp["workflow"] = workflow_data

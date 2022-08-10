@@ -9,6 +9,7 @@ from flask import current_app
 from google.auth import compute_engine
 from google.auth.transport import requests as grequests
 from google.cloud import storage
+from PIL import Image
 
 
 def message(status, message):
@@ -76,6 +77,14 @@ def put(f_from, f_to):
         current_app.config["FS_OBJ"].put(f_from, f_to)
     else:
         shutil.copy2(f_from, f_to)
+
+
+def exists(path):
+    path = path.replace("//", "/")
+    if current_app.config["FS_IS_REMOTE"]:
+        return current_app.config["FS_OBJ"].exists(path)
+    else:
+        return os.path.exists(path)
 
 
 def generate_download_signed_url_v4(bucket_name, blob_name, expiration):

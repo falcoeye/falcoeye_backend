@@ -138,6 +138,8 @@ def test_capture_image(mock_post, app, client, camera, streaming_admin):
     )
 
     put(f"{basedir}/media/fish.jpg", f"{user_img_dir}/{registry_key}.jpg")
+    logging.info(f"Creating thumbnail {user_img_dir}/{registry_key}_120.jpg")
+    put(f"{basedir}/media/fish.jpg", f"{user_img_dir}/{registry_key}_120.jpg")
 
     resp = client.post(
         "/api/media/image",
@@ -171,7 +173,7 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
         camera.id,
         "video",
         access_token,
-        length=10,
+        length=1,
     )
 
     th = threading.Thread(
@@ -207,6 +209,9 @@ def test_capture_video(mock_post, app, client, camera, streaming_admin):
         f"{basedir}/media/arabian_angelfish_short.mp4",
         f"{user_vid_dir}/{registry_key}.mp4",
     )
+
+    logging.info("Creating thumbnail")
+    put(f"{basedir}/media/fish.jpg", f"{user_vid_dir}/{registry_key}_120.jpg")
 
     resp = client.post(
         "/api/media/video",

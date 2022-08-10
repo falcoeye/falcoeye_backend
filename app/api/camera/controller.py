@@ -117,7 +117,7 @@ class Camera(Resource):
         with current_app.config["FS_OBJ"].open(
             os.path.relpath(
                 os.path.join(
-                    f'{current_app.config["USER_ASSETS"]}/{user_id}/{camera_id}',
+                    f'{current_app.config["USER_ASSETS"]}/{user_id}/cameras/{camera_id}',
                     f"img_{img_size}.jpg",
                 )
             )

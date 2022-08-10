@@ -1,16 +1,16 @@
 {
-    "name": "Arabian Angelfish Monitor",
-    "usedfor": "Monitoring arabian angelfish passed in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. This model extracts segments from videos or record clips from livestream, only when a car have made a full appearance in the sight of the view of the camer.",
-    "consideration": "- Depending on the interval, arabian angelfish might not be observed\n- Arabian angelfish must be within close proximity\n- Weather visibility might affect the results ",
+    "name": "KAUST Fish Counter",
+    "usedfor": "Monitoring fish crowd in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. When crossed with maritime data (weather, water condition and quality) the outcome can be used to detect fish behavior over different conditions",
+    "consideration": "- A single fish can be counted more than once\n- Depending on the interval, fish might not be observed and counted\n- Fish must be within close proximity\n- Underwater visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
-    "results_description": "split & end of video: multiple files for each segment\nsplit & first occurrence: single segment cut\nmerge: single files combining all appearances.\nEach segment must have the relative (video) or actual (stream) timestamp.",
-    "structure":{
+    "results_description": "Line chart shows number of fish in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
+    "structure": {
         "feeds": {
             "sources": [
                 "video",
                 "streaming_source"
             ],
-            "params": [
+            "params":[
                 {
                     "name": "filename",
                     "type": "string",
@@ -58,7 +58,7 @@
                     "type": "int",
                     "disc": "Sample every (seconds for stream and frame for video)",
                     "source": "user",
-                    "default": 1
+                    "default": 30
                 },
                 {
                     "name": "min_score_thresh",
@@ -75,20 +75,6 @@
                     "default": 100
                 },
                 {
-                    "name": "min_to_trigger_in",
-                    "type": "int",
-                    "disc": "Number of consecutive detections before start recording ([1-10])",
-                    "source": "user",
-                    "default": 5
-                },
-                {
-                    "name": "min_to_trigger_out",
-                    "type": "int",
-                    "disc": "Number of consecutive miss-detections before stop recording ([1-10])",
-                    "source": "user",
-                    "default": 5
-                },
-                {
                     "name": "length",
                     "type": "float",
                     "disc": "Length of streaming (seconds, -1 for entire video)",
@@ -98,23 +84,9 @@
                 {
                     "name": "frequency",
                     "type": "int",
-                    "disc": "Length of streaming (seconds, -1 for entire video)",
+                    "disc": "Output frequency (every n frame)",
                     "source": "user",
-                    "default": 5
-                },
-                {
-                    "name": "timed_gate_open_freq",
-                    "type": "int",
-                    "disc": "Frequency of opening timed gate in a leaky valve (i.e. every what frames?)",
-                    "source": "user",
-                    "default": 30
-                },
-                {
-                    "name": "timed_gate_opened_last",
-                    "type": "int",
-                    "disc": "Time the timed gate is kept open (i.e. after how many frames?) < timed_gate_open_freq",
-                    "source": "user",
-                    "default": 10
+                    "default": 3
                 },
                 {
                     "name": "ntasks",
@@ -136,52 +108,42 @@
                 "username": "$username",
                 "password": "$password",
                 "length": "$length",
-                "sample_every": "$sample_every"
+                "sample_every": "$sample_every",
+                "resolution": "$resolution"
             },
             {
-                "name": "arabian_angelfish_model",
+                "name": "findfish_model",
                 "type": "TFObjectDetectionModel",
-                "model_name": "arabian-angelfish",
+                "model_name": "findfish",
                 "version": 1,
-                "protocol": "restful"
+                "protocol": "gRPC"
             },
             {
-                "name": "arabian_angelfish_model_thread",
-                "type": "ConcurrentPostTasksThreadWrapper",
-                "node": "arabian_angelfish_model",
-                "ntasks": "$ntasks"
+                "name": "findfish_model_thread",
+                "type": "ConcurrentgRPCTasksThreadWrapper",
+                "node": "findfish_model",
+                "ntasks": "$ntasks",
+                "max_send_message_length": 6230000
             },
             {
                 "name": "falcoeye_detection",
                 "type": "FalcoeyeDetectionNode",
                 "labelmap": {
-                    "1": "arabian_angelfish"
+                    "1": "fish"
                 },
                 "min_score_thresh": "$min_score_thresh",
                 "max_boxes": "$max_boxes"
             },
             {
-                "name": "sequence_maintainer",
-                "type": "SortedSequence"
+                "name": "class_counter",
+                "type": "ClassCounter",
+                "keys": ["fish"]
             },
             {
-                "name": "leaky_valve",
-                "type": "OneLeakyOneTimedValve",
-                "timed_gate_open_freq": "$timed_gate_open_freq",
-                "timed_gate_opened_last": "$timed_gate_opened_last",
-                "nodes": ["sequence_maintainer","arabian_angelfish_model_thread"],
-                "close_on_close": [false,true]
-            },
-            {
-                "name": "arabian_angelfish_monitor",
-                "type": "LeakyClasstMonitor",
-                "object_name": "arabian_angelfish",
-                "min_to_trigger_in": "$min_to_trigger_in",
-                "min_to_trigger_out": "$min_to_trigger_out"
-            },
-            {
-                "name": "video_writer",
-                "type": "VideoWriter",
+                "name": "csv_outputter",
+                "type": "CSVWriter",
+                "xaxis": "Timestamp",
+                "yaxis": "fish",
                 "prefix": "$prefix"
             },
             {
@@ -190,24 +152,21 @@
                 "frequency": "$frequency",
                 "nodes": [
                     "falcoeye_detection",
-                    "sequence_maintainer",
-                    "arabian_angelfish_monitor",
-                    "video_writer"
+                    "class_counter",
+                    "csv_outputter"
                 ]
             }
         ],
         "edges": [
-            ["stream_source","leaky_valve"],
-            ["falcoeye_detection","sequence_maintainer"],
-            ["sequence_maintainer","arabian_angelfish_monitor"],
-            ["arabian_angelfish_monitor","video_writer"],
-            ["arabian_angelfish_model_thread","sequence_runner"]
+            ["stream_source","findfish_model_thread"],
+            ["falcoeye_detection","class_counter"],
+            ["class_counter","csv_outputter"],
+            ["findfish_model_thread","sequence_runner"]
         ],
         "starters":["stream_source"],
         "run_order": [
             "sequence_runner",
-            "leaky_valve",
-            "arabian_angelfish_model_thread",
+            "findfish_model_thread",
             "stream_source"
         ]
     }

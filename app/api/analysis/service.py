@@ -9,7 +9,10 @@ from flask import current_app, send_file
 from app import db
 from app.dbmodels.ai import Analysis
 from app.dbmodels.ai import Workflow as Workflow
+from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import AnalysisSchema
+from app.dbmodels.studio import Image as Image
+from app.dbmodels.studio import Video as Video
 from app.utils import (
     err_resp,
     generate_download_signed_url_v4,
@@ -41,6 +44,23 @@ class AnalysisService:
         except Exception as error:
             logger.error(error)
             return internal_err_resp()
+
+    @staticmethod
+    def get_source(wf_source, user_id):
+        source_id = wf_source["id"]
+        if wf_source["type"] == "video":
+            if video := Video.query.filter_by(user=user_id, id=source_id).first():
+                video_dir = (
+                    f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{source_id}'
+                )
+                video_path = f"{video_dir}/video_original.mp4"
+                return {"filename": video_path}
+        elif wf_source["type"] == "image":
+            return None
+        elif wf_source["type"] == "streaming_source":
+            if camera := Camera.query.filter_by(owner_id=user_id, id=source_id).first():
+                return camera.con_to_json()
+        return None
 
     @staticmethod
     def create_analysis(user_id, data):
@@ -86,10 +106,28 @@ class AnalysisService:
             logger.info(f"Loading workflow structure from {workflow_structure}")
             wf_structure = load_workflow_structure(workflow_structure)
 
-            wf_args = data.get("args", {})
-            # This is where analysis output will be stored. Must be augmented here
+            logger.info("parsing feeds")
+            # parsing feeds
+            feeds = data.get("feeds", None)
+            if not feeds:
+                return err_resp("invalid workflow", "workflow_404", 404)
+            # TODO: check for bad inputs
+            wf_params = feeds["params"]
+            wf_source = feeds["source"]
+            if wf_source["type"] not in wf_structure["feeds"]["sources"]:
+                return err_resp("invalid workflow", "workflow_404", 404)
+            # getting actual source data
+            wf_source = AnalysisService.get_source(wf_source, user_id)
+            logging.info(f"Calculated sources {wf_source}")
+
+            # preparing args starting with params
+            wf_args = wf_params
+            # this is where analysis output will be stored. Must be augmented here
             wf_args["prefix"] = storage_path
-            data = {
+            # putting source
+            wf_args.update(wf_source)
+
+            anal_data = {
                 "analysis": {"id": str(new_analysis.id), "args": wf_args},
                 "workflow": wf_structure,
             }
@@ -100,7 +138,7 @@ class AnalysisService:
             headers = {"accept": "application/json", "Content-Type": "application/json"}
 
             wf_resp = requests.post(
-                f"{workflow_service}/api/analysis/", json=data, headers=headers
+                f"{workflow_service}/api/analysis/", json=anal_data, headers=headers
             )
 
             logger.info(f"Response received {wf_resp.json()}")

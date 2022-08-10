@@ -1,5 +1,5 @@
 {
-    "name": "Arabian Angelfish Monitor",
+    "name": "Arabian Angelfish Monitor (gRPC)",
     "usedfor": "Monitoring arabian angelfish passed in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. This model extracts segments from videos or record clips from livestream, only when a car have made a full appearance in the sight of the view of the camer.",
     "consideration": "- Depending on the interval, arabian angelfish might not be observed\n- Arabian angelfish must be within close proximity\n- Weather visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
@@ -10,7 +10,7 @@
                 "video",
                 "streaming_source"
             ],
-            "params": [
+            "params":[
                 {
                     "name": "filename",
                     "type": "string",
@@ -143,13 +143,14 @@
                 "type": "TFObjectDetectionModel",
                 "model_name": "arabian-angelfish",
                 "version": 1,
-                "protocol": "restful"
+                "protocol": "gRPC"
             },
             {
                 "name": "arabian_angelfish_model_thread",
-                "type": "ConcurrentPostTasksThreadWrapper",
+                "type": "ConcurrentgRPCTasksThreadWrapper",
                 "node": "arabian_angelfish_model",
-                "ntasks": "$ntasks"
+                "ntasks": "$ntasks",
+                "max_send_message_length": 6230000
             },
             {
                 "name": "falcoeye_detection",

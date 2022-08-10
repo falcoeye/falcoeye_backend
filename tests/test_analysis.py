@@ -40,19 +40,49 @@ def test_list_analysis(app, client, analysis):
 
 
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
-def test_add_analysis(mock_post, app, client, user, workflow):
+def test_add_analysis(mock_post, app, client, user, workflow, video):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     data = {
         "name": "FishCounter",
-        "creator": str(user.id),
         "workflow_id": str(workflow.id),
-        "status": "new",
-        "args": {
-            "filename": f"{basedir}/tests/media/lutjanis.mov",
-            "sample_every": 30,
-            "min_score_thresh": 0.30,
-            "max_boxes": 30,
+        "feeds": {
+            "source": {"type": "video", "id": str(video.id)},
+            "params": {
+                "sample_every": 30,
+                "min_score_thresh": 0.30,
+                "max_boxes": 30,
+            },
+        },
+    }
+    resp = client.post(
+        "/api/analysis/",
+        data=json.dumps(data),
+        content_type="application/json",
+        headers=headers,
+    )
+    assert resp.status_code == 201
+    assert resp.json.get("message") == "analysis added"
+
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    rmtree(workflow_dir)
+
+
+@mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
+def test_add_analysis_camera(mock_post, app, client, user, workflow, camera):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    data = {
+        "name": "FishCounter",
+        "workflow_id": str(workflow.id),
+        "feeds": {
+            "source": {"type": "streaming_source", "id": str(camera.id)},
+            "params": {
+                "sample_every": 30,
+                "min_score_thresh": 0.30,
+                "max_boxes": 30,
+            },
         },
     }
     resp = client.post(

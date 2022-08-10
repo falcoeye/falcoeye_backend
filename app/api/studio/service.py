@@ -8,7 +8,7 @@ from app import db
 from app.api import registry
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Video as Video
-from app.utils import err_resp, internal_err_resp, message, mkdir, move, rmtree
+from app.utils import err_resp, exists, internal_err_resp, message, mkdir, move, rmtree
 
 from .utils import load_image_data, load_video_data
 
@@ -103,6 +103,17 @@ class StudioService:
             extension = registry_item.capture_path.split("/")[-1].split(".")[-1]
             try:
                 move(registry_item.capture_path, f"{imgs_dir}/img_original.{extension}")
+                for s in [75, 120, 260, 400]:
+                    thumbnail_s = registry_item.capture_path.replace(
+                        f".{extension}", f"_{s}.{extension}"
+                    )
+                    logging.info(f"Checking if {thumbnail_s} exists?")
+                    if exists(thumbnail_s):
+                        logger.info(
+                            f"Moving thumbnail from {thumbnail_s} to {imgs_dir}/img_{s}.{extension}"
+                        )
+                        move(thumbnail_s, f"{imgs_dir}/img_{s}.{extension}")
+
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)
 
@@ -201,6 +212,13 @@ class StudioService:
                     registry_item.capture_path,
                     target_file,
                 )
+                for s in [75, 120, 260, 400]:
+                    thmb_img = registry_item.capture_path.replace(
+                        f".{extension}", f"_{s}.jpg"
+                    )
+                    if exists(thmb_img):
+                        move(thmb_img, f"{video_dir}/video_{s}.jpg")
+
                 logger.info("Moving video succeeded")
             except Exception as error:
                 return err_resp("process failed", "move_417", 417)

@@ -5,7 +5,12 @@
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
     "results_description": "Line chart shows number of fish in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
     "structure": {
-        "args": [
+        "feeds": {
+            "sources": [
+                "video",
+                "streaming_source"
+            ],
+            "params":[
             {
                 "name": "filename",
                 "type": "string",
@@ -19,13 +24,6 @@
                 "disc": "url for camera in case of streaming server",
                 "source": "infered",
                 "default": null
-            },
-            {
-                "name": "resolution",
-                "type": "string",
-                "disc": "resolution of streaming  in case of streaming server",
-                "source": "user",
-                "default": "best"
             },
             {
                 "name": "host",
@@ -90,7 +88,8 @@
                 "source": "user",
                 "default": 3
             }
-        ],
+            ]
+        },
         "nodes": [
             {
                 "name": "stream_source",
@@ -109,13 +108,14 @@
                 "name": "findfish_model",
                 "type": "TFObjectDetectionModel",
                 "model_name": "findfish",
-                "version": 1
+                "version": 1,
+                "protocol": "restful"
             },
             {
                 "name": "findfish_model_thread",
                 "type": "ConcurrentPostTasksThreadWrapper",
                 "node": "findfish_model",
-                "tcplimit": 8
+                "ntasks": 4
             },
             {
                 "name": "falcoeye_detection",
