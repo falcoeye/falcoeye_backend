@@ -127,7 +127,9 @@ class CameraService:
             thumbnail_img = f"{camera_dir}/img_260.jpg"
             if base64_img:
                 imgdata = base64.b64decode(base64_img)
-                with open(camera_img, "wb") as f:
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(camera_img), "wb"
+                ) as f:
                     f.write(imgdata)
 
                 logging.info("Adding camera thumbnail")
