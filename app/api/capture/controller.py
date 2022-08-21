@@ -34,6 +34,22 @@ class Capture(Resource):
         user_id = get_jwt_identity()
         return CaptureService.capture(user_id, data)
 
+    @api.doc(
+        """Get a list of all registry keys""",
+        responses={
+            200: ("registry data sent", CaptureDto.registry_list),
+            400: ("user not found"),
+            404: "no registry found",
+            401: ("unauthorized"),
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self):
+        """Get a list of all user registry"""
+        user_id = get_jwt_identity()
+        return CaptureService.get_all_registry_keys(user_id)
+
 
 @api.route("/<registry_key>")
 @api.param("registry_key", "Registry key received from capture request")

@@ -163,3 +163,16 @@ class AnalysisSchema(ma.Schema):
             "status",
             "results_path",
         )
+
+
+class RegistrySchema(ma.Schema):
+    class Meta:
+        fields = (
+            "id",
+            "media_type",
+            "user",
+            "camera_id",
+            "status",
+            "created_at",
+            "capture_path",
+        )

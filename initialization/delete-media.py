@@ -36,11 +36,11 @@ headers = {
 #     elif m["media_type"] == "video":
 #         resp = requests.delete(f"{URL}/api/media/video/{m['id']}", headers=headers)
 
-resp = requests.get(f"{URL}/api/analysis/", headers=headers)
-s_media = resp.json()["analysis"]
-logging.info(s_media)
+# resp = requests.get(f"{URL}/api/analysis/", headers=headers)
+# s_media = resp.json()["analysis"]
+# logging.info(s_media)
 
-for m in s_media:
-    logging.info(f"Deleting {m['id']}")
-    resp = requests.delete(f"{URL}/api/analysis/{m['id']}", headers=headers)
-    logging.info(resp.status_code)
+# for m in s_media:
+#     logging.info(f"Deleting {m['id']}")
+#     resp = requests.delete(f"{URL}/api/analysis/{m['id']}", headers=headers)
+#     logging.info(resp.status_code)

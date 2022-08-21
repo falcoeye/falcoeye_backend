@@ -38,3 +38,12 @@ class CaptureDto:
             "capture_path": fields.String,
         },
     )
+
+    registry_list = api.model(
+        "Registry list",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "registry": fields.List(fields.Nested(capture_data)),
+        },
+    )

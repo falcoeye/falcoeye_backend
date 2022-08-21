@@ -36,6 +36,8 @@ class AnalysisService:
 
         try:
             analysis_data = load_analysis_data(analysis, many=True)
+            if len(analysis_data) == 0:
+                return err_resp("no analysis found", "analysis_404", 404)
             resp = message(True, "analysis data sent")
             resp["analysis"] = analysis_data
 

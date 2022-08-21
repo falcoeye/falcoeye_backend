@@ -18,6 +18,7 @@ from app.utils import (
 )
 
 from .streamer import Streamer
+from .utils import load_registry_data
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,31 @@ class CaptureService:
         elif capture_type == "video":
             length = data.get("length", 60)
             return CaptureService.record_video(user_id, camera_id, length=length)
+
+    @staticmethod
+    def get_all_registry_keys(admin_id):
+
+        if not (user := User.query.filter_by(id=admin_id).first()):
+            return err_resp("user not found", "user_400", 400)
+
+        logger.info(f"Is {user.id} admin?")
+        logger.info(f"{user.has_permission(Permission.CHANGE_CAPTURE_STATUS)}")
+        # only admin is allowed
+        if not user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
+            return err_resp("unauthorized", "role_401", 401)
+
+        logging.info("Retrieving all registry items")
+        if not (registry_keys := Registry.query.all()):
+            return err_resp("no registry found", "registry_404", 404)
+
+        try:
+            registry_data = load_registry_data(registry_keys, many=True)
+            resp = message(True, "analysis data sent")
+            resp["registry"] = registry_data
+            return resp, 200
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
 
     @staticmethod
     def capture_image(user_id, camera_id):

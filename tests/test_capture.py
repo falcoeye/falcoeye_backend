@@ -352,3 +352,65 @@ def test_delete_caputre_by_admin(mock_post, app, client, camera, streaming_admin
 
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     rmtree(user_temp_dir)
+
+
+@mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
+def test_get_analysis_by_admin(mock_post, app, client, camera, streaming_admin):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+    access_token = resp.json.get("access_token")
+
+    resp = login_user(client, streaming_admin["email"], streaming_admin["password"])
+    assert "access_token" in resp.json
+    admin_access_token = resp.json.get("access_token")
+
+    registry_key = post_capture(
+        client,
+        camera.id,
+        "video",
+        access_token,
+        length=1,
+    )
+
+    th = threading.Thread(
+        target=change_status, args=(client, registry_key, admin_access_token, 2)
+    )
+    th.start()
+
+    time_before_kill = 100
+    sleep_time = 3
+    loop_until_finished(
+        client, registry_key, time_before_kill, sleep_time, access_token
+    )
+
+    user_id = get_user_id(client, access_token)
+    logging.info(f"User id: {user_id}")
+    user_vid_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}/videos/"
+    logging.info(f"User video directory: {user_vid_dir}")
+    mkdir(user_vid_dir)
+    logging.info(f"Directory created? {os.path.exists(user_vid_dir)}")
+    logging.info(
+        f"Copying: {basedir}/media/arabian_angelfish_short.mp4 to {user_vid_dir}/{registry_key}.mp4"
+    )
+
+    # Currently only supporting mp4
+    put(
+        f"{basedir}/media/arabian_angelfish_short.mp4",
+        f"{user_vid_dir}/{registry_key}.mp4",
+    )
+
+    logging.info("Creating thumbnail")
+    put(f"{basedir}/media/fish.jpg", f"{user_vid_dir}/{registry_key}_120.jpg")
+
+    resp = client.get(
+        "/api/capture",
+        headers={
+            "X-API-KEY": admin_access_token,
+            "Content-type": "application/json",
+        },
+    )
+
+    assert resp.status_code == 200
+
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
+    rmtree(user_temp_dir)
