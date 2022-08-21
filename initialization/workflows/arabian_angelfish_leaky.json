@@ -98,7 +98,7 @@
                 {
                     "name": "frequency",
                     "type": "int",
-                    "disc": "Length of streaming (seconds, -1 for entire video)",
+                    "disc": "Output frequency (every n frame)",
                     "source": "user",
                     "default": 5
                 },

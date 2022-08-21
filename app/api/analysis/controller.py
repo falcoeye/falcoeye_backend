@@ -29,8 +29,9 @@ class AnalysisList(Resource):
     )
     @jwt_required()
     def get(self):
-        """Get a list of all system analysis"""
-        return AnalysisService.get_analysis()
+        """Get a list of all user analysis"""
+        user_id = get_jwt_identity()
+        return AnalysisService.get_analysis(user_id)
 
     @api.doc(
         "Add a new analysis",

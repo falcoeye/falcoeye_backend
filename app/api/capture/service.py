@@ -2,16 +2,19 @@ import logging
 
 from flask import current_app
 
+from app import db
 from app.api.registry import change_status, register
 from app.dbmodels.camera import Camera as Camera
 from app.dbmodels.registry import Registry
 from app.dbmodels.user import Permission, User
 from app.utils import (
     err_resp,
+    exists,
     generate_download_signed_url_v4,
     internal_err_resp,
     message,
     mkdir,
+    rmtree,
 )
 
 from .streamer import Streamer
@@ -169,3 +172,50 @@ class CaptureService:
             return err_resp("request failed", "role_417", 417)
 
         return message(True, "capture data changed"), 200
+
+    @staticmethod
+    def _delete_capture(capture_obj):
+
+        db.session.delete(capture_obj)
+        db.session.commit()
+        if capture_obj.media_type == "image":
+            capture_data = f'{current_app.config["TEMPORARY_DATA_PATH"]}/{capture_obj.user}/images/{capture_obj.id}'
+        elif capture_obj.media_type == "video":
+            capture_data = f'{current_app.config["TEMPORARY_DATA_PATH"]}/{capture_obj.user}/videos/{capture_obj.id}'
+
+        if exists(capture_data):
+            rmtree(capture_data)
+
+        resp = message(True, "analysis deleted")
+        return resp, 200
+
+    @staticmethod
+    def delete_capture(user_id, capture_id):
+        """Delete a capture from DB by id and user id"""
+        if not (user := User.query.filter_by(id=user_id).first()):
+            return err_resp("user not found", "user_400", 400)
+        logging.info(f"deleting capture {capture_id} by {user_id}")
+        if user.has_permission(Permission.CHANGE_CAPTURE_STATUS):
+            if not (capture_req := Registry.query.filter_by(id=capture_id).first()):
+                return err_resp(
+                    "capture not found",
+                    "capture_404",
+                    404,
+                )
+        elif not (
+            capture_req := Registry.query.filter_by(user=user_id, id=capture_id).first()
+        ):
+            return err_resp(
+                "capture not found",
+                "analysis_404",
+                404,
+            )
+        if not capture_req:
+            logging.info(f"unauthorized call {capture_req}")
+            return err_resp("unauthorized", "role_401", 401)
+
+        try:
+            return CaptureService._delete_capture(capture_req)
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()

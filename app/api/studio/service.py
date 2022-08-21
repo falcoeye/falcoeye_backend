@@ -138,11 +138,12 @@ class StudioService:
             image_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/images/{media_id}/'
             )
-            if not os.path.exists(image_dir):
+            if exists(image_dir):
                 resp = message(True, "image deleted")
                 return resp, 200
             try:
-                os.rmdir(image_dir)
+                logging.info(f"deleting {image_dir}")
+                rmtree(image_dir)
                 resp = message(True, "image deleted")
                 return resp, 200
             except Exception as error:
@@ -242,9 +243,10 @@ class StudioService:
             video_dir = (
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{media_id}/'
             )
-            if not os.path.exists(video_dir):
+            if not exists(video_dir):
                 return message(True, "video deleted"), 200
             try:
+                logging.info(f"deleting {video_dir}")
                 rmtree(video_dir)
                 resp = message(True, "video deleted")
                 return resp, 200

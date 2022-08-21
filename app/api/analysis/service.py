@@ -29,9 +29,9 @@ analysis_schema = AnalysisSchema()
 
 class AnalysisService:
     @staticmethod
-    def get_analysis():
-        """Get a list of all analysis"""
-        if not (analysis := Analysis.query.all()):
+    def get_analysis(user_id):
+        """Get a list of all user analysis"""
+        if not (analysis := Analysis.query.filter_by(creator=user_id)):
             return err_resp("no analysis found", "analysis_404", 404)
 
         try:

@@ -1,5 +1,5 @@
 {
-    "name": "KAUST Fish Counter",
+    "name": "KAUST Fish Counter (gRPC)",
     "usedfor": "Monitoring fish crowd in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. When crossed with maritime data (weather, water condition and quality) the outcome can be used to detect fish behavior over different conditions",
     "consideration": "- A single fish can be counted more than once\n- Depending on the interval, fish might not be observed and counted\n- Fish must be within close proximity\n- Underwater visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",

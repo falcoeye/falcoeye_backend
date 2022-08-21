@@ -68,3 +68,19 @@ class CaptureData(Resource):
         data = request.get_json()
         logging.info(f"Received new data for {registry_key} by {admin_id}")
         return CaptureService.set_capture_data(admin_id, registry_key, data)
+
+    @api.doc(
+        "Delete user's capture request",
+        responses={
+            200: ("capture deleted"),
+            404: "capture not found",
+            417: "deletion partially failed",
+            401: ("unauthorized"),
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def delete(self, registry_key):
+        """Delete user's video"""
+        current_user_id = get_jwt_identity()
+        return CaptureService.delete_capture(current_user_id, registry_key)
