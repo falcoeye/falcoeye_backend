@@ -1,12 +1,25 @@
 import json
 import logging
 import os
+from unittest import mock
 
 from app.utils import rmtree
 
 from .utils import login_user
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+def mocked_streamer_post(*args, **kwargs):
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        def response(self):
+            return self.json_data, self.status_code
+
+    return MockResponse({"status": True, "message": "Capture request initiated"}, 200)
 
 
 def get_user_id(client, access_token):
@@ -18,7 +31,8 @@ def get_user_id(client, access_token):
     return str(respjson.get("user").get("id"))
 
 
-def test_upload_video(app, client, user):
+@mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
+def test_upload_video(mock_post, app, client, user):
     resp = login_user(client)
     assert "access_token" in resp.json
     access_token = resp.json.get("access_token")

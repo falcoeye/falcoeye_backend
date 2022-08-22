@@ -52,6 +52,20 @@ def add(data):
     assert resp.status_code == 201
 
 
+logging.info("Deleting bad workflows")
+for sw in s_workflows:
+    found = False
+    for wf in workflows:
+        with open(wf) as f:
+            wkflowdict = json.load(f)
+        if sw["name"] == wkflowdict["name"]:
+            found = True
+            break
+    if not found:
+        logging.info(f"Deleting {sw['id']}")
+        resp = requests.delete(f"{URL}/api/workflow/{sw['id']}", headers=headers)
+
+
 for wf in workflows:
     logging.info(f"Loading {wf}")
     with open(wf) as f:

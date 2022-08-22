@@ -34,3 +34,14 @@ class Streamer:
         }
         resp = requests.post(f"{streaming_service}/api/capture", data=json.dumps(data))
         return resp
+
+    @staticmethod
+    def generate_thumbnail(video_file, output_path):
+        streaming_service = current_app.config["STREAMER_HOST"]
+        data = {
+            "video_file": video_file,
+            "output_path": output_path,
+            "capture_type": "thumbnail",
+        }
+        resp = requests.post(f"{streaming_service}/api/capture", data=json.dumps(data))
+        return resp

@@ -3,6 +3,7 @@ import os
 
 from flask import current_app
 
+from app.api.capture.streamer import Streamer
 from app.api.registry import change_status, register
 from app.utils import err_resp, generate_download_signed_url_v4, message, mkdir
 
@@ -69,6 +70,7 @@ class UploadService:
             with current_app.config["FS_OBJ"].open(
                 os.path.relpath(registry_object.capture_path), "wb"
             ) as f:
+                logging.info(f"Type of video file {type(video_file)}")
                 f.write(video_file.stream.read())
 
             resp = message(True, "upload request succeeded")
@@ -76,9 +78,17 @@ class UploadService:
             bucket = current_app.config["FS_BUCKET"]
             blob_path = registry_object.capture_path.replace(bucket, "")
             logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
-            resp["temporary_path"] = generate_download_signed_url_v4(
-                bucket, blob_path, 15
+            signed_url = generate_download_signed_url_v4(bucket, blob_path, 15)
+            resp["temporary_path"] = signed_url
+            # TODO: clean this // mess
+            video_path = registry_object.capture_path.replace("//", "/")
+            thumbnail_path = f"{os.path.splitext(video_path)[0]}_260.jpg"
+
+            logging.info(
+                f"Generating thumbnail from {signed_url} and store it in {thumbnail_path}"
             )
+            streamer_resp = Streamer.generate_thumbnail(signed_url, thumbnail_path)
+
             logging.info(f'generated link: {resp["temporary_path"]}')
             change_status(str(registry_object.id), "SUCCEEDED")
             return resp, 200
