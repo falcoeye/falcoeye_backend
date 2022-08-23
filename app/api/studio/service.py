@@ -91,6 +91,11 @@ class StudioService:
             db.session.flush()
             db.session.commit()
 
+            registry_item.status = "PROCESSED"
+            db.session.add(registry_item)
+            db.session.flush()
+            db.session.commit()
+
             logger.info("Image database object created")
 
             imgs_dir = (

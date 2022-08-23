@@ -9,8 +9,16 @@ from PIL import Image
 
 from app import db
 from app.dbmodels.camera import Camera
+from app.dbmodels.registry import Registry
 from app.dbmodels.schemas import CameraSchema
-from app.utils import err_resp, internal_err_resp, message, mkdir, put
+from app.utils import (
+    err_resp,
+    generate_download_signed_url_v4,
+    internal_err_resp,
+    message,
+    mkdir,
+    put,
+)
 
 from .utils import load_camera_data
 
@@ -38,6 +46,34 @@ class CameraService:
             return internal_err_resp()
 
     @staticmethod
+    def get_registry(user_id, camera_id):
+        # There should be one of this
+        reg_key = Registry.query.filter(
+            Registry.status.in_(("SUCCEEDED", "STARTED")),
+            Registry.user == user_id,
+            Registry.camera_id == camera_id,
+        ).first()
+
+        registry = {}
+        if reg_key:
+            registry["capture_status"] = reg_key.status
+            registry["registry_key"] = str(reg_key.id)
+            if reg_key.status == "SUCCEEDED":
+                bucket = current_app.config["FS_BUCKET"]
+                blob_path = reg_key.capture_path.replace(bucket, "")
+                logging.info(
+                    f"generating 15 minutes signed url for {bucket} {blob_path}"
+                )
+                registry["temporary_path"] = generate_download_signed_url_v4(
+                    bucket, blob_path, 15
+                )
+                logging.info(f'generated link: {registry["temporary_path"]}')
+            else:
+                registry["temporary_path"] = None
+
+        return registry
+
+    @staticmethod
     def get_camera_by_id(user_id, camera_id):
         """Get camera by ID"""
         if not (
@@ -45,13 +81,14 @@ class CameraService:
         ):
             return err_resp("camera not found", "camera_404", 404)
 
+        registry = CameraService.get_registry(user_id, camera_id)
+
         try:
             camera_data = load_camera_data(camera)
             resp = message(True, "camera data sent")
             resp["camera"] = camera_data
-
+            resp["registry"] = registry
             return resp, 200
-
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

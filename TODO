@@ -1,0 +1,26 @@
+Frontend
+1. Complete analysis page both csv and video
+2. Upload doesn't work from mobile
+3. Upload doesn't allow user to add tags and notes
+4. Edit media (notes and tags)
+5. Dashboard page
+6. Run RTSP camera
+7. No duplicate capture. Either delete existing or submit it
+8. Change analysis icon
+9. User profile page
+10. Remove setting page
+11. New logo with the concept of AI
+12. New analysis from workflow page.
+13. Pagenation for analysis, media and workflows
+14. Enable dark mode
+15. Remove ID from workflow cards in workflow list page and add other information
+
+Backend
+1. Implement pagenation
+2. Implement edit user profile end-point
+3. Deploy and test newly implemented duplicate capture feature
+4. One capture for all cameras, not each camera
+5.
+
+Data
+1. Submit lots of analysis with longer results

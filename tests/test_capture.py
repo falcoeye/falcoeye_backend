@@ -414,3 +414,212 @@ def test_get_analysis_by_admin(mock_post, app, client, camera, streaming_admin):
 
     user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
     rmtree(user_temp_dir)
+
+
+@mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
+def test_capture_and_leave(mock_post, app, client, camera, streaming_admin):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+    access_token = resp.json.get("access_token")
+
+    resp = login_user(client, streaming_admin["email"], streaming_admin["password"])
+    assert "access_token" in resp.json
+    admin_access_token = resp.json.get("access_token")
+
+    registry_key = post_capture(
+        client,
+        camera.id,
+        "video",
+        access_token,
+        length=1,
+    )
+
+    th = threading.Thread(
+        target=change_status, args=(client, registry_key, admin_access_token, 2)
+    )
+    th.start()
+
+    time_before_kill = 100
+    sleep_time = 3
+    loop_until_finished(
+        client, registry_key, time_before_kill, sleep_time, access_token
+    )
+
+    video_info = {
+        "camera_id": str(camera.id),
+        "tags": "DummyTags",
+        "note": "DummyNote",
+        "registry_key": registry_key,
+    }
+
+    user_id = get_user_id(client, access_token)
+    logging.info(f"User id: {user_id}")
+    user_vid_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}/videos/"
+    logging.info(f"User video directory: {user_vid_dir}")
+    mkdir(user_vid_dir)
+    logging.info(f"Directory created? {os.path.exists(user_vid_dir)}")
+    logging.info(
+        f"Copying: {basedir}/media/arabian_angelfish_short.mp4 to {user_vid_dir}/{registry_key}.mp4"
+    )
+
+    # Currently only supporting mp4
+    put(
+        f"{basedir}/media/arabian_angelfish_short.mp4",
+        f"{user_vid_dir}/{registry_key}.mp4",
+    )
+
+    logging.info("Creating thumbnail")
+    put(f"{basedir}/media/fish.jpg", f"{user_vid_dir}/{registry_key}_120.jpg")
+
+    # Testing leaving
+    resp = client.get(
+        f"/api/camera/{camera.id}",
+        headers={
+            "X-API-KEY": access_token,
+            "Content-type": "application/json",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json.get("camera").get("name") == camera.name
+    assert resp.json.get("message") == "camera data sent"
+    assert resp.json.get("registry")["registry_key"] == registry_key
+    assert resp.json.get("registry")["capture_status"] == "SUCCEEDED"
+
+    resp = client.post(
+        "/api/media/video",
+        data=json.dumps(video_info),
+        headers={
+            "X-API-KEY": access_token,
+            "Content-type": "application/json",
+        },
+    )
+
+    assert resp.status_code == 201
+
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)
+
+
+@mock.patch("app.api.capture.streamer.requests.post", side_effect=mocked_streamer_post)
+def test_multiple_capture(mock_post, app, client, camera, streaming_admin):
+    resp = login_user(client)
+    assert "access_token" in resp.json
+    access_token = resp.json.get("access_token")
+
+    resp = login_user(client, streaming_admin["email"], streaming_admin["password"])
+    assert "access_token" in resp.json
+    admin_access_token = resp.json.get("access_token")
+
+    registry_key = post_capture(
+        client,
+        camera.id,
+        "video",
+        access_token,
+        length=1,
+    )
+
+    th = threading.Thread(
+        target=change_status, args=(client, registry_key, admin_access_token, 4)
+    )
+    th.start()
+
+    # second capture should fail while still processing existing capture
+    logging.info("Testing second capture while status STARTED")
+    request_data = {"capture_type": "video", "camera_id": str(camera.id), "length": 1}
+    resp = client.post(
+        "/api/capture",
+        data=json.dumps(request_data),
+        content_type="application/json",
+        headers={"X-API-KEY": access_token},
+    )
+    logging.info(resp.json)
+    assert resp.status_code == 417
+
+    time_before_kill = 100
+    sleep_time = 3
+    loop_until_finished(
+        client, registry_key, time_before_kill, sleep_time, access_token
+    )
+
+    logging.info("Testing second capture while status SUCCEEDED with video")
+    # second capture should fail
+    request_data = {"capture_type": "video", "camera_id": str(camera.id), "length": 1}
+    resp = client.post(
+        "/api/capture",
+        data=json.dumps(request_data),
+        content_type="application/json",
+        headers={"X-API-KEY": access_token},
+    )
+    logging.info(resp.json)
+    assert resp.status_code == 417
+
+    logging.info("Testing second capture while status SUCCEEDED with image")
+    # second capture image route should also fail
+    request_data = {"capture_type": "image", "camera_id": str(camera.id)}
+    resp = client.post(
+        "/api/capture",
+        data=json.dumps(request_data),
+        content_type="application/json",
+        headers={"X-API-KEY": access_token},
+    )
+    logging.info(resp.json)
+    assert resp.status_code == 417
+
+    # submitting
+    video_info = {
+        "camera_id": str(camera.id),
+        "tags": "DummyTags",
+        "note": "DummyNote",
+        "registry_key": registry_key,
+    }
+
+    user_id = get_user_id(client, access_token)
+    logging.info(f"User id: {user_id}")
+    user_vid_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}/videos/"
+    logging.info(f"User video directory: {user_vid_dir}")
+    mkdir(user_vid_dir)
+    logging.info(f"Directory created? {os.path.exists(user_vid_dir)}")
+    logging.info(
+        f"Copying: {basedir}/media/arabian_angelfish_short.mp4 to {user_vid_dir}/{registry_key}.mp4"
+    )
+
+    # Currently only supporting mp4
+    put(
+        f"{basedir}/media/arabian_angelfish_short.mp4",
+        f"{user_vid_dir}/{registry_key}.mp4",
+    )
+
+    logging.info("Creating thumbnail")
+    put(f"{basedir}/media/fish.jpg", f"{user_vid_dir}/{registry_key}_120.jpg")
+
+    # Testing leaving
+    resp = client.get(
+        f"/api/camera/{camera.id}",
+        headers={
+            "X-API-KEY": access_token,
+            "Content-type": "application/json",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json.get("camera").get("name") == camera.name
+    assert resp.json.get("message") == "camera data sent"
+    assert resp.json.get("registry")["registry_key"] == registry_key
+    assert resp.json.get("registry")["capture_status"] == "SUCCEEDED"
+
+    resp = client.post(
+        "/api/media/video",
+        data=json.dumps(video_info),
+        headers={
+            "X-API-KEY": access_token,
+            "Content-type": "application/json",
+        },
+    )
+
+    assert resp.status_code == 201
+
+    user_temp_dir = f"{app.config['TEMPORARY_DATA_PATH']}/{user_id}"
+    user_asset_dir = f"{app.config['USER_ASSETS']}/{user_id}"
+    rmtree(user_temp_dir)
+    rmtree(user_asset_dir)

@@ -28,6 +28,14 @@ class CameraDto:
             "created_at": fields.DateTime,
         },
     )
+    registry = api.model(
+        "Registry object",
+        {
+            "capture_status": fields.String,
+            "registry_key": fields.String,
+            "temporary_path": fields.String,
+        },
+    )
 
     camera_post = api.model(
         "Camera post data",
@@ -71,6 +79,7 @@ class CameraDto:
             "status": fields.Boolean,
             "message": fields.String,
             "camera": fields.Nested(camera),
+            "registry": fields.Nested(registry),
         },
     )
 
