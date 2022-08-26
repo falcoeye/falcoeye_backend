@@ -39,7 +39,10 @@ class StudioList(Resource):
     def get(self):
         """Get user's media"""
         current_user_id = get_jwt_identity()
-        return StudioService.get_user_media(current_user_id)
+        orderby = request.args.get("orderby", "created_at")
+        per_page = request.args.get("per_page", 10)
+        page = request.args.get("page", 1)
+        return StudioService.get_user_media(current_user_id, orderby, per_page, page)
 
 
 @api.route("/image/<media_id>")
@@ -74,6 +77,21 @@ class StudioImageGet(Resource):
         """Delete user's image"""
         current_user_id = get_jwt_identity()
         return StudioService.delete_image(current_user_id, media_id)
+
+    @api.doc(
+        "Edit user's image",
+        responses={
+            200: ("image edited", image_resp),
+            404: "image not found",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def put(self, media_id):
+        """Edit user's image"""
+        current_user_id = get_jwt_identity()
+        image_data = request.get_json()
+        return StudioService.edit_image(current_user_id, media_id, image_data)
 
 
 @api.route("/image/<string:media_id>/img_<string:img_size>.<extension>")
@@ -181,6 +199,21 @@ class StudioVideoGet(Resource):
         """Delete user's video"""
         current_user_id = get_jwt_identity()
         return StudioService.delete_video(current_user_id, media_id)
+
+    @api.doc(
+        "Edit user's video",
+        responses={
+            200: ("video edited", video_resp),
+            404: "video not found",
+        },
+        security="apikey",
+    )
+    @jwt_required()
+    def put(self, media_id):
+        """Edit user's video"""
+        current_user_id = get_jwt_identity()
+        video_data = request.get_json()
+        return StudioService.edit_video(current_user_id, media_id, video_data)
 
 
 @api.route("/video")

@@ -3,38 +3,67 @@ import os
 from datetime import datetime
 
 from flask import current_app
+from sqlalchemy import desc
 
 from app import db
 from app.api import registry
 from app.dbmodels.studio import Image as Image
+from app.dbmodels.studio import Media as Media
 from app.dbmodels.studio import Video as Video
 from app.utils import err_resp, exists, internal_err_resp, message, mkdir, move, rmtree
 
-from .utils import load_image_data, load_video_data
+from .utils import load_image_data, load_media_data, load_video_data
 
 logger = logging.getLogger(__name__)
+
+orderby_dict = {
+    "media_type": Media.media_type,
+    "created_at": Media.created_at,
+    "camera": Media.camera,
+    "note": Media.note,
+    "tags": Media.tags,
+    "workflow": Media.workflow,
+    "duration": Media.duration,
+    "media_type_desc": desc(Media.media_type),
+    "created_at_desc": desc(Media.created_at),
+    "camera_desc": desc(Media.camera),
+    "note_desc": desc(Media.note),
+    "tags_desc": desc(Media.tags),
+    "workflow_desc": desc(Media.workflow),
+    "duration_desc": desc(Media.duration),
+}
 
 
 class StudioService:
     @staticmethod
-    def get_user_media(user_id):
+    def get_user_media(user_id, orderby, per_page, page):
         """Get user data by username"""
-        videos = Video.query.filter_by(user=user_id).all()
-        images = Image.query.filter_by(user=user_id).all()
-        if not videos and not images:
+        orderby = orderby_dict.get(orderby, Media.created_at)
+        if not (
+            media := Media.query.filter_by(user=user_id)
+            .order_by(orderby)
+            .paginate(page, per_page=per_page)
+            .items
+        ):
             resp = message(True, "no media found")
             return resp, 204
 
-        try:
-            video_data = load_video_data(videos, many=True)
-            image_data = load_image_data(images, many=True)
-            # TODO: eliminate this somehow
-            for v in video_data:
-                v["media_type"] = "video"
-            for i in image_data:
-                i["media_type"] = "image"
+        # images = Image.query.filter_by(user=user_id).all()
+        # if not videos and not images:
+        #    resp = message(True, "no media found")
+        #    return resp, 204
 
-            media_data = video_data + image_data
+        try:
+            media_data = load_media_data(media, many=True)
+            # video_data = load_video_data(videos, many=True)
+            # image_data = load_image_data(images, many=True)
+            # TODO: eliminate this somehow
+            # for v in video_data:
+            #     v["media_type"] = "video"
+            # for i in image_data:
+            #     i["media_type"] = "image"
+
+            # media_data = video_data + image_data
             logger.info(f"Number of media: {len(media_data)}")
             resp = message(True, "media data sent")
             resp["media"] = media_data
@@ -47,7 +76,11 @@ class StudioService:
     @staticmethod
     def get_image(user_id, media_id):
 
-        if not (image := Image.query.filter_by(user=user_id, id=media_id).first()):
+        if not (
+            image := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="image"
+            ).first()
+        ):
             return err_resp("image not found", "image_404", 404)
         try:
             # TODO: Add image link
@@ -79,13 +112,14 @@ class StudioService:
 
         # user only send registry key here.
         try:
-            new_image = Image(
+            new_image = Media(
                 user=user_id,
                 tags=tags,
                 note=note,
                 camera_id=camera_id,
                 workflow_id=workflow_id,
                 created_at=datetime.utcnow(),
+                media_type="image",
             )
             db.session.add(new_image)
             db.session.flush()
@@ -133,7 +167,11 @@ class StudioService:
     @staticmethod
     def delete_image(user_id, media_id):
 
-        if (img := Image.query.filter_by(user=user_id, id=media_id).first()) is None:
+        if (
+            img := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="image"
+            ).first()
+        ) is None:
             return err_resp("image not found", "image_404", 404)
         try:
             db.session.delete(img)
@@ -159,8 +197,35 @@ class StudioService:
             return internal_err_resp()
 
     @staticmethod
+    def edit_image(user_id, media_id, data):
+        if (
+            media := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="image"
+            ).first()
+        ) is None:
+            return err_resp("media not found", "media_404", 404)
+        tags = data.get("tags", media.tags)
+        note = data.get("note", media.note)
+        try:
+            media.tags = tags
+            media.note = note
+            db.session.flush()
+            db.session.commit()
+            resp = message(True, "media edited")
+            media_data = load_image_data(media)
+            resp["image"] = media_data
+            return resp, 200
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
     def get_video(user_id, media_id):
-        if not (video := Video.query.filter_by(user=user_id, id=media_id).first()):
+        if not (
+            video := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="video"
+            ).first()
+        ):
             return err_resp("video not found", "video_404", 404)
         try:
             video_data = load_video_data(video)
@@ -191,13 +256,14 @@ class StudioService:
             return err_resp("process failed", "registry_417", 417)
 
         try:
-            new_video = Video(
+            new_video = Media(
                 user=user_id,
                 tags=tags,
                 note=note,
                 camera_id=camera_id,
                 workflow_id=workflow_id,
                 created_at=datetime.utcnow(),
+                media_type="video",
             )
             db.session.add(new_video)
             db.session.flush()
@@ -239,7 +305,11 @@ class StudioService:
 
     @staticmethod
     def delete_video(user_id, media_id):
-        if (video := Video.query.filter_by(user=user_id, id=media_id).first()) is None:
+        if (
+            video := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="video"
+            ).first()
+        ) is None:
             return err_resp("video not found", "video_404", 404)
         try:
             db.session.delete(video)
@@ -258,6 +328,29 @@ class StudioService:
             except Exception as error:
                 resp = message(True, "deletion partially failed")
                 return resp, 417
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def edit_video(user_id, media_id, data):
+        if (
+            media := Media.query.filter_by(
+                user=user_id, id=media_id, media_type="video"
+            ).first()
+        ) is None:
+            return err_resp("media not found", "media_404", 404)
+        tags = data.get("tags", media.tags)
+        note = data.get("note", media.note)
+        try:
+            media.tags = tags
+            media.note = note
+            db.session.flush()
+            db.session.commit()
+            resp = message(True, "media edited")
+            media_data = load_video_data(media)
+            resp["video"] = media_data
+            return resp, 200
         except Exception as error:
             current_app.logger.error(error)
             return internal_err_resp()

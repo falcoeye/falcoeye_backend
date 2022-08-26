@@ -5,6 +5,7 @@ from io import BytesIO
 
 import requests
 from flask import current_app, send_file
+from sqlalchemy import desc
 
 from app import db
 from app.dbmodels.ai import Analysis
@@ -12,6 +13,7 @@ from app.dbmodels.ai import Workflow as Workflow
 from app.dbmodels.camera import Camera
 from app.dbmodels.schemas import AnalysisSchema
 from app.dbmodels.studio import Image as Image
+from app.dbmodels.studio import Media as Media
 from app.dbmodels.studio import Video as Video
 from app.utils import (
     err_resp,
@@ -27,11 +29,32 @@ logger = logging.getLogger(__name__)
 analysis_schema = AnalysisSchema()
 
 
+orderby_dict = {
+    "name": Analysis.name,
+    "creator": Analysis.creator,
+    "created_at": Analysis.created_at,
+    "workflow_id": Analysis.workflow_id,
+    "status": Analysis.status,
+    "name_desc": desc(Analysis.name),
+    "creator_desc": desc(Analysis.creator),
+    "created_at_desc": desc(Analysis.created_at),
+    "workflow_id_desc": desc(Analysis.workflow_id),
+    "status_desc": desc(Analysis.status),
+}
+
+
 class AnalysisService:
     @staticmethod
-    def get_analysis(user_id):
+    def get_analysis(user_id, orderby, per_page, page):
         """Get a list of all user analysis"""
-        if not (analysis := Analysis.query.filter_by(creator=user_id)):
+
+        orderby = orderby_dict.get(orderby, Media.created_at)
+        if not (
+            analysis := Analysis.query.filter_by(creator=user_id)
+            .order_by(orderby)
+            .paginate(page, per_page=per_page)
+            .items
+        ):
             return err_resp("no analysis found", "analysis_404", 404)
 
         try:
@@ -51,7 +74,9 @@ class AnalysisService:
     def get_source(wf_source, user_id):
         source_id = wf_source["id"]
         if wf_source["type"] == "video":
-            if video := Video.query.filter_by(user=user_id, id=source_id).first():
+            if video := Media.query.filter_by(
+                user=user_id, id=source_id, media_type="video"
+            ).first():
                 video_dir = (
                     f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{source_id}'
                 )

@@ -70,6 +70,14 @@ class CaptureService:
             return internal_err_resp()
 
     @staticmethod
+    def has_camera_capture(user_id):
+        # There should be one of this
+        reg_key = Registry.query.filter(
+            Registry.status.in_(("SUCCEEDED", "STARTED")), Registry.user == user_id
+        ).first()
+        return reg_key is not None
+
+    @staticmethod
     def capture_image(user_id, camera_id):
 
         if not (
@@ -78,7 +86,7 @@ class CaptureService:
             return err_resp("camera not found", "camera_404", 404)
 
         # TODO: find another response number
-        if CaptureService.has_camera_capture(user_id, camera_id):
+        if CaptureService.has_camera_capture(user_id):
             return err_resp(
                 "something went wrong with capturing service", "capture_417", 417
             )
@@ -119,16 +127,6 @@ class CaptureService:
             return internal_err_resp()
 
     @staticmethod
-    def has_camera_capture(user_id, camera_id):
-        # There should be one of this
-        reg_key = Registry.query.filter(
-            Registry.status.in_(("SUCCEEDED", "STARTED")),
-            Registry.user == user_id,
-            Registry.camera_id == camera_id,
-        ).first()
-        return reg_key is not None
-
-    @staticmethod
     def record_video(user_id, camera_id, length=60):
         if not (
             camera := Camera.query.filter_by(owner_id=user_id, id=camera_id).first()
@@ -136,7 +134,7 @@ class CaptureService:
             return err_resp("camera not found", "camera_404", 404)
 
         # TODO: find another response number
-        if CaptureService.has_camera_capture(user_id, camera_id):
+        if CaptureService.has_camera_capture(user_id):
             return err_resp(
                 "something went wrong with capturing service", "capture_417", 417
             )

@@ -12,7 +12,7 @@ from app import db as database
 from app.dbmodels.ai import AIModel, Analysis, Dataset, Workflow
 from app.dbmodels.camera import Camera
 from app.dbmodels.registry import Registry
-from app.dbmodels.studio import Image, Video
+from app.dbmodels.studio import Image, Media, Video
 from app.dbmodels.user import Role, User
 from app.utils import mkdir, put
 
@@ -178,8 +178,12 @@ def registry_video(app, db, user, camera):
 @pytest.fixture
 def image(db, user, harbour_camera):
 
-    image = Image(
-        user=user.id, camera_id=harbour_camera.id, tags="DummyTags", note="DummyNote"
+    image = Media(
+        user=user.id,
+        camera_id=harbour_camera.id,
+        tags="DummyTags",
+        note="DummyNote",
+        media_type="image",
     )
     db.session.add(image)
     db.session.commit()
@@ -188,12 +192,13 @@ def image(db, user, harbour_camera):
 
 @pytest.fixture
 def video(db, user, harbour_camera):
-    video = Video(
+    video = Media(
         user=user.id,
         camera_id=harbour_camera.id,
         tags="DummyTags",
         note="DummyNote",
         duration=10,
+        media_type="video",
     )
     db.session.add(video)
     db.session.commit()

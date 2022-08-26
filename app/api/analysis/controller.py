@@ -31,7 +31,10 @@ class AnalysisList(Resource):
     def get(self):
         """Get a list of all user analysis"""
         user_id = get_jwt_identity()
-        return AnalysisService.get_analysis(user_id)
+        orderby = request.args.get("orderby", "name")
+        per_page = request.args.get("per_page", 10)
+        page = request.args.get("page", 1)
+        return AnalysisService.get_analysis(user_id, orderby, per_page, page)
 
     @api.doc(
         "Add a new analysis",

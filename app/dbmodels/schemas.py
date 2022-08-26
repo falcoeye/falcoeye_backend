@@ -75,6 +75,28 @@ class ImageSchema(ma.Schema):
         )
 
 
+class MediaSchema(ma.Schema):
+    # id = GUIDSerializationField(attribute="guid",required=True)
+    # camera_id = GUIDSerializationField(attribute="camera_id", required=True)
+    # user = GUIDSerializationField(attribute="user",required=True)
+    note = ma.fields.Str(required=False)
+    tags = ma.fields.Str(required=False)
+
+    class Meta:
+        model_converter = GUIDConverter
+        fields = (
+            "id",
+            "camera_id",
+            "user",
+            "note",
+            "tags",
+            "workflow",
+            "created_at",
+            "duration",
+            "media_type",
+        )
+
+
 class CameraSchema(ma.Schema):
     # id = GUIDSerializationField(attribute="guid", required=True)
     name = ma.fields.Str(required=False)

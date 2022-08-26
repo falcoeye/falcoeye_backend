@@ -70,6 +70,7 @@ class CameraDto:
             "status": fields.Boolean,
             "message": fields.String,
             "camera": fields.List(fields.Nested(camera_short)),
+            "registry": fields.Nested(registry),
         },
     )
 

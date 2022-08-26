@@ -6,6 +6,7 @@ from datetime import datetime
 
 from flask import current_app
 from PIL import Image
+from sqlalchemy import desc
 
 from app import db
 from app.dbmodels.camera import Camera
@@ -25,20 +26,39 @@ from .utils import load_camera_data
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 camera_schema = CameraSchema()
+orderby_dict = {
+    "name": Camera.name,
+    "streaming_type": Camera.streaming_type,
+    "created_at": Camera.created_at,
+    "status": Camera.status,
+    "name_desc": desc(Camera.name),
+    "streaming_type_desc": desc(Camera.streaming_type),
+    "created_at_desc": desc(Camera.created_at),
+    "status_desc": desc(Camera.status),
+}
 
 
 class CameraService:
     @staticmethod
-    def get_user_cameras(user_id):
+    def get_user_cameras(user_id, orderby, per_page, page):
         """Get a list of cameras"""
-        if not (cameras := Camera.query.filter_by(owner_id=user_id).all()):
+        orderby = orderby_dict.get(orderby, Camera.name)
+
+        if not (
+            cameras := Camera.query.filter_by(owner_id=user_id)
+            .order_by(orderby)
+            .paginate(page, per_page=per_page)
+            .items
+        ):
             return err_resp("no camera found", "camera_404", 404)
+
+        registry = CameraService.get_registry(user_id)
 
         try:
             camera_data = load_camera_data(cameras, many=True)
             resp = message(True, "camera data sent")
             resp["camera"] = camera_data
-
+            resp["registry"] = registry
             return resp, 200
 
         except Exception as error:
@@ -46,12 +66,12 @@ class CameraService:
             return internal_err_resp()
 
     @staticmethod
-    def get_registry(user_id, camera_id):
+    def get_registry(user_id, camera_id=None):
         # There should be one of this
         reg_key = Registry.query.filter(
             Registry.status.in_(("SUCCEEDED", "STARTED")),
-            Registry.user == user_id,
-            Registry.camera_id == camera_id,
+            Registry.user == user_id
+            # Registry.camera_id == camera_id,
         ).first()
 
         registry = {}

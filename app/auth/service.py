@@ -15,19 +15,32 @@ class AuthService:
     @staticmethod
     def login(data):
         # Assign vars
-        email = data["email"]
-        password = data["password"]
-
+        email = data.get("email", None)
+        password = data.get("password", None)
+        if email is None or password is None:
+            return err_resp(
+                "invalid data",
+                "invalid_403",
+                403,
+            )
         try:
             # Fetch user data
-            if not (user := User.query.filter_by(email=email).first()):
-                return err_resp(
-                    "email not found",
-                    "email_404",
-                    404,
-                )
+            if "@" in email:
+                if not (user := User.query.filter_by(email=email).first()):
+                    return err_resp(
+                        "usern not found",
+                        "user_404",
+                        404,
+                    )
+            else:
+                if not (user := User.query.filter_by(username=email).first()):
+                    return err_resp(
+                        "usern not found",
+                        "user_404",
+                        404,
+                    )
 
-            elif user and user.verify_password(password):
+            if user.verify_password(password):
                 user_info = user_schema.dump(user)
 
                 access_token = create_access_token(
