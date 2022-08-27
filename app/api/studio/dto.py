@@ -81,5 +81,6 @@ class MediaDto:
             "status": fields.Boolean,
             "message": fields.String,
             "media": fields.List(fields.Nested(medial_list_item)),
+            "lastPage": fields.Boolean,
         },
     )

@@ -40,9 +40,12 @@ class StudioList(Resource):
         """Get user's media"""
         current_user_id = get_jwt_identity()
         orderby = request.args.get("orderby", "created_at")
-        per_page = request.args.get("per_page", 10)
-        page = request.args.get("page", 1)
-        return StudioService.get_user_media(current_user_id, orderby, per_page, page)
+        per_page = int(request.args.get("per_page", 10))
+        page = int(request.args.get("page", 1))
+        order_dir = request.args.get("order_dir", "asc")
+        return StudioService.get_user_media(
+            current_user_id, orderby, per_page, page, order_dir
+        )
 
 
 @api.route("/image/<media_id>")

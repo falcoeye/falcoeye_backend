@@ -45,24 +45,27 @@ orderby_dict = {
 
 class AnalysisService:
     @staticmethod
-    def get_analysis(user_id, orderby, per_page, page):
+    def get_analysis(user_id, orderby, per_page, page, order_dir):
         """Get a list of all user analysis"""
-
+        if order_dir == "desc":
+            orderby += "_desc"
         orderby = orderby_dict.get(orderby, Media.created_at)
-        if not (
-            analysis := Analysis.query.filter_by(creator=user_id)
+        query = (
+            Analysis.query.filter_by(creator=user_id)
             .order_by(orderby)
             .paginate(page, per_page=per_page)
-            .items
-        ):
+        )
+        if not (analysis := query.items):
             return err_resp("no analysis found", "analysis_404", 404)
 
+        lastPage = not query.has_next
         try:
             analysis_data = load_analysis_data(analysis, many=True)
             if len(analysis_data) == 0:
                 return err_resp("no analysis found", "analysis_404", 404)
             resp = message(True, "analysis data sent")
             resp["analysis"] = analysis_data
+            resp["lastPage"] = lastPage
 
             return resp, 200
 

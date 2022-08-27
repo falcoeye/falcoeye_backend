@@ -40,18 +40,19 @@ orderby_dict = {
 
 class CameraService:
     @staticmethod
-    def get_user_cameras(user_id, orderby, per_page, page):
+    def get_user_cameras(user_id, orderby, per_page, page, order_dir):
         """Get a list of cameras"""
+        if order_dir == "desc":
+            orderby += "_desc"
         orderby = orderby_dict.get(orderby, Camera.name)
-
-        if not (
-            cameras := Camera.query.filter_by(owner_id=user_id)
+        query = (
+            Camera.query.filter_by(owner_id=user_id)
             .order_by(orderby)
             .paginate(page, per_page=per_page)
-            .items
-        ):
+        )
+        if not (cameras := query.items):
             return err_resp("no camera found", "camera_404", 404)
-
+        lastPage = not query.has_next
         registry = CameraService.get_registry(user_id)
 
         try:
@@ -59,6 +60,7 @@ class CameraService:
             resp = message(True, "camera data sent")
             resp["camera"] = camera_data
             resp["registry"] = registry
+            resp["lastPage"] = lastPage
             return resp, 200
 
         except Exception as error:

@@ -64,5 +64,6 @@ class WorkflowDto:
             "status": fields.Boolean,
             "message": fields.String,
             "workflow": fields.Nested(workflow),
+            "lastPage": fields.Boolean,
         },
     )

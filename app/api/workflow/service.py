@@ -7,6 +7,7 @@ from datetime import datetime
 
 from flask import current_app
 from PIL import Image
+from sqlalchemy import desc
 
 from app import db
 from app.dbmodels.ai import AIModel, Workflow
@@ -21,20 +22,33 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 workflow_schema = WorkflowSchema()
 
+orderby_dict = {
+    "name": Workflow.name,
+    "creator": Workflow.creator,
+    "publish_date": Workflow.publish_date,
+    "name_desc": desc(Workflow.name),
+    "creator_desc": desc(Workflow.creator),
+    "publish_date_desc": desc(Workflow.publish_date),
+}
+
 
 class WorkflowService:
     @staticmethod
-    def get_workflows():
+    def get_workflows(orderby, per_page, page, order_dir):
         """Get a list of all workflows"""
-        if not (workflows := Workflow.query.all()):
+        if order_dir == "desc":
+            orderby += "_desc"
+        orderby = orderby_dict.get(orderby, Workflow.name)
+        query = Workflow.query.order_by(orderby).paginate(page, per_page=per_page)
+        if not (workflows := query.items):
             return err_resp("no workflow found", "workflow_404", 404)
-
+        lastPage = not query.has_next
         try:
             workflow_data = load_workflow_data(workflows, many=True)
             logger.info(workflow_data)
             resp = message(True, "workflow data sent")
             resp["workflow"] = workflow_data
-
+            resp["lastPage"] = True
             return resp, 200
 
         except Exception as error:

@@ -36,18 +36,21 @@ orderby_dict = {
 
 class StudioService:
     @staticmethod
-    def get_user_media(user_id, orderby, per_page, page):
+    def get_user_media(user_id, orderby, per_page, page, order_dir):
         """Get user data by username"""
+        if order_dir == "desc":
+            orderby += "_desc"
         orderby = orderby_dict.get(orderby, Media.created_at)
-        if not (
-            media := Media.query.filter_by(user=user_id)
+        query = (
+            Media.query.filter_by(user=user_id)
             .order_by(orderby)
             .paginate(page, per_page=per_page)
-            .items
-        ):
+        )
+        if not (media := query.items):
             resp = message(True, "no media found")
             return resp, 204
 
+        lastPage = not query.has_next
         # images = Image.query.filter_by(user=user_id).all()
         # if not videos and not images:
         #    resp = message(True, "no media found")
@@ -67,6 +70,7 @@ class StudioService:
             logger.info(f"Number of media: {len(media_data)}")
             resp = message(True, "media data sent")
             resp["media"] = media_data
+            resp["lastPage"] = lastPage
             return resp, 200
 
         except Exception as error:

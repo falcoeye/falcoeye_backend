@@ -17,13 +17,14 @@ Frontend
 
 Backend
 1. Implement pagenation /
-2. Implement edit user profile end-point /
+2. Implement edit user proefile end-point /
 3. Deploy and test newly implemented duplicate capture feature
 4. One capture for all cameras, not each camera /
 5. Edit media item /
+6. lastPage flag for pagination
 
 Workflow
-1. uint8 images to save size
+1. uint8 images to save size /
 
 Data
 1. Submit lots of analysis with longer results

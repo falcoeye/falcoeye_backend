@@ -32,9 +32,12 @@ class CameraList(Resource):
         """Get a list of user's cameras"""
         current_user_id = get_jwt_identity()
         orderby = request.args.get("orderby", "name")
-        per_page = request.args.get("per_page", 10)
-        page = request.args.get("page", 1)
-        return CameraService.get_user_cameras(current_user_id, orderby, per_page, page)
+        per_page = int(request.args.get("per_page", 10))
+        page = int(request.args.get("page", 1))
+        order_dir = request.args.get("order_dir", "asc")
+        return CameraService.get_user_cameras(
+            current_user_id, orderby, per_page, page, order_dir
+        )
 
     @api_camera.doc(
         "Add a new camera",

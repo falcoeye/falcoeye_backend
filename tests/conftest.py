@@ -273,6 +273,50 @@ def workflow(app, db, user, aimodel):
 
 
 @pytest.fixture
+def two_workflow(app, db, user, aimodel):
+    with open(
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+    ) as f:
+        workflow_json = json.load(f)
+
+    workflow1 = Workflow(
+        name="FishCounter",
+        creator=user.id,
+        publish_date=datetime.now(),
+        aimodel_id=aimodel.id,
+        usedfor="detecting stuff",
+        consideration="be careful",
+        assumption="barely works",
+        results_description="stuff",
+    )
+    workflow2 = Workflow(
+        name="FishCounter2",
+        creator=user.id,
+        publish_date=datetime.now(),
+        aimodel_id=aimodel.id,
+        usedfor="detecting stuff",
+        consideration="be careful",
+        assumption="barely works",
+        results_description="stuff",
+    )
+    db.session.add(workflow1)
+    db.session.add(workflow2)
+    db.session.commit()
+
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow1.id}/'
+    logging.info(f"Creating workflow directory {workflow_dir}")
+
+    mkdir(workflow_dir)
+    logging.info("Writing structure file")
+    with current_app.config["FS_OBJ"].open(
+        os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+    ) as f:
+        f.write(json.dumps(workflow_json["structure"]))
+
+    return workflow1, workflow2
+
+
+@pytest.fixture
 def analysis(db, user, workflow):
     analysis = Analysis(
         name="analysis",
@@ -286,3 +330,29 @@ def analysis(db, user, workflow):
     db.session.add(analysis)
     db.session.commit()
     return analysis
+
+
+@pytest.fixture
+def two_analysis(db, user, workflow):
+    analysis1 = Analysis(
+        name="analysis1",
+        creator=str(user.id),
+        workflow_id=str(workflow.id),
+        status="completed",
+        results_path="/path/to/results",
+        message="",
+        created_at=datetime.utcnow(),
+    )
+    analysis2 = Analysis(
+        name="analysis2",
+        creator=str(user.id),
+        workflow_id=str(workflow.id),
+        status="completed",
+        results_path="/path/to/results",
+        message="",
+        created_at=datetime.utcnow(),
+    )
+    db.session.add(analysis1)
+    db.session.add(analysis2)
+    db.session.commit()
+    return analysis1, analysis2

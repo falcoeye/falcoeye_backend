@@ -42,6 +42,7 @@ class AnalysisDto:
             "status": fields.Boolean,
             "message": fields.String,
             "analysis": fields.List(fields.Nested(analysis_short)),
+            "lastPage": fields.Boolean,
         },
     )
 
@@ -51,5 +52,6 @@ class AnalysisDto:
             "status": fields.Boolean,
             "message": fields.String,
             "analysis": fields.Nested(analysis),
+            "lastPage": fields.Boolean,
         },
     )

@@ -33,6 +33,21 @@ def test_list_workflow(app, client, workflow):
     rmtree(workflow_dir)
 
 
+def test_list_workflow_paged(app, client, two_workflow):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/workflow/?per_page=1", headers=headers)
+    assert resp.status_code == 200
+    logging.info(resp.json.get("workflow"))
+    assert len(resp.json.get("workflow")) == 1
+    assert resp.json.get("message") == "workflow data sent"
+    workflow_id = str(two_workflow[0].id)
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}'
+    logging.info(f"Removing workflow directory {workflow_dir}")
+
+    rmtree(workflow_dir)
+
+
 def test_get_workflow_by_id(app, client, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}

@@ -31,7 +31,11 @@ class WorkflowList(Resource):
     @jwt_required()
     def get(self):
         """Get a list of all system workflows"""
-        return WorkflowService.get_workflows()
+        orderby = request.args.get("orderby", "created_at")
+        per_page = int(request.args.get("per_page", 10))
+        page = int(request.args.get("page", 1))
+        order_dir = request.args.get("order_dir", "asc")
+        return WorkflowService.get_workflows(orderby, per_page, page, order_dir)
 
     @api.doc(
         "Add a new workflow",

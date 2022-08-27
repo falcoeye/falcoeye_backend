@@ -39,6 +39,21 @@ def test_list_analysis(app, client, analysis):
     rmtree(workflow_dir)
 
 
+def test_list_analysis_paging(app, client, two_analysis):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/analysis/?per_page=1", headers=headers)
+    assert resp.status_code == 200
+    assert len(resp.json.get("analysis")) == 1
+    assert resp.json.get("message") == "analysis data sent"
+
+    workflow_dir = (
+        f'{app.config["FALCOEYE_ASSETS"]}/workflows/{two_analysis[0].workflow_id}'
+    )
+    logging.info(f"Removing workflow directory {workflow_dir}")
+    rmtree(workflow_dir)
+
+
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
 def test_add_analysis(mock_post, app, client, user, workflow, video):
     resp = login_user(client)
