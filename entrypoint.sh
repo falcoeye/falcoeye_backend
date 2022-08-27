@@ -8,9 +8,10 @@
 
 # echo "PostgreSQL started"
 
-# flask db init
-# flask db migrate
-# flask db upgrade
+#flask db init
+#flask  db revision --rev-id a0fe5faf6ccc
+#flask db migrate
+#flask db upgrade
 
 #echo "Uncomment in the first deployment"
 #cd initialization
