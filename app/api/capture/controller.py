@@ -35,6 +35,7 @@ class Capture(Resource):
         """Initiate a caputre request"""
         data = request.get_json()
         user_id = get_jwt_identity()
+        logging.info(f"Capture request with {data}")
         return CaptureService.capture(user_id, data)
 
     @api.doc(
@@ -108,7 +109,7 @@ class CaptureData(Resource):
 @api.route("/video/<string:user_id>/videos/<string:registry_key>.mp4")
 @api.param("user_id", "User ID")
 @api.param("registry_key", "Registry key")
-class StudioVideoServeLocal(Resource):
+class CaptureVideoServeLocal(Resource):
     @api.doc(
         "Get user's video",
         security="apikey",
@@ -155,7 +156,7 @@ class StudioVideoServeLocal(Resource):
 @api.route("/image/<string:user_id>/images/<string:registry_key>.jpg")
 @api.param("user_id", "User ID")
 @api.param("registry_key", "Registry key")
-class StudioImageServeLocal(Resource):
+class CaptureImageServeLocal(Resource):
     @api.doc(
         "Get user's video",
         security="apikey",
