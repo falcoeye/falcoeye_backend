@@ -14,8 +14,8 @@ logging.basicConfig(
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# URL = "http://localhost:5000"
-URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
+URL = "http://localhost:8000"
+# URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
 
 workflow_user = os.getenv("WORKFLOW_USER").strip()
 workflow_password = os.getenv("WORKFLOW_PASSWORD").strip()
@@ -42,7 +42,10 @@ def get_base64img(imgfile):
 
 
 resp = requests.get(f"{URL}/api/workflow/", headers=headers)
-s_workflows = resp.json()["workflow"]
+if resp.status_code != 404:
+    s_workflows = resp.json()["workflow"]
+else:
+    s_workflows = []
 logging.info(s_workflows)
 
 

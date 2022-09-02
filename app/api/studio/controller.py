@@ -1,8 +1,9 @@
 import logging
 import os
+import re
 from io import BytesIO
 
-from flask import current_app, request, send_file
+from flask import current_app, redirect, request, send_file, url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
@@ -20,6 +21,7 @@ image_resp = MediaDto.image_resp
 video_post = MediaDto.video_post
 image_post = MediaDto.image_post
 media_resp = MediaDto.media_resp
+media_count_resp = MediaDto.media_count_resp
 
 image_schema = ImageSchema()
 video_schema = VideoSchema()
@@ -46,6 +48,20 @@ class StudioList(Resource):
         return StudioService.get_user_media(
             current_user_id, orderby, per_page, page, order_dir
         )
+
+
+@api.route("/count")
+class StudioListCount(Resource):
+    @api.doc(
+        "Get user's media count",
+        responses={200: ("media count data sent", media_count_resp)},
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self):
+        """Get user's media"""
+        current_user_id = get_jwt_identity()
+        return StudioService.get_user_media_count(current_user_id)
 
 
 @api.route("/image/<media_id>")
@@ -251,15 +267,78 @@ class StudioVideoServe(Resource):
     def get(self, media_id, resolution):
         """Get user's video"""
         current_user_id = get_jwt_identity()
+        logging.info(
+            f'Serving video from current deployment {current_app.config["DEPLOYMENT"]}'
+        )
+        if (
+            current_app.config["DEPLOYMENT"] == "local"
+            or current_app.config["DEPLOYMENT"] == "k8s"
+        ):
+            url = f"{request.url_root}api/media/video/{media_id}/{current_user_id}/serve/video_{resolution}.mp4"
+            return url
 
         video_path = f'{current_app.config["USER_ASSETS"]}/{current_user_id}/videos/{media_id}/video_{resolution}.mp4'
+
+        # just in case
+        video_path = video_path.replace("//", "/")
         bucket = current_app.config["FS_BUCKET"]
         blob_path = video_path.replace(bucket, "")
         logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
+
         url = generate_download_signed_url_v4(bucket, blob_path, 15)
         logging.info(f"generated link: {url}")
 
         return url
+
+
+@api.route(
+    "/video/<string:media_id>/<string:user_id>/serve/video_<string:resolution>.mp4"
+)
+@api.param("media_id", "Video ID")
+@api.param("user_id", "User ID")
+@api.param("resolution", "Video Resolution")
+class StudioVideoServeLocal(Resource):
+    @api.doc(
+        "Get user's video",
+        security="apikey",
+    )
+    @jwt_required(optional=True)
+    def get(self, media_id, user_id, resolution):
+        """Get user's video"""
+
+        video_path = f'{current_app.config["USER_ASSETS"]}/{user_id}/videos/{media_id}/video_{resolution}.mp4'
+        logging.info(f"serving {video_path}")
+        headers = request.headers
+
+        if "range" not in headers:
+            return current_app.response_class(status=400)
+
+        size = os.stat(video_path)
+        size = size.st_size
+        logging.info(f"File size {size}")
+        chunk_size = 10**3
+        start = int(re.sub(r"\D", "", headers["range"]))
+        end = min(start + chunk_size, size - 1)
+
+        content_lenght = end - start + 1
+        logging.info(f"Content Length {content_lenght}")
+
+        def get_chunk(video_path, start, end):
+            with open(video_path, "rb") as f:
+                f.seek(start)
+                chunk = f.read(end)
+            return chunk
+
+        headers = {
+            "Content-Range": f"bytes {start}-{end}/{size}",
+            "Accept-Ranges": "bytes",
+            "Content-Length": content_lenght,
+            "Content-Type": "video/mp4",
+        }
+
+        return current_app.response_class(
+            get_chunk(video_path, start, end), 206, headers
+        )
 
 
 @api.route("/video/<string:media_id>/video_<int:img_size>.jpg")

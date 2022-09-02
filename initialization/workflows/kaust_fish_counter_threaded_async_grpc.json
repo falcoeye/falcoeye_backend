@@ -94,6 +94,13 @@
                     "disc": "Number of tcp process at a time",
                     "source": "user",
                     "default": 4
+                },
+                {
+                    "name": "resolution",
+                    "type": "string",
+                    "disc": "Stream resolution",
+                    "source": "user",
+                    "default": "720p"
                 }
             ]
         },
@@ -123,7 +130,7 @@
                 "type": "ConcurrentgRPCTasksThreadWrapper",
                 "node": "findfish_model",
                 "ntasks": "$ntasks",
-                "max_send_message_length": 6230000
+                "max_send_message_length": 6866000
             },
             {
                 "name": "falcoeye_detection",

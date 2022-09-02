@@ -84,3 +84,11 @@ class MediaDto:
             "lastPage": fields.Boolean,
         },
     )
+    media_count_resp = api.model(
+        "Media Data Count Response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "media_count": fields.Integer,
+        },
+    )

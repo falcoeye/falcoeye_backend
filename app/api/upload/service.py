@@ -87,7 +87,10 @@ class UploadService:
             logging.info(
                 f"Generating thumbnail from {signed_url} and store it in {thumbnail_path}"
             )
-            streamer_resp = Streamer.generate_thumbnail(signed_url, thumbnail_path)
+            try:
+                streamer_resp = Streamer.generate_thumbnail(signed_url, thumbnail_path)
+            except Exception as e:
+                pass
 
             logging.info(f'generated link: {resp["temporary_path"]}')
             change_status(str(registry_object.id), "SUCCEEDED")

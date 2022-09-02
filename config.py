@@ -4,6 +4,8 @@ from datetime import timedelta
 
 import fsspec
 
+from k8s import FalcoServingKube
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -37,17 +39,26 @@ class Config:
     FS_BUCKET = os.environ.get("FS_BUCKET", "")
     FS_PROJECT = os.environ.get("FS_PROJECT", "falcoeye")
     FS_TOKEN = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "cloud")
+    DEPLOYMENT = os.environ.get("DEPLOYMENT", "local")
     if FS_TOKEN != "cloud":
         # running localy
         with open(FS_TOKEN) as f:
             FS_TOKEN = json.load(f)
+
+    SERVICES = {
+        "falcoeye-streaming": {"env": "STREAMING_HOST", "k8s": None},
+        "falcoeye-workflow": {"env": "STREAMING_WORKFLOW", "k8s": None},
+    }
+    if DEPLOYMENT == "k8s":
+        SERVICES["falcoeye-streaming"]["k8s"] = FalcoServingKube("falcoeye-streaming")
+        SERVICES["falcoeye-workflow"]["k8s"] = FalcoServingKube("falcoeye-workflow")
 
     if FS_PROTOCOL in ("gs", "gcs"):
         import gcsfs
 
         FS_OBJ = gcsfs.GCSFileSystem(project=FS_PROJECT, token=FS_TOKEN)
         FS_IS_REMOTE = True
-
+        DEPLOYMENT = os.environ.get("DEPLOYMENT")
         TEMPORARY_DATA_PATH = os.environ.get(
             "TEMPORARY_DATA_PATH", f"{FS_BUCKET}/falcoeye-temp/data/"
         )

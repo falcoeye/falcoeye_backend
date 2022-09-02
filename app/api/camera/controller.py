@@ -57,6 +57,20 @@ class CameraList(Resource):
         return CameraService.create_camera(user_id=user_id, data=camera_data)
 
 
+@api_camera.route("/count")
+class CameraListCount(Resource):
+    @api_camera.doc(
+        "Get user's camera count",
+        responses={200: ("camera count data sent", CameraDto.camera_count_resp)},
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self):
+        """Get user's camera count"""
+        current_user_id = get_jwt_identity()
+        return CameraService.get_user_camera_count(current_user_id)
+
+
 @api_camera.route("/<camera_id>")
 @api_camera.param("camera_id", "Camera ID")
 class Camera(Resource):

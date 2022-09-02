@@ -17,9 +17,12 @@ from app.dbmodels.studio import Media as Media
 from app.dbmodels.studio import Video as Video
 from app.utils import (
     err_resp,
+    exists,
     generate_download_signed_url_v4,
+    get_service,
     internal_err_resp,
     message,
+    rmtree,
 )
 
 from .utils import load_analysis_data, load_workflow_structure
@@ -69,6 +72,18 @@ class AnalysisService:
 
             return resp, 200
 
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def get_user_analysis_count(user_id):
+        """Get user data by username"""
+        analysis_count = Analysis.query.filter_by(creator=user_id).count()
+        try:
+            resp = message(True, "analysis count data sent")
+            resp["analysis_count"] = analysis_count
+            return resp, 200
         except Exception as error:
             logger.error(error)
             return internal_err_resp()
@@ -161,7 +176,9 @@ class AnalysisService:
                 "analysis": {"id": str(new_analysis.id), "args": wf_args},
                 "workflow": wf_structure,
             }
-            workflow_service = current_app.config["WORKFLOW_HOST"]
+            workflow_service = get_service(
+                "falcoeye-workflow"
+            )  # current_app.config["WORKFLOW_HOST"]
             logger.info(
                 f"Sending request to workflow server on {workflow_service}/api/analysis"
             )
@@ -228,6 +245,13 @@ class AnalysisService:
             db.session.delete(analysis)
             db.session.commit()
 
+            storage_path = (
+                f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{analysis_id}/"
+            )
+
+            logging.info(f"Deleting data from {storage_path}")
+            if exists(storage_path):
+                rmtree(storage_path)
             resp = message(True, "analysis deleted")
             return resp, 200
 

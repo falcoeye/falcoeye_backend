@@ -3,11 +3,13 @@ import json
 import requests
 from flask import current_app
 
+from app.utils import get_service
+
 
 class Streamer:
     @staticmethod
     def capture_image(registry_key, camera, output_path):
-        streaming_service = current_app.config["STREAMER_HOST"]
+        streaming_service = get_service("falcoeye-streaming")
         data = {
             "registry_key": registry_key,
             "camera": camera.con_to_json(),
@@ -24,7 +26,7 @@ class Streamer:
         length,
         output_path,
     ):
-        streaming_service = current_app.config["STREAMER_HOST"]
+        streaming_service = get_service("falcoeye-streaming")
         data = {
             "registry_key": registry_key,
             "camera": camera.con_to_json(),
@@ -37,7 +39,7 @@ class Streamer:
 
     @staticmethod
     def generate_thumbnail(video_file, output_path):
-        streaming_service = current_app.config["STREAMER_HOST"]
+        streaming_service = get_service("falcoeye-streaming")
         data = {
             "video_file": video_file,
             "output_path": output_path,

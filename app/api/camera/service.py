@@ -68,6 +68,18 @@ class CameraService:
             return internal_err_resp()
 
     @staticmethod
+    def get_user_camera_count(user_id):
+        """Get user data by username"""
+        camera_count = Camera.query.filter_by(owner_id=user_id).count()
+        try:
+            resp = message(True, "camera count data sent")
+            resp["camera_count"] = camera_count
+            return resp, 200
+        except Exception as error:
+            logging.error(error)
+            return internal_err_resp()
+
+    @staticmethod
     def get_registry(user_id, camera_id=None):
         # There should be one of this
         reg_key = Registry.query.filter(

@@ -58,6 +58,20 @@ class WorkflowList(Resource):
         return WorkflowService.create_workflow(user_id=user_id, data=workflow_data)
 
 
+@api.route("/count")
+class WorkflowListCount(Resource):
+    @api.doc(
+        "Get user's workflow count",
+        responses={200: ("workflow count data sent", WorkflowDto.workflow_count_resp)},
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self):
+        """Get user's workflow"""
+        current_user_id = get_jwt_identity()
+        return WorkflowService.get_workflow_count()
+
+
 @api.route("/<workflow_id>")
 @api.param("workflow_id", " Workflow ID")
 class Workflow(Resource):

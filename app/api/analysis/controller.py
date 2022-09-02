@@ -55,6 +55,20 @@ class AnalysisList(Resource):
         return AnalysisService.create_analysis(user_id=user_id, data=analysis_data)
 
 
+@api.route("/count")
+class AnalysisListCount(Resource):
+    @api.doc(
+        "Get user's analysis count",
+        responses={200: ("analysis count data sent", AnalysisDto.analysis_count_resp)},
+        security="apikey",
+    )
+    @jwt_required()
+    def get(self):
+        """Get user's analysis count"""
+        current_user_id = get_jwt_identity()
+        return AnalysisService.get_user_analysis_count(current_user_id)
+
+
 @api.route("/<analysis_id>")
 @api.param("analysis_id", " Analysis ID")
 class Analysis(Resource):

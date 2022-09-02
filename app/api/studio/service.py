@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from flask import current_app
+from flask import current_app, request, send_file
 from sqlalchemy import desc
 
 from app import db
@@ -73,6 +73,18 @@ class StudioService:
             resp["lastPage"] = lastPage
             return resp, 200
 
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def get_user_media_count(user_id):
+        """Get user data by username"""
+        media_count = Media.query.filter_by(user=user_id).count()
+        try:
+            resp = message(True, "media count data sent")
+            resp["media_count"] = media_count
+            return resp, 200
         except Exception as error:
             logger.error(error)
             return internal_err_resp()
@@ -270,6 +282,11 @@ class StudioService:
                 media_type="video",
             )
             db.session.add(new_video)
+            db.session.flush()
+            db.session.commit()
+
+            registry_item.status = "PROCESSED"
+            db.session.add(registry_item)
             db.session.flush()
             db.session.commit()
 

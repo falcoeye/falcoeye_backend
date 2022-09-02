@@ -12,7 +12,6 @@ class AnalysisDto:
             "created_at": fields.DateTime,
             "workflow_id": fields.String,
             "status": fields.String,
-            "results_path": fields.String,
         },
     )
 
@@ -53,5 +52,13 @@ class AnalysisDto:
             "message": fields.String,
             "analysis": fields.Nested(analysis),
             "lastPage": fields.Boolean,
+        },
+    )
+    analysis_count_resp = api.model(
+        "Analysis Data Count Response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "analysis_count": fields.Integer,
         },
     )

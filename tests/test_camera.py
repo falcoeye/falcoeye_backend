@@ -92,6 +92,15 @@ def test_list_cameras(client, camera):
     assert resp.json.get("message") == "camera data sent"
 
 
+def test_list_camera_count(client, camera):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/camera/count", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "camera count data sent"
+    assert resp.json.get("camera_count") == 1
+
+
 def test_empty_cameras(client, user):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}

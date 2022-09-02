@@ -48,9 +48,21 @@ class WorkflowService:
             logger.info(workflow_data)
             resp = message(True, "workflow data sent")
             resp["workflow"] = workflow_data
-            resp["lastPage"] = True
+            resp["lastPage"] = lastPage
             return resp, 200
 
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def get_workflow_count():
+        """Get workflows count"""
+        workflow_count = Workflow.query.count()
+        try:
+            resp = message(True, "workflow count data sent")
+            resp["workflow_count"] = workflow_count
+            return resp, 200
         except Exception as error:
             logger.error(error)
             return internal_err_resp()

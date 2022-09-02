@@ -15,7 +15,7 @@ RUN apt-get update && \
 
 RUN pip3 install gunicorn
 
-EXPOSE 5000
+EXPOSE 8000
 
 COPY . .
 RUN chmod +x /usr/src/app/entrypoint.sh

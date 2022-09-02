@@ -52,6 +52,15 @@ def test_list_media_paged(client, app, user, registry_image, camera):
     rmtree(user_asset_dir)
 
 
+def test_list_media_count(client, image, video):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/media/count", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "media count data sent"
+    assert resp.json.get("media_count") == 2
+
+
 def test_add_image(app, client, user, registry_image, camera):
     resp = login_user(client)
     assert "access_token" in resp.json

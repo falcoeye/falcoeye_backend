@@ -27,9 +27,9 @@ class UserGet(Resource):
 
 
 @api.route("/edit")
-class UserGet(Resource):
+class UserEdit(Resource):
     @api.doc(
-        "Get a specific user",
+        "Edit a specific user",
         responses={
             200: ("user data sent", data_resp),
             403: "username or email exists",
@@ -38,8 +38,8 @@ class UserGet(Resource):
         security="apikey",
     )
     @jwt_required()
-    def get(self):
-        """Get a specific user's data by their username"""
+    def put(self):
+        """Edit a specific user's data by their username"""
         current_user_id = get_jwt_identity()
         user_data = request.get_json()
         return UserService.edit_user(current_user_id, user_data)

@@ -1,6 +1,6 @@
 import logging
 
-from flask import current_app
+from flask import current_app, request
 
 from app import db
 from app.api.registry import change_status, register
@@ -182,15 +182,30 @@ class CaptureService:
             return err_resp("registry key not found", "not_found_403", 403)
 
         resp = message(True, "capture data sent")
+
         resp["capture_status"] = registry_item.status
-        resp["registry_key"] = str(registry_item.id)
+        resp["registry_key"] = registry_key
         if registry_item.status == "SUCCEEDED":
             bucket = current_app.config["FS_BUCKET"]
             blob_path = registry_item.capture_path.replace(bucket, "")
             logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
-            resp["temporary_path"] = generate_download_signed_url_v4(
-                bucket, blob_path, 15
-            )
+
+            if (
+                current_app.config["DEPLOYMENT"] == "local"
+                or current_app.config["DEPLOYMENT"] == "k8s"
+            ):
+                if registry_item.media_type == "video":
+                    resp[
+                        "temporary_path"
+                    ] = f"{request.url_root}api/capture/video/{user_id}/videos/{registry_key}.mp4"
+                elif registry_item.media_type == "image":
+                    resp[
+                        "temporary_path"
+                    ] = f"{request.url_root}api/capture/image/{user_id}/images/{registry_key}.jpg"
+            else:
+                resp["temporary_path"] = generate_download_signed_url_v4(
+                    bucket, blob_path, 15
+                )
             logging.info(f'generated link: {resp["temporary_path"]}')
         else:
             resp["temporary_path"] = None

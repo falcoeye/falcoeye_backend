@@ -27,7 +27,7 @@ def test_edit_user_details(client, db, user):
         "name": "Falcoeye Test Edited",
     }
     headers = {"X-API-KEY": access_token}
-    resp = client.get(
+    resp = client.put(
         "/api/user/edit",
         headers=headers,
         data=json.dumps(data),

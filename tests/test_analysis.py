@@ -54,6 +54,15 @@ def test_list_analysis_paging(app, client, two_analysis):
     rmtree(workflow_dir)
 
 
+def test_list_analysis_count(client, analysis):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/analysis/count", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "analysis count data sent"
+    assert resp.json.get("analysis_count") == 1
+
+
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
 def test_add_analysis(mock_post, app, client, user, workflow, video):
     resp = login_user(client)

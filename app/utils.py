@@ -48,6 +48,7 @@ def mkdir(path):
 
 
 def rmtree(path):
+    path = path.replace("//", "/")
     path = os.path.relpath(path)
     if not path.endswith("/"):
         path = path + "/"
@@ -88,10 +89,14 @@ def exists(path):
 
 
 def generate_download_signed_url_v4(bucket_name, blob_name, expiration):
+
+    blob_name = blob_name.replace("//", "/")
     if bucket_name is None or bucket_name.strip() == "":
         # running localy
         return blob_name
 
+    if blob_name[0] == "/":
+        blob_name = blob_name[1:]
     # multiple // in the blob will not generate a correct link
     if blob_name[0] == "/":
         blob_name = blob_name[1:]
@@ -121,3 +126,16 @@ def generate_download_signed_url_v4(bucket_name, blob_name, expiration):
         access_token=credentials.token,
     )
     return url
+
+
+def get_service(service_name):
+    if (
+        current_app.config["DEPLOYMENT"] == "gcloud"
+        or current_app.config["DEPLOYMENT"] == "local"
+    ):
+        return os.environ.get(current_app.config["SERVICES"][service_name]["env"])
+    elif current_app.config["DEPLOYMENT"] == "k8s":
+        return (
+            "http://"
+            + current_app.config["SERVICES"][service_name]["k8s"].get_service_address()
+        )

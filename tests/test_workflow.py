@@ -48,6 +48,15 @@ def test_list_workflow_paged(app, client, two_workflow):
     rmtree(workflow_dir)
 
 
+def test_list_workflow_count(client, workflow):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    resp = client.get("/api/workflow/count", headers=headers)
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "workflow count data sent"
+    assert resp.json.get("workflow_count") == 1
+
+
 def test_get_workflow_by_id(app, client, workflow):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}

@@ -67,3 +67,11 @@ class WorkflowDto:
             "lastPage": fields.Boolean,
         },
     )
+    workflow_count_resp = api.model(
+        "Workflow Data Count Response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "workflow_count": fields.Integer,
+        },
+    )

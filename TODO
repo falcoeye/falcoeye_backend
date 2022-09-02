@@ -14,17 +14,26 @@ Frontend
 13. Pagenation for analysis, media and workflows
 14. Enable dark mode
 15. Remove ID from workflow cards in workflow list page and add other information
+16. Can't clear fields in analysis submission
 
 Backend
 1. Implement pagenation /
 2. Implement edit user proefile end-point /
-3. Deploy and test newly implemented duplicate capture feature
+3. Deploy and test newly implemented duplicate capture feature /
 4. One capture for all cameras, not each camera /
 5. Edit media item /
-6. lastPage flag for pagination
+6. lastPage flag for pagination /
+7. remove capture path from analysis reponse /
+8. need /count endpoints for the follwoing: sources media workflows analysis jobs
 
 Workflow
 1. uint8 images to save size /
+
+Deployment
+1. Check cluster option
+
+Training
+1. Try faster_rcnn_inception_v2_coco
 
 Data
 1. Submit lots of analysis with longer results

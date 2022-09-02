@@ -84,6 +84,14 @@ class CameraDto:
             "registry": fields.Nested(registry),
         },
     )
+    camera_count_resp = api.model(
+        "Camera Data Count Response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "camera_count": fields.Integer,
+        },
+    )
 
 
 """class CameraManufacturerDto:
