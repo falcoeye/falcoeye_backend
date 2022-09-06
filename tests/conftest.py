@@ -242,7 +242,7 @@ def aimodel(db, user, dataset):
 @pytest.fixture
 def workflow(app, db, user, aimodel):
     with open(
-        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async_grpc.json"
     ) as f:
         workflow_json = json.load(f)
 
@@ -275,7 +275,7 @@ def workflow(app, db, user, aimodel):
 @pytest.fixture
 def two_workflow(app, db, user, aimodel):
     with open(
-        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async_grpc.json"
     ) as f:
         workflow_json = json.load(f)
 

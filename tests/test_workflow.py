@@ -69,7 +69,7 @@ def test_add_workflow_with_img(client, app, user):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     with open(
-        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async_grpc.json"
     ) as f:
         structure = json.load(f)
     data = {
@@ -103,7 +103,7 @@ def test_add_workflow(client, app, user):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     with open(
-        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async.json"
+        f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async_grpc.json"
     ) as f:
         structure = json.load(f)
     data = {
