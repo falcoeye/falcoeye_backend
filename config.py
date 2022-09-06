@@ -47,7 +47,7 @@ class Config:
 
     SERVICES = {
         "falcoeye-streaming": {"env": "STREAMING_HOST", "k8s": None},
-        "falcoeye-workflow": {"env": "STREAMING_WORKFLOW", "k8s": None},
+        "falcoeye-workflow": {"env": "WORKFLOW_HOST", "k8s": None},
     }
     if DEPLOYMENT == "k8s":
         SERVICES["falcoeye-streaming"]["k8s"] = FalcoServingKube("falcoeye-streaming")

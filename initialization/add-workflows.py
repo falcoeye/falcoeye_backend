@@ -67,6 +67,7 @@ for sw in s_workflows:
     if not found:
         logging.info(f"Deleting {sw['id']}")
         resp = requests.delete(f"{URL}/api/workflow/{sw['id']}", headers=headers)
+        logging.info(resp.json())
 
 
 for wf in workflows:

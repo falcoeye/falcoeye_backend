@@ -15,6 +15,10 @@ Frontend
 14. Enable dark mode
 15. Remove ID from workflow cards in workflow list page and add other information
 16. Can't clear fields in analysis submission
+17. Something went wrong after signup
+18. First analysis produces infinit error
+19. New login from new user doesn't work. It login same user always
+20. No analysis found error
 
 Backend
 1. Implement pagenation /
@@ -24,16 +28,20 @@ Backend
 5. Edit media item /
 6. lastPage flag for pagination /
 7. remove capture path from analysis reponse /
-8. need /count endpoints for the follwoing: sources media workflows analysis jobs
+8. need /count endpoints for the follwoing: sources media workflows analysis jobs /
+9. fix token problem
 
 Workflow
 1. uint8 images to save size /
+2. what if ai svc is running but not Deployment
+3. if creating analysis didn't inialize, don't added it to db
+
 
 Deployment
 1. Check cluster option
 
 Training
-1. Try faster_rcnn_inception_v2_coco
+1. Try faster_rcnn_inception_v2_coco /
 
 Data
-1. Submit lots of analysis with longer results
+1. Submit lots of analysis with longer results /

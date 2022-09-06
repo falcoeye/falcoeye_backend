@@ -69,6 +69,7 @@ class WorkflowService:
 
     @staticmethod
     def create_workflow(user_id, data):
+        new_workflow = None
         try:
             name = data["name"]
             logger.info(f"Received new workflow {name}")
@@ -137,6 +138,11 @@ class WorkflowService:
             resp["workflow"] = workflow_info
             return resp, 201
         except Exception as error:
+            if new_workflow:
+                db.session.delete(new_workflow)
+                db.session.flush()
+                db.session.commit()
+
             logger.error(error)
             return internal_err_resp()
 
