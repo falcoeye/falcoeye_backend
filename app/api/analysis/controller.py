@@ -1,6 +1,8 @@
 import logging
+import os
+import re
 
-from flask import request
+from flask import current_app, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restx import Resource
 
@@ -139,4 +141,52 @@ class Analysis(Resource):
         current_user_id = get_jwt_identity()
         return AnalysisService.get_analysis_file_by_id(
             current_user_id, analysis_id, file_name, ext
+        )
+
+
+@api.route("/<string:analysis_id>/<string:user_id>/video/<file_name>.mp4")
+@api.param("analysis_id", "Analysis ID")
+@api.param("user_id", "User ID")
+@api.param("file_name", "File name")
+class AnalysisVideoServeLocal(Resource):
+    @api.doc(
+        "Get user's video",
+        security="apikey",
+    )
+    @jwt_required(optional=True)
+    def get(self, analysis_id, user_id, file_name):
+        """Get user's video"""
+
+        video_path = f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}/{file_name}.mp4'
+        logging.info(f"serving {video_path}")
+        headers = request.headers
+
+        if "range" not in headers:
+            return current_app.response_class(status=400)
+
+        size = os.stat(video_path)
+        size = size.st_size
+        logging.info(f"File size {size}")
+        chunk_size = 10**3
+        start = int(re.sub(r"\D", "", headers["range"]))
+        end = min(start + chunk_size, size - 1)
+
+        content_lenght = end - start + 1
+        logging.info(f"Content Length {content_lenght}")
+
+        def get_chunk(video_path, start, end):
+            with open(video_path, "rb") as f:
+                f.seek(start)
+                chunk = f.read(end)
+            return chunk
+
+        headers = {
+            "Content-Range": f"bytes {start}-{end}/{size}",
+            "Accept-Ranges": "bytes",
+            "Content-Length": content_lenght,
+            "Content-Type": "video/mp4",
+        }
+
+        return current_app.response_class(
+            get_chunk(video_path, start, end), 206, headers
         )

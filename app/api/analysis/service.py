@@ -4,7 +4,7 @@ from datetime import datetime
 from io import BytesIO
 
 import requests
-from flask import current_app, send_file
+from flask import current_app, request, send_file
 from sqlalchemy import desc
 
 from app import db
@@ -309,13 +309,19 @@ class AnalysisService:
                         data = f.read()
                     return send_file(BytesIO(data), mimetype="application/csv")
                 elif ext == "mp4":
-                    bucket = current_app.config["FS_BUCKET"]
-                    blob_path = full_name.replace(bucket, "")
-                    logging.info(
-                        f"generating 15 minutes signed url for {bucket} {blob_path}"
-                    )
-                    url = generate_download_signed_url_v4(bucket, blob_path, 15)
-                    return url
+                    if (
+                        current_app.config["DEPLOYMENT"] == "local"
+                        or current_app.config["DEPLOYMENT"] == "k8s"
+                    ):
+                        return f"{request.url_root}api/analysis/{analysis_id}/{user_id}/video/{file_name}.mp4"
+                    else:
+                        bucket = current_app.config["FS_BUCKET"]
+                        blob_path = full_name.replace(bucket, "")
+                        logging.info(
+                            f"generating 15 minutes signed url for {bucket} {blob_path}"
+                        )
+                        url = generate_download_signed_url_v4(bucket, blob_path, 15)
+                        return url
                 else:
                     return err_resp("not implemented", "analysis_501", 501)
             else:
