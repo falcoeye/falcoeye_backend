@@ -59,7 +59,8 @@ class AnalysisService:
             .paginate(page, per_page=per_page)
         )
         if not (analysis := query.items):
-            return err_resp("no analysis found", "analysis_404", 404)
+            resp = message(True, "no analysis found")
+            return resp, 204
 
         lastPage = not query.has_next
         try:
@@ -109,6 +110,7 @@ class AnalysisService:
 
     @staticmethod
     def create_analysis(user_id, data):
+        new_analysis = None
         try:
 
             name = data["name"]
@@ -201,9 +203,14 @@ class AnalysisService:
                     "analysis_403",
                     403,
                 )
+                db.session.delete(new_analysis)
+                db.session.commit()
                 return err_resp, 403
 
         except Exception as error:
+            if new_analysis:
+                db.session.delete(new_analysis)
+                db.session.commit()
             logger.error(error)
             return internal_err_resp()
 
@@ -281,7 +288,7 @@ class AnalysisService:
                     data = f.read()
                 return send_file(BytesIO(data), mimetype="application/json")
             else:
-                return err_resp("no output yet", "analysis_425", 425)
+                return err_resp("no output yet", "analysis_204", 204)
         except Exception as error:
             logger.error(error)
             return internal_err_resp()

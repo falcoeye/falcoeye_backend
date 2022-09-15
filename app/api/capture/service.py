@@ -247,7 +247,7 @@ class CaptureService:
         if exists(capture_data):
             rmtree(capture_data)
 
-        resp = message(True, "analysis deleted")
+        resp = message(True, "capture deleted")
         return resp, 200
 
     @staticmethod

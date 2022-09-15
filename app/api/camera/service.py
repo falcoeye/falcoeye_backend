@@ -51,7 +51,8 @@ class CameraService:
             .paginate(page, per_page=per_page)
         )
         if not (cameras := query.items):
-            return err_resp("no camera found", "camera_404", 404)
+            resp = message(True, "no camera found")
+            return resp, 204
         lastPage = not query.has_next
         registry = CameraService.get_registry(user_id)
 

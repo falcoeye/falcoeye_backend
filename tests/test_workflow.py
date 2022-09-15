@@ -191,7 +191,7 @@ def test_empty_workflows(client, user):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/workflow/", headers=headers)
-    assert resp.status_code == 404
+    assert resp.status_code == 204
 
 
 def test_get_invalid_workflow_by_id(client, user):

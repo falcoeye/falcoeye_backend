@@ -20,6 +20,14 @@ Frontend
 19. New login from new user doesn't work. It login same user always
 20. No analysis found error
 
+21. After analysis is created from workflow, close the workflow
+22. Updated view of analysis (refresh every 5 seconds or so)
+23. The burger menu icond (looks miss-placed)
+24. The mobile view for the workflow is not good. I cannot create new analysis easily. I cannot scroll to the button
+25. TIMESTAMP to date (for video it is time since begining, for stream actuall time since the epoch). Can you handle this directly from frontend, or it require adding something to meta.json
+26. Remove buttons in video analysis (first,middle,last)
+27. Don’t call all videos of video analysis upon launching of the analysis. Instead each would have thumbnail, and an image, and put them in list or grid view not in sequence
+
 Backend
 1. Implement pagenation /
 2. Implement edit user proefile end-point /

@@ -130,6 +130,8 @@ class User(Model):
     def has_permission(self, permission):
         logging.info(f"Checking if user has permission: {permission}")
         role = Role.query.filter_by(id=self.role_id).first()
+        if role is None:
+            role = Role.query.filter_by(name="User").first()
         logging.info(f"User role: {role.name}")
         return role.has_permission(permission)
 

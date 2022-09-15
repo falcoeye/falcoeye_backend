@@ -41,7 +41,8 @@ class WorkflowService:
         orderby = orderby_dict.get(orderby, Workflow.name)
         query = Workflow.query.order_by(orderby).paginate(page, per_page=per_page)
         if not (workflows := query.items):
-            return err_resp("no workflow found", "workflow_404", 404)
+            resp = message(True, "no workflow found")
+            return resp, 204
         lastPage = not query.has_next
         try:
             workflow_data = load_workflow_data(workflows, many=True)

@@ -25,7 +25,7 @@ class AnalysisList(Resource):
         """Get a list of all analysis""",
         responses={
             200: ("analysis data sent", AnalysisDto.analysis_list),
-            404: "no analysis found",
+            204: "no analysis found",
         },
         security="apikey",
     )
@@ -110,7 +110,7 @@ class Analysis(Resource):
         "Get user's analysis meta file by id",
         responses={
             404: "analysis not found",
-            425: "no output yet",
+            204: "no output yet",
         },
         security="apikey",
     )

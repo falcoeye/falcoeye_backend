@@ -140,14 +140,14 @@
             },
             {
                 "name": "arabian_angelfish_model",
-                "type": "TFObjectDetectionModel",
+                "type": "TFModel",
                 "model_name": "arabian-angelfish",
                 "version": 1,
                 "protocol": "gRPC"
             },
             {
                 "name": "arabian_angelfish_model_thread",
-                "type": "ConcurrentgRPCTasksThreadWrapper",
+                "type": "ConcurrentTFgRPCTasksThreadWrapper",
                 "node": "arabian_angelfish_model",
                 "ntasks": "$ntasks",
                 "max_send_message_length": 6230000

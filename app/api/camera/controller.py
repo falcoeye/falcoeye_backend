@@ -23,7 +23,7 @@ class CameraList(Resource):
         "Get a list of user's cameras",
         responses={
             200: ("camera data sent", CameraDto.camera_list),
-            404: "no camera found",
+            204: "no camera found",
         },
         security="apikey",
     )

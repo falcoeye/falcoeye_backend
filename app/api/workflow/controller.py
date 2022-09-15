@@ -24,7 +24,7 @@ class WorkflowList(Resource):
         """Get a list of all workflows""",
         responses={
             200: ("workflow data sent", WorkflowDto.workflow_list),
-            404: "no workflows found",
+            204: "no workflows found",
         },
         security="apikey",
     )

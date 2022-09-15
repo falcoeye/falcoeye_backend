@@ -120,14 +120,14 @@
             },
             {
                 "name": "cocoobjects_model",
-                "type": "TFObjectDetectionModel",
+                "type": "TFModel",
                 "model_name": "cocoobjects",
                 "version": 1,
                 "protocol": "gRPC"
             },
             {
                 "name": "cocoobjects_model_thread",
-                "type": "ConcurrentgRPCTasksThreadWrapper",
+                "type": "ConcurrentTFgRPCTasksThreadWrapper",
                 "node": "cocoobjects_model",
                 "ntasks": "$ntasks",
                 "max_send_message_length": 6866000
