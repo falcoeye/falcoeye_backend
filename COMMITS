@@ -1,0 +1,8 @@
+1.0
+backend: add end point for updating analysis
+backend: create thumbnail endpoints for results
+backend: update post to put in updating capture status
+streaming: update post to put in posting to the backend for updating capture status
+workflow: change fourccc to H264
+workflow: create thumbnail for video results
+workflow: post new status after completion

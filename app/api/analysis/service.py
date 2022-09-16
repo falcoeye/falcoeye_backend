@@ -15,6 +15,7 @@ from app.dbmodels.schemas import AnalysisSchema
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Media as Media
 from app.dbmodels.studio import Video as Video
+from app.dbmodels.user import Permission, User
 from app.utils import (
     err_resp,
     exists,
@@ -329,10 +330,52 @@ class AnalysisService:
                         )
                         url = generate_download_signed_url_v4(bucket, blob_path, 15)
                         return url
+                elif ext == "jpg":
+                    with current_app.config["FS_OBJ"].open(full_name) as f:
+                        img = f.read()
+                        return send_file(
+                            BytesIO(img),
+                            mimetype="image/jpg",
+                        )
                 else:
                     return err_resp("not implemented", "analysis_501", 501)
+
             else:
                 return err_resp("no output yet", "analysis_425", 425)
+        except Exception as error:
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def update_analysis_by_id(user_id, analysis_id, data):
+        """Delete a analysis from DB by name and user id"""
+        if not (user := User.query.filter_by(id=user_id).first()):
+            return err_resp("user not found", "user_400", 400)
+
+        logger.info(f"Is {user.id} admin?")
+        logger.info(f"{user.has_permission(Permission.CHANGE_ANALYSIS_DATA)}")
+        if user.has_permission(Permission.CHANGE_ANALYSIS_DATA):
+            if not (analysis := Analysis.query.filter_by(id=analysis_id).first()):
+                return err_resp(
+                    "analysis not found",
+                    "analysis_404",
+                    404,
+                )
+        else:
+            return err_resp("unauthorized", "role_401", 401)
+
+        try:
+            # TODO: other fields
+            status = data.get("status", analysis.status)
+            analysis.status = status
+            db.session.flush()
+            db.session.commit()
+
+            resp = message(True, "analysis edited")
+            analysis_data = load_analysis_data(analysis)
+            resp["analysis"] = analysis_data
+            return resp, 200
+
         except Exception as error:
             logger.error(error)
             return internal_err_resp()

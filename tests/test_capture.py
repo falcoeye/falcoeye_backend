@@ -81,7 +81,7 @@ def change_status(client, registry_key, admin_access_token, wait_before=2):
     time.sleep(wait_before)
     logging.info(f"Posting to change status for {registry_key}")
 
-    res = client.post(
+    res = client.put(
         f"/api/capture/{registry_key}",
         headers={
             "X-API-KEY": admin_access_token,

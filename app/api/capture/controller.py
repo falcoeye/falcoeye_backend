@@ -83,7 +83,7 @@ class CaptureData(Resource):
         security="apikey",
     )
     @jwt_required()
-    def post(self, registry_key):
+    def put(self, registry_key):
         admin_id = get_jwt_identity()
         data = request.get_json()
         logging.info(f"Received new data for {registry_key} by {admin_id}")

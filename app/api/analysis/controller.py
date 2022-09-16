@@ -102,6 +102,26 @@ class Analysis(Resource):
         current_user_id = get_jwt_identity()
         return AnalysisService.delete_analysis(current_user_id, analysis_id)
 
+    @api.doc(
+        "Edit user's analysis",
+        responses={
+            200: ("analysis edited", AnalysisDto.analysis_resp),
+            404: "analysis not found",
+            400: "user not found",
+            401: ("unauthorized"),
+        },
+        security="apikey",
+    )
+    @api.expect(AnalysisDto.analysis_post, validate=False)
+    @jwt_required()
+    def put(self, analysis_id):
+        """Update user's analysis"""
+        analysis_data = request.get_json()
+        current_user_id = get_jwt_identity()
+        return AnalysisService.update_analysis_by_id(
+            current_user_id, analysis_id, analysis_data
+        )
+
 
 @api.route("/<analysis_id>/meta.json")
 @api.param("analysis_id", " Analysis ID")

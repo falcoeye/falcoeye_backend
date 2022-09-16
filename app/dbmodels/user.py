@@ -21,6 +21,7 @@ class Permission:
     DELETE_ANALYSIS = 4
     STOP_ANALYSIS = 5
     CHANGE_CAPTURE_STATUS = 6
+    CHANGE_ANALYSIS_DATA = 7
 
 
 N = 16
@@ -74,6 +75,7 @@ class Role(Model):
                 Permission.DELETE_ANALYSIS,
                 Permission.STOP_ANALYSIS,
                 Permission.CHANGE_CAPTURE_STATUS,
+                Permission.CHANGE_ANALYSIS_DATA,
             ],
         }
 
@@ -84,8 +86,12 @@ class Role(Model):
                 role = Role(name=r, permissions=permissions_to_integer(p))
                 role.default = role.name == default_role
                 db.session.add(role)
-
-        db.session.commit()
+            else:
+                # updating permission in case new privileges are added
+                role.permissions = permissions_to_integer(p)
+                logging.info(f"Updated role permission {r}: {role.permissions}")
+            db.session.flush()
+            db.session.commit()
 
     def has_permission(self, perm):
         logging.info(f"My permissions: {self.permissions}")
