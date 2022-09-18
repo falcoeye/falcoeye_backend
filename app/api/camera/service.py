@@ -262,6 +262,31 @@ class CameraService:
             camera.longitude = longitude
             camera.status = status
 
+            base64_img = data.get("image", None)
+            if base64_img:
+                camera_dir = (
+                    f'{current_app.config["USER_ASSETS"]}/{user_id}/cameras/{camera.id}'
+                )
+                mkdir(camera_dir)
+                camera_img = f"{camera_dir}/img_original.jpg"
+                thumbnail_img = f"{camera_dir}/img_260.jpg"
+                imgdata = base64.b64decode(base64_img)
+                logging.info("Updating camera image")
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(camera_img), "wb"
+                ) as f:
+                    f.write(imgdata)
+
+                logging.info("Updating camera thumbnail")
+                buffer = io.BytesIO()
+                img = Image.open(io.BytesIO(imgdata))
+                img.thumbnail((260, 260))
+                img.save(buffer, format="JPEG")
+                with current_app.config["FS_OBJ"].open(
+                    os.path.relpath(thumbnail_img), "wb"
+                ) as f:
+                    f.write(buffer.getbuffer())
+
             db.session.flush()
             db.session.commit()
             camera_data = load_camera_data(camera)

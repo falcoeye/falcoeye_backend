@@ -1,8 +1,20 @@
 1.0
-backend: add end point for updating analysis
-backend: create thumbnail endpoints for results
-backend: update post to put in updating capture status
-streaming: update post to put in posting to the backend for updating capture status
-workflow: change fourccc to H264
-workflow: create thumbnail for video results
-workflow: post new status after completion
+backend:
+add end point for updating analysis
+create thumbnail endpoints for results
+update post to put in updating capture status
+
+streaming:
+update post to put in posting to the backend for updating capture status
+
+workflow:
+change fourccc to H264
+create thumbnail for video results
+post new status after completion
+
+1.1
+backend:
+return empty array when no analysis
+allow update camera thumbnail
+workflow:
+multiple models are working now, incremental port assignment

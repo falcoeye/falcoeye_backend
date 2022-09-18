@@ -61,6 +61,8 @@ class AnalysisService:
         )
         if not (analysis := query.items):
             resp = message(True, "no analysis found")
+            resp["analysis"] = []
+            resp["lastPage"] = True
             return resp, 204
 
         lastPage = not query.has_next

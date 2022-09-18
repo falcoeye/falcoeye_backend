@@ -145,10 +145,13 @@ def test_update_camera_by_id(client, camera):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}
     camera.name = "UpdatedCamera"
+    camera_json = camera_schema.dump(camera)
+    base64img = get_base64img(f"{basedir}/media/fish.jpg")
+    camera_json["image"] = base64img
     resp = client.put(
         f"/api/camera/{camera.id}",
         headers=headers,
-        data=json.dumps(camera_schema.dump(camera)),
+        data=json.dumps(camera_json),
         content_type="application/json",
     )
     assert resp.status_code == 200
