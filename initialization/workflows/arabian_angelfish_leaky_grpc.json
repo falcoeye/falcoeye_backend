@@ -154,7 +154,7 @@
             },
             {
                 "name": "falcoeye_detection",
-                "type": "FalcoeyeDetectionNode",
+                "type": "FalcoeyeTFDetectionNode",
                 "labelmap": {
                     "1": "arabian_angelfish"
                 },

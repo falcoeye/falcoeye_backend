@@ -46,18 +46,19 @@ Backend
 10. handle workflow error /
 11. create thumbnail endpoints for results /
 12. change post to put for updating capture status /
+13. video not playing in upload
 
 
 Workflow
 1. uint8 images to save size /
 2. what if ai svc is running but not Deployment
 3. if creating analysis didn't inialize, don't added it to db /
-4. Handle all errors
+4. Handle all errors /
 5. Submit change status /
 6. create thumbnail for video results /
 7. multiple models not possible /
 8. fix the context thing
-9. fix when tf model takes long time to load
+9. fix when tf model takes long time to load /
 
 
 Deployment

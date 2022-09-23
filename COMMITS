@@ -18,3 +18,16 @@ return empty array when no analysis
 allow update camera thumbnail
 workflow:
 multiple models are working now, incremental port assignment
+
+1.2
+workflow:
+fix when tf model takes long time to load
+handle errors and divide nodes into safe and critical
+
+1.3
+workflow:
+support torch detection
+sub-divided detection node into torch/tensorflow
+fixed k8s bug when pulling pod's logs
+backend:
+added counting birds workflow
