@@ -29,5 +29,11 @@ workflow:
 support torch detection
 sub-divided detection node into torch/tensorflow
 fixed k8s bug when pulling pod's logs
+support m3u8 streaming
 backend:
 added counting birds workflow
+
+1.4
+backend:
+added detect waste workflow
+fixed empty stuff (camera,media,analysis)

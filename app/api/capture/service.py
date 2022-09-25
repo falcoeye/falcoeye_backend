@@ -185,6 +185,7 @@ class CaptureService:
 
         resp["capture_status"] = registry_item.status
         resp["registry_key"] = registry_key
+        resp["media_type"] = registry_item.media_type
         if registry_item.status == "SUCCEEDED":
             bucket = current_app.config["FS_BUCKET"]
             blob_path = registry_item.capture_path.replace(bucket, "")

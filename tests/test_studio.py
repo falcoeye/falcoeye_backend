@@ -99,7 +99,7 @@ def test_empty_media(client, user):
     headers = {"X-API-KEY": resp.json.get("access_token")}
     resp = client.get("/api/media/", headers=headers, content_type="application/json")
 
-    assert resp.status_code == 204
+    assert resp.status_code == 200
     # TODO: Why cannot access data
 
 

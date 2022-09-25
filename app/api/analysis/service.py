@@ -60,19 +60,23 @@ class AnalysisService:
             .paginate(page, per_page=per_page)
         )
         if not (analysis := query.items):
-            resp = message(True, "no analysis found")
+            resp = message(True, "analysis data sent")
             resp["analysis"] = []
             resp["lastPage"] = True
-            return resp, 204
+            return resp, 200
 
         lastPage = not query.has_next
         try:
             analysis_data = load_analysis_data(analysis, many=True)
             if len(analysis_data) == 0:
-                return err_resp("no analysis found", "analysis_404", 404)
-            resp = message(True, "analysis data sent")
-            resp["analysis"] = analysis_data
-            resp["lastPage"] = lastPage
+                resp = message(True, "analysis data sent")
+                resp["analysis"] = []
+                resp["lastPage"] = True
+                return resp, 204
+            else:
+                resp = message(True, "analysis data sent")
+                resp["analysis"] = analysis_data
+                resp["lastPage"] = lastPage
 
             return resp, 200
 

@@ -47,8 +47,10 @@ class StudioService:
             .paginate(page, per_page=per_page)
         )
         if not (media := query.items):
-            resp = message(True, "no media found")
-            return resp, 204
+            resp = message(True, "media data sent")
+            resp["media"] = []
+            resp["lastPage"] = True
+            return resp, 200
 
         lastPage = not query.has_next
         # images = Image.query.filter_by(user=user_id).all()

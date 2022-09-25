@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import datetime
 
-from flask import current_app
+from flask import current_app, request
 from PIL import Image
 from sqlalchemy import desc
 
@@ -51,8 +51,10 @@ class CameraService:
             .paginate(page, per_page=per_page)
         )
         if not (cameras := query.items):
-            resp = message(True, "no camera found")
-            return resp, 204
+            resp = message(True, "camera data sent")
+            resp["camera"] = []
+            resp["lastPage"] = True
+            return resp, 200
         lastPage = not query.has_next
         registry = CameraService.get_registry(user_id)
 
@@ -83,25 +85,41 @@ class CameraService:
     @staticmethod
     def get_registry(user_id, camera_id=None):
         # There should be one of this
-        reg_key = Registry.query.filter(
+        registry_item = Registry.query.filter(
             Registry.status.in_(("SUCCEEDED", "STARTED")),
             Registry.user == user_id
             # Registry.camera_id == camera_id,
         ).first()
 
         registry = {}
-        if reg_key:
-            registry["capture_status"] = reg_key.status
-            registry["registry_key"] = str(reg_key.id)
-            if reg_key.status == "SUCCEEDED":
+        if registry_item:
+            registry_key = str(registry_item.id)
+            registry["capture_status"] = registry_item.status
+            registry["registry_key"] = registry_key
+            registry["media_type"] = registry_item.media_type
+            if registry_item.status == "SUCCEEDED":
                 bucket = current_app.config["FS_BUCKET"]
-                blob_path = reg_key.capture_path.replace(bucket, "")
+                blob_path = registry_item.capture_path.replace(bucket, "")
                 logging.info(
                     f"generating 15 minutes signed url for {bucket} {blob_path}"
                 )
-                registry["temporary_path"] = generate_download_signed_url_v4(
-                    bucket, blob_path, 15
-                )
+
+                if (
+                    current_app.config["DEPLOYMENT"] == "local"
+                    or current_app.config["DEPLOYMENT"] == "k8s"
+                ):
+                    if registry_item.media_type == "video":
+                        registry[
+                            "temporary_path"
+                        ] = f"{request.url_root}api/capture/video/{user_id}/videos/{registry_key}.mp4"
+                    elif registry_item.media_type == "image":
+                        registry[
+                            "temporary_path"
+                        ] = f"{request.url_root}api/capture/image/{user_id}/images/{registry_key}.jpg"
+                else:
+                    registry["temporary_path"] = generate_download_signed_url_v4(
+                        bucket, blob_path, 15
+                    )
                 logging.info(f'generated link: {registry["temporary_path"]}')
             else:
                 registry["temporary_path"] = None

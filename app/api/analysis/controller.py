@@ -23,10 +23,7 @@ logger = logging.getLogger(__name__)
 class AnalysisList(Resource):
     @api.doc(
         """Get a list of all analysis""",
-        responses={
-            200: ("analysis data sent", AnalysisDto.analysis_list),
-            204: "no analysis found",
-        },
+        responses={200: ("analysis data sent", AnalysisDto.analysis_list)},
         security="apikey",
     )
     @jwt_required()

@@ -21,10 +21,7 @@ camera_schema = CameraSchema()
 class CameraList(Resource):
     @api_camera.doc(
         "Get a list of user's cameras",
-        responses={
-            200: ("camera data sent", CameraDto.camera_list),
-            204: "no camera found",
-        },
+        responses={200: ("camera data sent", CameraDto.camera_list)},
         security="apikey",
     )
     @jwt_required()

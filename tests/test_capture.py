@@ -483,6 +483,7 @@ def test_capture_and_leave(mock_post, app, client, camera, streaming_admin):
     assert resp.json.get("camera").get("name") == camera.name
     assert resp.json.get("message") == "camera data sent"
     assert resp.json.get("registry")["registry_key"] == registry_key
+    assert resp.json.get("registry")["media_type"] == "video"
     assert resp.json.get("registry")["capture_status"] == "SUCCEEDED"
 
     resp = client.post(

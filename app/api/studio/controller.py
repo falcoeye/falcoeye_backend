@@ -31,10 +31,7 @@ video_schema = VideoSchema()
 class StudioList(Resource):
     @api.doc(
         "Get user's media",
-        responses={
-            200: ("media data sent", media_resp),
-            204: "no media found",
-        },
+        responses={200: ("media data sent", media_resp)},
         security="apikey",
     )
     @jwt_required()
