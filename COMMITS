@@ -37,3 +37,12 @@ added counting birds workflow
 backend:
 added detect waste workflow
 fixed empty stuff (camera,media,analysis)
+
+1.5
+backend:
+enhanced car workflow
+workflow
+added size filter
+made nms suppressor optional
+timestamp to date in case of streaming
+improved client tester to visualize prediction

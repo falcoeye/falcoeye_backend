@@ -65,7 +65,7 @@
                     "type": "float",
                     "disc": "Minimum detection confidance ([0-1])",
                     "source": "user",
-                    "default": 0.50
+                    "default": 0.1
                 },
                 {
                     "name": "max_boxes",
@@ -73,6 +73,20 @@
                     "disc": "Maximum number of detections ([0-100])",
                     "source": "user",
                     "default": 100
+                },
+                {
+                    "name": "width_threshold",
+                    "type": "float",
+                    "disc": "Detection large width suppressor ([0-1])",
+                    "source": "user",
+                    "default": 0.1
+                },
+                {
+                    "name": "height_threshold",
+                    "type": "float",
+                    "disc": "Detection large height suppressor ([0-1])",
+                    "source": "user",
+                    "default": 0.1
                 },
                 {
                     "name": "length",
@@ -218,7 +232,14 @@
                     "90":"toothbrush"
                 },
                 "min_score_thresh": "$min_score_thresh",
-                "max_boxes": "$max_boxes"
+                "max_boxes": "$max_boxes",
+                "overlap_thresh": null
+            },
+            {
+                "name": "size_filter",
+                "type": "SizeFilter",
+                "width_threshold": "$width_threshold",
+                "height_threshold": "$height_threshold"
             },
             {
                 "name": "class_counter",
@@ -238,6 +259,7 @@
                 "frequency": "$frequency",
                 "nodes": [
                     "falcoeye_detection",
+                    "size_filter",
                     "class_counter",
                     "csv_outputter"
                 ]

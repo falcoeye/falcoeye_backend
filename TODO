@@ -48,7 +48,8 @@ Backend
 10. handle workflow error /
 11. create thumbnail endpoints for results /
 12. change post to put for updating capture status /
-13. video not playing in upload
+13. video not playing in upload /
+14. Bug: capture, delete before capture is completed, capture
 
 
 Workflow

@@ -75,6 +75,13 @@
                     "default": 100
                 },
                 {
+                    "name": "overlap_thresh",
+                    "type": "float",
+                    "disc": "Detection overlap suppressor ([0-1])",
+                    "source": "user",
+                    "default": 0.5
+                },
+                {
                     "name": "length",
                     "type": "float",
                     "disc": "Length of streaming (seconds, -1 for entire video)",
@@ -139,7 +146,8 @@
                     "1": "fish"
                 },
                 "min_score_thresh": "$min_score_thresh",
-                "max_boxes": "$max_boxes"
+                "max_boxes": "$max_boxes",
+                "overlap_thresh": "$overlap_thresh"
             },
             {
                 "name": "class_counter",
