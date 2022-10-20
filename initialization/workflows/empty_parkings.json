@@ -1,9 +1,9 @@
 {
-    "name": "Cars Counter (gRPC)",
-    "usedfor": "Monitoring cars crowd in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. When crossed with maritime data (weather, water condition and quality) the outcome can be used to detect cars behavior over different conditions",
-    "consideration": "- A single cars can be counted more than once\n- Depending on the interval, cars might not be observed and counted\n- cars must be within close proximity\n- Underwater visibility might affect the results ",
+    "name": "Empty parking lot",
+    "usedfor": "Monitoring empty car lots certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. ",
+    "consideration": "- Depending on the interval, cars might not be observed and counted\n- cars must be within close proximity\n- Underwater visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
-    "results_description": "Line chart shows number of cars in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
+    "results_description": "Line chart shows number of empty parkings in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
     "structure": {
         "feeds": {
             "sources": [
@@ -52,6 +52,13 @@
                     "disc": "password for camera in case of rtsp camera",
                     "source": "infered",
                     "default": null
+                },
+                {
+                    "name": "max_cars",
+                    "type": "int",
+                    "disc": "Maximum number of parking lots",
+                    "source": "user",
+                    "default": 100
                 },
                 {
                     "name": "sample_every",
@@ -242,9 +249,10 @@
                 "height_threshold": "$height_threshold"
             },
             {
-                "name": "class_counter",
-                "type": "ClassCounter",
-                "keys": ["car"]
+                "name": "missing_cars",
+                "type": "MissingClassCounter",
+                "keys": ["car"],
+                "maxes": {"car": "$max_cars"}
             },
             {
                 "name": "csv_outputter",
@@ -260,7 +268,7 @@
                 "nodes": [
                     "falcoeye_detection",
                     "size_filter",
-                    "class_counter",
+                    "missing_cars",
                     "csv_outputter"
                 ]
             }
@@ -268,8 +276,8 @@
         "edges": [
             ["stream_source","cocoobjects_model_thread"],
             ["falcoeye_detection","size_filter"],
-            ["size_filter","class_counter"],
-            ["class_counter","csv_outputter"],
+            ["size_filter","missing_cars"],
+            ["missing_cars","csv_outputter"],
             ["cocoobjects_model_thread","sequence_runner"]
         ],
         "starters":["stream_source"],

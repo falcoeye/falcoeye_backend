@@ -1,9 +1,9 @@
 {
-    "name": "Cars Counter (gRPC)",
-    "usedfor": "Monitoring cars crowd in certain location over several time intervals to compare the crowd over daytime, days, weeks, months and seasons. When crossed with maritime data (weather, water condition and quality) the outcome can be used to detect cars behavior over different conditions",
-    "consideration": "- A single cars can be counted more than once\n- Depending on the interval, cars might not be observed and counted\n- cars must be within close proximity\n- Underwater visibility might affect the results ",
+    "name": "People in Zone",
+    "usedfor": "Monitoring people crowd in certain zone of the camera view over several time intervals to compare the crowd over daytime, days, weeks, months and seasons.",
+    "consideration": "- A single person can be counted more than once\n- Depending on the interval, person might not be observed and counted\n- person must be within close proximity\n- Underwater visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
-    "results_description": "Line chart shows number of cars in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
+    "results_description": "Line chart shows number of person in the specified zone in the sight of view per predicted frame\nUser can aggregate results by second, minutes, hour and day\nAggregation includes sum and average\n\nEach frame will have relative (video) or actual (stream) timestamp.\n\nFor the video, the result will be published after the full prediction is completed\n\nFor the stream, the results will be published actively",
     "structure": {
         "feeds": {
             "sources": [
@@ -54,6 +54,13 @@
                     "default": null
                 },
                 {
+                    "name": "zone",
+                    "type": "string",
+                    "disc": "Zone definition (x1,y1,x2,y2,...,xn,yn)",
+                    "source": "user",
+                    "default": "1344,56,438,1071,1688,1071,1911,56"
+                },
+                {
                     "name": "sample_every",
                     "type": "int",
                     "disc": "Sample every (seconds for stream and frame for video)",
@@ -65,7 +72,7 @@
                     "type": "float",
                     "disc": "Minimum detection confidance ([0-1])",
                     "source": "user",
-                    "default": 0.1
+                    "default": 0.5
                 },
                 {
                     "name": "max_boxes",
@@ -73,20 +80,6 @@
                     "disc": "Maximum number of detections ([0-100])",
                     "source": "user",
                     "default": 100
-                },
-                {
-                    "name": "width_threshold",
-                    "type": "float",
-                    "disc": "Detection large width suppressor ([0-1])",
-                    "source": "user",
-                    "default": 0.1
-                },
-                {
-                    "name": "height_threshold",
-                    "type": "float",
-                    "disc": "Detection large height suppressor ([0-1])",
-                    "source": "user",
-                    "default": 0.1
                 },
                 {
                     "name": "length",
@@ -236,21 +229,22 @@
                 "overlap_thresh": null
             },
             {
-                "name": "size_filter",
-                "type": "SizeFilter",
-                "width_threshold": "$width_threshold",
-                "height_threshold": "$height_threshold"
+                "name": "zone_filter",
+                "type": "ZoneFilter",
+                "points": "$zone",
+                "width": 1920,
+                "height": 1080
             },
             {
                 "name": "class_counter",
                 "type": "ClassCounter",
-                "keys": ["car"]
+                "keys": ["person"]
             },
             {
                 "name": "csv_outputter",
                 "type": "CSVWriter",
                 "xaxis": "Timestamp",
-                "yaxis": "car",
+                "yaxis": "person",
                 "prefix": "$prefix"
             },
             {
@@ -259,7 +253,7 @@
                 "frequency": "$frequency",
                 "nodes": [
                     "falcoeye_detection",
-                    "size_filter",
+                    "zone_filter",
                     "class_counter",
                     "csv_outputter"
                 ]
@@ -267,8 +261,8 @@
         ],
         "edges": [
             ["stream_source","cocoobjects_model_thread"],
-            ["falcoeye_detection","size_filter"],
-            ["size_filter","class_counter"],
+            ["falcoeye_detection","zone_filter"],
+            ["zone_filter","class_counter"],
             ["class_counter","csv_outputter"],
             ["cocoobjects_model_thread","sequence_runner"]
         ],

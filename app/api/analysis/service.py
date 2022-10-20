@@ -72,7 +72,7 @@ class AnalysisService:
                 resp = message(True, "analysis data sent")
                 resp["analysis"] = []
                 resp["lastPage"] = True
-                return resp, 204
+                return resp, 200
             else:
                 resp = message(True, "analysis data sent")
                 resp["analysis"] = analysis_data

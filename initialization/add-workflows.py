@@ -42,7 +42,7 @@ def get_base64img(imgfile):
 
 
 resp = requests.get(f"{URL}/api/workflow/", headers=headers)
-if resp.status_code != 404:
+if resp.status_code != 204:
     s_workflows = resp.json()["workflow"]
 else:
     s_workflows = []
