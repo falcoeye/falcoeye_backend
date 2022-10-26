@@ -1,3 +1,4 @@
+import json
 import logging
 import os.path
 from datetime import datetime
@@ -23,6 +24,7 @@ from app.utils import (
     get_service,
     internal_err_resp,
     message,
+    mkdir,
     rmtree,
 )
 
@@ -118,6 +120,7 @@ class AnalysisService:
     @staticmethod
     def create_analysis(user_id, data):
         new_analysis = None
+        storage_path = None
         try:
 
             name = data["name"]
@@ -148,7 +151,9 @@ class AnalysisService:
             logger.info("Database item is created")
 
             storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{str(new_analysis.id)}/"
+            mkdir(storage_path)
             logger.info(f"Analysis results will be stored in {storage_path}")
+
             new_analysis.results_path = storage_path
             logger.info("Updating database item with storage path")
             # Analysis started. create a db object
@@ -185,6 +190,10 @@ class AnalysisService:
                 "analysis": {"id": str(new_analysis.id), "args": wf_args},
                 "workflow": wf_structure,
             }
+            anal_structure = f"{storage_path}/structure.json"
+            with open(anal_structure, "w") as f:
+                f.write(json.dumps(anal_data, indent=4))
+
             workflow_service = get_service(
                 "falcoeye-workflow"
             )  # current_app.config["WORKFLOW_HOST"]
@@ -194,7 +203,9 @@ class AnalysisService:
             headers = {"accept": "application/json", "Content-Type": "application/json"}
 
             wf_resp = requests.post(
-                f"{workflow_service}/api/analysis/", json=anal_data, headers=headers
+                f"{workflow_service}/api/analysis/",
+                json={"analysis_file": anal_structure},
+                headers=headers,
             )
 
             logger.info(f"Response received {wf_resp.json()}")
@@ -205,19 +216,21 @@ class AnalysisService:
                 resp["analysis"] = analysis_info
                 return resp, 201
             else:
-                err_resp(
+                resp = err_resp(
                     "Something went wrong. Couldn't start the workflow",
                     "analysis_403",
                     403,
                 )
                 db.session.delete(new_analysis)
                 db.session.commit()
-                return err_resp, 403
+                return resp, 403
 
         except Exception as error:
             if new_analysis:
                 db.session.delete(new_analysis)
                 db.session.commit()
+                if storage_path:
+                    rmtree(storage_path)
             logger.error(error)
             return internal_err_resp()
 
