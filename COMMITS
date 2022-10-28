@@ -48,8 +48,23 @@ timestamp to date in case of streaming
 improved client tester to visualize prediction
 
 1.6
-backend
-workflow
+backend:
+workflow:
 added multiple new filters
 fixed bugs in multiple filters
 refactored fill args
+
+2.0
+backend:
+writing structure json file of analysis in analysis folder
+workflow:
+spin-off actual workflow running to analysis
+implement kubernetes job
+analysis:
+first commit
+
+2.1
+streaming:
+refactored to kubernetes jobs
+backend:
+supported streaming jobs

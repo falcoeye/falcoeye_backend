@@ -172,6 +172,7 @@ class CaptureService:
                 return response, 404
 
         except Exception as error:
+            logging.error(error)
             current_app.logger.error(error)
             return internal_err_resp()
 
