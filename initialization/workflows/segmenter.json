@@ -93,7 +93,14 @@
                     "type": "float",
                     "disc": "Blending alpha",
                     "source": "user",
-                    "default": 1
+                    "default": 0.5
+                },
+                {
+                    "name": "size",
+                    "type": "string",
+                    "disc": "Resize your video to (width,height) for faster prediction. (-1) for no resizing",
+                    "source": "user",
+                    "default": "640,360"
                 },
                 {
                     "name": "ntasks",
@@ -116,6 +123,19 @@
                 "password": "$password",
                 "length": "$length",
                 "sample_every": "$sample_every"
+            },
+            {
+                "name": "resizer",
+                "type": "Resizer",
+                "size": "$size"
+            },
+            {
+                "name": "sequence_runner_resizer",
+                "type": "SequenceRunner",
+                "frequency": "1",
+                "nodes": [
+                    "resizer"
+                ]
             },
             {
                 "name": "segmenter_model",
@@ -322,7 +342,8 @@
             }
         ],
         "edges": [
-            ["stream_source","leaky_valve"],
+            ["stream_source","sequence_runner_resizer"],
+            ["resizer","leaky_valve"],
             ["falcoeye_segmentation","sequence_maintainer"],
             ["sequence_maintainer","segmentation_blender"],
             ["segmentation_blender","video_writer"],
@@ -333,6 +354,7 @@
             "sequence_runner",
             "leaky_valve",
             "segmenter_model_thread",
+            "sequence_runner_resizer",
             "stream_source"
         ]
     }
