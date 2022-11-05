@@ -68,3 +68,11 @@ streaming:
 refactored to kubernetes jobs
 backend:
 supported streaming jobs
+capture:
+first commit
+
+2.2
+backend:
+added segmenter workflow
+analysis:
+supported segmentation
