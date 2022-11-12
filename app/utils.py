@@ -1,7 +1,9 @@
 import logging
 import os
 import os.path
+import random
 import shutil
+import string
 from datetime import datetime, timedelta
 
 import google.auth
@@ -21,6 +23,14 @@ def validation_error(status, errors):
     response_object = {"status": status, "errors": errors}
 
     return response_object
+
+
+def random_string(N=6):
+    randomstr = "".join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(N)
+    )
+    logging.info(f"random_string called with N={N}: returning {randomstr}")
+    return randomstr
 
 
 def err_resp(msg, reason, code):

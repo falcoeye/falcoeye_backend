@@ -25,6 +25,7 @@ from app.utils import (
     internal_err_resp,
     message,
     mkdir,
+    random_string,
     rmtree,
 )
 
@@ -118,31 +119,66 @@ class AnalysisService:
         return None
 
     @staticmethod
-    def create_analysis(user_id, data):
+    def execute_workflow(user_id, wf_structure, data, storage_path, analysis_id):
+
+        logger.info("parsing feeds")
+        # parsing feeds
+        feeds = data.get("feeds", None)
+        if not feeds:
+            return err_resp("invalid workflow", "workflow_404", 404)
+        # TODO: check for bad inputs
+        wf_params = feeds["params"]
+        wf_source = feeds["source"]
+        if wf_source["type"] not in wf_structure["feeds"]["sources"]:
+            return err_resp("invalid workflow", "workflow_404", 404)
+        # getting actual source data
+        wf_source = AnalysisService.get_source(wf_source, user_id)
+        logging.info(f"Calculated sources {wf_source}")
+
+        # preparing args starting with params
+        wf_args = wf_params
+        # this is where analysis output will be stored. Must be augmented here
+        wf_args["prefix"] = storage_path
+        # putting source
+        wf_args.update(wf_source)
+
+        anal_data = {
+            "analysis": {"id": analysis_id, "args": wf_args},
+            "workflow": wf_structure,
+        }
+        anal_structure = f"{storage_path}/structure.json"
+        with open(anal_structure, "w") as f:
+            f.write(json.dumps(anal_data, indent=4))
+
+        workflow_service = get_service(
+            "falcoeye-workflow"
+        )  # current_app.config["WORKFLOW_HOST"]
+        logger.info(
+            f"Sending request to workflow server on {workflow_service}/api/analysis"
+        )
+        headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+        wf_resp = requests.post(
+            f"{workflow_service}/api/analysis/",
+            json={"analysis_file": anal_structure},
+            headers=headers,
+        )
+
+        logger.info(f"Response received {wf_resp.json()}")
+        return wf_resp
+
+    @staticmethod
+    def create_long_analysis(user_id, wf_id, wf_structure, data):
         new_analysis = None
         storage_path = None
         try:
-
             name = data["name"]
-            logger.info(f"Creating analysis with name {name}")
-            if Analysis.query.filter_by(name=name).first() is not None:
-                logger.error(f"Analysis with name {name} already exists")
-                return err_resp("name already exists", "name_404", 404)
-
-            workflow_id = data.get("workflow_id", None)
-            logger.info(f"Analysis uses the following workflow {workflow_id}")
-            # workflows are assumed to be accessible by everyone here
-            if not workflow_id or not (
-                workflow := Workflow.query.filter_by(id=workflow_id).first()
-            ):
-                return err_resp("invalid workflow", "workflow_404", 404)
-
             new_analysis = Analysis(
                 name=name,
                 creator=user_id,
                 created_at=datetime.utcnow(),
                 status="new",
-                workflow_id=workflow.id,
+                workflow_id=wf_id,
             )
             # Analysis started. create a db object
             db.session.add(new_analysis)
@@ -161,54 +197,9 @@ class AnalysisService:
             db.session.flush()
             db.session.commit()
 
-            workflow_structure = f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}/structure.json'
-            logger.info(f"Loading workflow structure from {workflow_structure}")
-            wf_structure = load_workflow_structure(workflow_structure)
-
-            logger.info("parsing feeds")
-            # parsing feeds
-            feeds = data.get("feeds", None)
-            if not feeds:
-                return err_resp("invalid workflow", "workflow_404", 404)
-            # TODO: check for bad inputs
-            wf_params = feeds["params"]
-            wf_source = feeds["source"]
-            if wf_source["type"] not in wf_structure["feeds"]["sources"]:
-                return err_resp("invalid workflow", "workflow_404", 404)
-            # getting actual source data
-            wf_source = AnalysisService.get_source(wf_source, user_id)
-            logging.info(f"Calculated sources {wf_source}")
-
-            # preparing args starting with params
-            wf_args = wf_params
-            # this is where analysis output will be stored. Must be augmented here
-            wf_args["prefix"] = storage_path
-            # putting source
-            wf_args.update(wf_source)
-
-            anal_data = {
-                "analysis": {"id": str(new_analysis.id), "args": wf_args},
-                "workflow": wf_structure,
-            }
-            anal_structure = f"{storage_path}/structure.json"
-            with open(anal_structure, "w") as f:
-                f.write(json.dumps(anal_data, indent=4))
-
-            workflow_service = get_service(
-                "falcoeye-workflow"
-            )  # current_app.config["WORKFLOW_HOST"]
-            logger.info(
-                f"Sending request to workflow server on {workflow_service}/api/analysis"
+            wf_resp = AnalysisService.execute_workflow(
+                user_id, wf_structure, data, storage_path, str(new_analysis.id)
             )
-            headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-            wf_resp = requests.post(
-                f"{workflow_service}/api/analysis/",
-                json={"analysis_file": anal_structure},
-                headers=headers,
-            )
-
-            logger.info(f"Response received {wf_resp.json()}")
 
             if wf_resp.status_code == 200:
                 analysis_info = analysis_schema.dump(new_analysis)
@@ -224,13 +215,77 @@ class AnalysisService:
                 db.session.delete(new_analysis)
                 db.session.commit()
                 return resp, 403
-
         except Exception as error:
             if new_analysis:
                 db.session.delete(new_analysis)
                 db.session.commit()
                 if storage_path:
                     rmtree(storage_path)
+            logger.error(error)
+            return internal_err_resp()
+
+    @staticmethod
+    def create_short_analysis(user_id, wf_id, wf_structure, data):
+        analysis_id = random_string().lower()
+        storage_path = f"{current_app.config['TEMPORARY_DATA_PATH']}/{user_id}/analysis/{analysis_id}/"
+        mkdir(storage_path)
+        logger.info(f"Analysis results will be stored in {storage_path}")
+        wf_resp = AnalysisService.execute_workflow(
+            user_id, wf_structure, data, storage_path, analysis_id
+        )
+        if wf_resp.status_code == 200:
+            resp = message(True, "analysis done")
+            results = {}
+            results_path = f"{storage_path}/results.json"
+            if exists(results_path):
+                with open(results_path) as f:
+                    results = json.load(f)
+            resp["analysis"] = results
+            return resp, 200
+        else:
+            resp = err_resp(
+                "Something went wrong. Couldn't start the workflow",
+                "analysis_403",
+                403,
+            )
+            return resp, 403
+
+    @staticmethod
+    def create_analysis(user_id, data):
+
+        try:
+            name = data["name"]
+            logger.info(f"Creating analysis with name {name}")
+            if Analysis.query.filter_by(name=name).first() is not None:
+                logger.error(f"Analysis with name {name} already exists")
+                return err_resp("name already exists", "name_404", 404)
+
+            workflow_id = data.get("workflow_id", None)
+            logger.info(f"Analysis uses the following workflow {workflow_id}")
+            # workflows are assumed to be accessible by everyone here
+            if not workflow_id or not (
+                workflow := Workflow.query.filter_by(id=workflow_id).first()
+            ):
+                return err_resp("invalid workflow", "workflow_404", 404)
+
+            # loading workflow file
+            workflow_structure = f'{current_app.config["FALCOEYE_ASSETS"]}/workflows/{workflow_id}/structure.json'
+            logger.info(f"Loading workflow structure from {workflow_structure}")
+            wf_structure = load_workflow_structure(workflow_structure)
+            # checking if short or long analysis
+            inline = wf_structure.get("inline", False)
+            if not inline:
+                logger.info(f"Running long workflow {workflow.id}")
+                return AnalysisService.create_long_analysis(
+                    user_id, workflow.id, wf_structure, data
+                )
+            else:
+                logger.info(f"Running inline workflow {workflow.id}")
+                return AnalysisService.create_short_analysis(
+                    user_id, workflow.id, wf_structure, data
+                )
+
+        except Exception as error:
             logger.error(error)
             return internal_err_resp()
 
@@ -301,6 +356,7 @@ class AnalysisService:
                 f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
             )
             logging.info(f"checking if meta exists {analysis_dir}/meta.json")
+
             if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
                 with current_app.config["FS_OBJ"].open(
                     os.path.relpath(f"{analysis_dir}/meta.json")

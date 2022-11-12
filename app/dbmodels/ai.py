@@ -47,6 +47,7 @@ class Workflow(Base):
     consideration = Column(db.String)
     assumption = Column(db.String)
     results_description = Column(db.String)
+    inline = Column(db.Boolean, default=False)
 
 
 class Analysis(Base):

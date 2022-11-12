@@ -94,6 +94,31 @@ def test_add_analysis(mock_post, app, client, user, workflow, video):
 
 
 @mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
+def test_add_inline_analysis(mock_post, app, client, user, inline_workflow, video):
+    resp = login_user(client)
+    headers = {"X-API-KEY": resp.json.get("access_token")}
+    data = {
+        "name": "TableFinder",
+        "workflow_id": str(inline_workflow.id),
+        "feeds": {"source": {"type": "video", "id": str(video.id)}, "params": {}},
+    }
+    resp = client.post(
+        "/api/analysis/",
+        data=json.dumps(data),
+        content_type="application/json",
+        headers=headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json.get("message") == "analysis done"
+
+    inline_workflow_dir = (
+        f'{app.config["FALCOEYE_ASSETS"]}/workflows/{inline_workflow.id}'
+    )
+    logging.info(f"Removing workflow directory {inline_workflow_dir}")
+    rmtree(inline_workflow_dir)
+
+
+@mock.patch("app.api.analysis.service.requests.post", side_effect=mocked_workflow_post)
 def test_edit_analysis(mock_post, app, client, user, workflow, video, streaming_admin):
     resp = login_user(client)
     headers = {"X-API-KEY": resp.json.get("access_token")}

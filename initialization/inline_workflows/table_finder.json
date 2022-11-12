@@ -1,9 +1,9 @@
 {
-    "name": "In-Door Segmenter",
-    "usedfor": "Segment in-door videos or stream",
-    "consideration": "No consideration",
-    "assumption": "Clear and highly textured scene",
-    "results_description": "Create a segmented version of the stream or the video",
+    "name": "Tabel Finder",
+    "usedfor": "Find tables",
+    "consideration": "Will have some noise",
+    "assumption": "Highly texture image",
+    "results_description": "Segmentation",
     "structure":{
         "feeds": {
             "sources": [
@@ -52,62 +52,6 @@
                     "disc": "password for camera in case of rtsp camera",
                     "source": "infered",
                     "default": null
-                },
-                {
-                    "name": "sample_every",
-                    "type": "int",
-                    "disc": "Sample every (seconds for stream and frame for video)",
-                    "source": "user",
-                    "default": 1
-                },
-                {
-                    "name": "length",
-                    "type": "float",
-                    "disc": "Length of streaming (seconds, -1 for entire video)",
-                    "source": "user",
-                    "default": -1
-                },
-                {
-                    "name": "frequency",
-                    "type": "int",
-                    "disc": "Output frequency (every n frame)",
-                    "source": "user",
-                    "default": 5
-                },
-                {
-                    "name": "timed_gate_open_freq",
-                    "type": "int",
-                    "disc": "Frequency of opening timed gate in a leaky valve (i.e. every what frames?)",
-                    "source": "user",
-                    "default": 60
-                },
-                {
-                    "name": "timed_gate_opened_last",
-                    "type": "int",
-                    "disc": "Time the timed gate is kept open (i.e. after how many frames?) < timed_gate_open_freq",
-                    "source": "user",
-                    "default": 1
-                },
-                {
-                    "name": "alpha",
-                    "type": "float",
-                    "disc": "Blending alpha",
-                    "source": "user",
-                    "default": 0.5
-                },
-                {
-                    "name": "size",
-                    "type": "string",
-                    "disc": "Resize your video to (width,height) for faster prediction. (-1) for no resizing",
-                    "source": "user",
-                    "default": "640,360"
-                },
-                {
-                    "name": "ntasks",
-                    "type": "int",
-                    "disc": "Number of tcp process at a time",
-                    "source": "user",
-                    "default": 4
                 }
             ]
         },
@@ -121,21 +65,8 @@
                 "port": "$port",
                 "username": "$username",
                 "password": "$password",
-                "length": "$length",
-                "sample_every": "$sample_every"
-            },
-            {
-                "name": "resizer",
-                "type": "Resizer",
-                "size": "$size"
-            },
-            {
-                "name": "sequence_runner_resizer",
-                "type": "SequenceRunner",
-                "frequency": "1",
-                "nodes": [
-                    "resizer"
-                ]
+                "length": {"value":1,"unit":"frame"},
+                "sample_every": 1
             },
             {
                 "name": "segmenter_model",
@@ -143,12 +74,6 @@
                 "model_name": "segmenter",
                 "version": 1,
                 "protocol": "gRPC"
-            },
-            {
-                "name": "segmenter_model_thread",
-                "type": "ConcurrentTorchgRPCTasksThreadWrapper",
-                "node": "segmenter_model",
-                "ntasks": "$ntasks"
             },
             {
                 "name": "falcoeye_segmentation",
@@ -309,16 +234,9 @@
                   }
             },
             {
-                "name": "sequence_maintainer",
-                "type": "SortedSequence"
-            },
-            {
-                "name": "leaky_valve",
-                "type": "OneLeakyOneTimedValve",
-                "timed_gate_open_freq": "$timed_gate_open_freq",
-                "timed_gate_opened_last": "$timed_gate_opened_last",
-                "nodes": ["sequence_maintainer","segmenter_model_thread"],
-                "close_on_close": [false,true]
+                "name": "table_finder",
+                "type": "TypeFilter",
+                "keys": ["table"]
             },
             {
                 "name": "segmentation_blender",
@@ -326,42 +244,33 @@
                 "alpha": 0.5
             },
             {
-                "name": "video_writer",
-                "type": "ActiveVideoWriter",
+                "name": "result",
+                "type": "Serializer",
                 "prefix": "$prefix"
             },
             {
                 "name": "finalizer",
-                "type": "Finalizer"
-            },
-            {
-                "name": "sequence_runner",
-                "type": "SequenceRunner",
-                "frequency": "$frequency",
-                "nodes": [
-                    "falcoeye_segmentation",
-                    "sequence_maintainer",
-                    "segmentation_blender",
-                    "video_writer",
-                    "finalizer"
-                ]
+                "type": "Finalizer",
+                "prefix": "$prefix"
             }
         ],
         "edges": [
-            ["stream_source","sequence_runner_resizer"],
-            ["resizer","leaky_valve"],
-            ["falcoeye_segmentation","sequence_maintainer"],
-            ["sequence_maintainer","segmentation_blender"],
-            ["segmentation_blender","video_writer"],
-            ["segmenter_model_thread","sequence_runner"]
+            ["stream_source","segmenter_model"],
+            ["segmenter_model","falcoeye_segmentation"],
+            ["falcoeye_segmentation","table_finder"],
+            ["table_finder","segmentation_blender"],
+            ["segmentation_blender","result"]
         ],
         "starters":["stream_source"],
         "run_order": [
-            "sequence_runner",
-            "leaky_valve",
-            "segmenter_model_thread",
-            "sequence_runner_resizer",
-            "stream_source"
-        ]
+            "stream_source",
+            "segmenter_model",
+            "falcoeye_segmentation",
+            "table_finder",
+            "segmentation_blender",
+            "result",
+            "finalizer"
+        ],
+        "inline": true
     }
 }

@@ -39,7 +39,12 @@ class WorkflowService:
         if order_dir == "desc":
             orderby += "_desc"
         orderby = orderby_dict.get(orderby, Workflow.name)
-        query = Workflow.query.order_by(orderby).paginate(page, per_page=per_page)
+        # get only big workflows (not inline)
+        query = (
+            Workflow.query.filter_by(inline=False)
+            .order_by(orderby)
+            .paginate(page, per_page=per_page)
+        )
         if not (workflows := query.items):
             resp = message(True, "no workflow found")
             return resp, 204
@@ -59,7 +64,8 @@ class WorkflowService:
     @staticmethod
     def get_workflow_count():
         """Get workflows count"""
-        workflow_count = Workflow.query.count()
+        # get only big workflows (not inline)
+        workflow_count = Workflow.query.filter_by(inline=False).count()
         try:
             resp = message(True, "workflow count data sent")
             resp["workflow_count"] = workflow_count
@@ -78,7 +84,8 @@ class WorkflowService:
                 return err_resp("name already exists", "name_taken", 403)
 
             workflow_structure = data["structure"]
-
+            # TODO: inline should not be in structure
+            is_inline = data["structure"].get("inline", False)
             # TODO: creation date vs publish date (which one)
             # TODO: no need for structure file anymore
             new_workflow = Workflow(
@@ -89,6 +96,7 @@ class WorkflowService:
                 consideration=data["consideration"],
                 assumption=data["assumption"],
                 results_description=data["results_description"],
+                inline=is_inline,
             )
 
             db.session.add(new_workflow)
@@ -107,32 +115,33 @@ class WorkflowService:
             ) as f:
                 f.write(json.dumps(workflow_structure))
 
-            base64_img = data.get("image", None)
-            workflow_img = f"{workflow_dir}/img_original.jpg"
-            thumbnail_img = f"{workflow_dir}/img_260.jpg"
-            if base64_img:
-                imgdata = base64.b64decode(base64_img)
-                with current_app.config["FS_OBJ"].open(
-                    os.path.relpath(workflow_img), "wb"
-                ) as f:
-                    f.write(imgdata)
+            if not is_inline:
+                base64_img = data.get("image", None)
+                workflow_img = f"{workflow_dir}/img_original.jpg"
+                thumbnail_img = f"{workflow_dir}/img_260.jpg"
+                if base64_img:
+                    imgdata = base64.b64decode(base64_img)
+                    with current_app.config["FS_OBJ"].open(
+                        os.path.relpath(workflow_img), "wb"
+                    ) as f:
+                        f.write(imgdata)
 
-                logging.info("Adding workflow thumbnail")
-                buffer = io.BytesIO()
-                img = Image.open(io.BytesIO(imgdata))
-                img.thumbnail((260, 260))
-                img.save(buffer, format="JPEG")
-                with current_app.config["FS_OBJ"].open(
-                    os.path.relpath(thumbnail_img), "wb"
-                ) as f:
-                    f.write(buffer.getbuffer())
+                    logging.info("Adding workflow thumbnail")
+                    buffer = io.BytesIO()
+                    img = Image.open(io.BytesIO(imgdata))
+                    img.thumbnail((260, 260))
+                    img.save(buffer, format="JPEG")
+                    with current_app.config["FS_OBJ"].open(
+                        os.path.relpath(thumbnail_img), "wb"
+                    ) as f:
+                        f.write(buffer.getbuffer())
 
-            else:
-                logger.info("No workflow image. Copying default")
-                put(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
-                put(f"{basedir}/assets/default_workflow_img_260.jpg", thumbnail_img)
+                else:
+                    logger.info("No workflow image. Copying default")
+                    put(f"{basedir}/assets/default_workflow_img.jpg", workflow_img)
+                    put(f"{basedir}/assets/default_workflow_img_260.jpg", thumbnail_img)
 
-            # TODO: resize and save more image sizes
+                # TODO: resize and save more image sizes
 
             workflow_info = workflow_schema.dump(new_workflow)
             resp = message(True, "workflow added")
@@ -244,6 +253,10 @@ class WorkflowService:
         assumption = data.get("assumption", workflow.assumption)
         structure = data.get("structure", None)
         base64_img = data.get("image", None)
+        # TODO: inline should not be in structure
+        inline = False
+        if structure:
+            inline = structure.get("inline", False)
 
         try:
             logging.info("Updating workflow meta data in db")
@@ -252,6 +265,7 @@ class WorkflowService:
             workflow.consideration = consideration
             workflow.results_description = results_description
             workflow.assumption = assumption
+            workflow.inline = inline
 
             db.session.flush()
             db.session.commit()

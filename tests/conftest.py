@@ -273,6 +273,38 @@ def workflow(app, db, user, aimodel):
 
 
 @pytest.fixture
+def inline_workflow(app, db, user, aimodel):
+    with open(f"{basedir}/../initialization/inline_workflows/table_finder.json") as f:
+        workflow_json = json.load(f)
+
+    workflow = Workflow(
+        name="TableFinder",
+        creator=user.id,
+        publish_date=datetime.now(),
+        aimodel_id=aimodel.id,
+        usedfor="detecting stuff",
+        consideration="be careful",
+        assumption="barely works",
+        results_description="stuff",
+        inline=True,
+    )
+    db.session.add(workflow)
+    db.session.commit()
+
+    workflow_dir = f'{app.config["FALCOEYE_ASSETS"]}/workflows/{workflow.id}/'
+    logging.info(f"Creating workflow directory {workflow_dir}")
+
+    mkdir(workflow_dir)
+    logging.info("Writing structure file")
+    with current_app.config["FS_OBJ"].open(
+        os.path.relpath(f"{workflow_dir}/structure.json"), "w"
+    ) as f:
+        f.write(json.dumps(workflow_json["structure"]))
+
+    return workflow
+
+
+@pytest.fixture
 def two_workflow(app, db, user, aimodel):
     with open(
         f"{basedir}/../initialization/workflows/kaust_fish_counter_threaded_async_grpc.json"

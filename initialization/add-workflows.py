@@ -27,6 +27,7 @@ headers = {
 }
 user_id = resp.json().get("user").get("id")
 workflows = glob.glob(f"{basedir}/workflows/*.json")
+workflows += glob.glob(f"{basedir}/inline_workflows/*.json")
 
 
 def update(wfid, data):
@@ -41,7 +42,8 @@ def get_base64img(imgfile):
     return data.decode("utf-8")
 
 
-resp = requests.get(f"{URL}/api/workflow/", headers=headers)
+# TODO: what after 100?!!
+resp = requests.get(f"{URL}/api/workflow/?per_page=100", headers=headers)
 if resp.status_code != 204:
     s_workflows = resp.json()["workflow"]
 else:

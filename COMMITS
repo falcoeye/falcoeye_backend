@@ -76,3 +76,11 @@ backend:
 added segmenter workflow
 analysis:
 supported segmentation
+
+2.3
+backend:
+support inline analysis
+workflow:
+support inline analysis
+analysis
+support inline analysis
