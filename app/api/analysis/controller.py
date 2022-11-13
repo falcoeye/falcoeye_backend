@@ -34,7 +34,11 @@ class AnalysisList(Resource):
         per_page = int(request.args.get("per_page", 10))
         page = int(request.args.get("page", 1))
         order_dir = request.args.get("order_dir", "asc")
-        return AnalysisService.get_analysis(user_id, orderby, per_page, page, order_dir)
+        # TODO: refactor this, users are not supposed to access their inline analysis
+        inline = request.args.get("inline", False)
+        return AnalysisService.get_analysis(
+            user_id, orderby, per_page, page, order_dir, inline
+        )
 
     @api.doc(
         "Add a new analysis",

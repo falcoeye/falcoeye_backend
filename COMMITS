@@ -84,3 +84,18 @@ workflow:
 support inline analysis
 analysis
 support inline analysis
+added tests
+added serializer output node
+added finalizer node
+fixed bugs
+
+2.4
+backend:
+fixed and completed support for inline analysis
+analysis:
+fixed serial
+added test_inline in deployed backend
+workflow:
+fixed and completed support for inline analysis
+streaming:
+fixed k8s core watch job bug

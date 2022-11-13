@@ -61,3 +61,4 @@ class Analysis(Base):
     status = Column(db.String)  # new, active, error, completed
     message = Column(db.String)
     results_path = Column(db.String)
+    inline = Column(db.Boolean, default=False)

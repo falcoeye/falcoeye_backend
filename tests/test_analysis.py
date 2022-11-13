@@ -108,8 +108,8 @@ def test_add_inline_analysis(mock_post, app, client, user, inline_workflow, vide
         content_type="application/json",
         headers=headers,
     )
-    assert resp.status_code == 200
-    assert resp.json.get("message") == "analysis done"
+    assert resp.status_code == 201
+    assert resp.json.get("message") == "analysis added"
 
     inline_workflow_dir = (
         f'{app.config["FALCOEYE_ASSETS"]}/workflows/{inline_workflow.id}'

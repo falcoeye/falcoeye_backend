@@ -34,14 +34,14 @@ orderby_dict = {
 
 class WorkflowService:
     @staticmethod
-    def get_workflows(orderby, per_page, page, order_dir):
+    def get_workflows(orderby, per_page, page, order_dir, inline):
         """Get a list of all workflows"""
         if order_dir == "desc":
             orderby += "_desc"
         orderby = orderby_dict.get(orderby, Workflow.name)
         # get only big workflows (not inline)
         query = (
-            Workflow.query.filter_by(inline=False)
+            Workflow.query.filter_by(inline=inline)
             .order_by(orderby)
             .paginate(page, per_page=per_page)
         )

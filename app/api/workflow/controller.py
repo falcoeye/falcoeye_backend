@@ -35,7 +35,9 @@ class WorkflowList(Resource):
         per_page = int(request.args.get("per_page", 10))
         page = int(request.args.get("page", 1))
         order_dir = request.args.get("order_dir", "asc")
-        return WorkflowService.get_workflows(orderby, per_page, page, order_dir)
+        # TODO: refactor this
+        inline = request.args.get("inline", False)
+        return WorkflowService.get_workflows(orderby, per_page, page, order_dir, inline)
 
     @api.doc(
         "Add a new workflow",

@@ -52,13 +52,13 @@ orderby_dict = {
 
 class AnalysisService:
     @staticmethod
-    def get_analysis(user_id, orderby, per_page, page, order_dir):
+    def get_analysis(user_id, orderby, per_page, page, order_dir, inline):
         """Get a list of all user analysis"""
         if order_dir == "desc":
             orderby += "_desc"
         orderby = orderby_dict.get(orderby, Media.created_at)
         query = (
-            Analysis.query.filter_by(creator=user_id)
+            Analysis.query.filter_by(creator=user_id, inline=inline)
             .order_by(orderby)
             .paginate(page, per_page=per_page)
         )
@@ -147,6 +147,7 @@ class AnalysisService:
             "workflow": wf_structure,
         }
         anal_structure = f"{storage_path}/structure.json"
+
         with open(anal_structure, "w") as f:
             f.write(json.dumps(anal_data, indent=4))
 
@@ -168,25 +169,33 @@ class AnalysisService:
         return wf_resp
 
     @staticmethod
-    def create_long_analysis(user_id, wf_id, wf_structure, data):
+    def create_analysis_(user_id, wf_id, wf_structure, data, inline):
+        name = data.get("name", random_string(10))
+        logger.info(f"Creating analysis with name {name}")
+        if Analysis.query.filter_by(name=name).first() is not None:
+            logger.error(f"Analysis with name {name} already exists")
+            return err_resp("name already exists", "name_404", 404)
+
         new_analysis = None
         storage_path = None
         try:
-            name = data["name"]
             new_analysis = Analysis(
                 name=name,
                 creator=user_id,
                 created_at=datetime.utcnow(),
                 status="new",
                 workflow_id=wf_id,
+                inline=inline,
             )
             # Analysis started. create a db object
             db.session.add(new_analysis)
             db.session.flush()
             db.session.commit()
             logger.info("Database item is created")
-
-            storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{str(new_analysis.id)}/"
+            if not inline:
+                storage_path = f"{current_app.config['USER_ASSETS']}/{user_id}/analysis/{str(new_analysis.id)}/"
+            else:
+                storage_path = f"{current_app.config['TEMPORARY_DATA_PATH']}/{user_id}/analysis/{str(new_analysis.id)}/"
             mkdir(storage_path)
             logger.info(f"Analysis results will be stored in {storage_path}")
 
@@ -225,41 +234,8 @@ class AnalysisService:
             return internal_err_resp()
 
     @staticmethod
-    def create_short_analysis(user_id, wf_id, wf_structure, data):
-        analysis_id = random_string().lower()
-        storage_path = f"{current_app.config['TEMPORARY_DATA_PATH']}/{user_id}/analysis/{analysis_id}/"
-        mkdir(storage_path)
-        logger.info(f"Analysis results will be stored in {storage_path}")
-        wf_resp = AnalysisService.execute_workflow(
-            user_id, wf_structure, data, storage_path, analysis_id
-        )
-        if wf_resp.status_code == 200:
-            resp = message(True, "analysis done")
-            results = {}
-            results_path = f"{storage_path}/results.json"
-            if exists(results_path):
-                with open(results_path) as f:
-                    results = json.load(f)
-            resp["analysis"] = results
-            return resp, 200
-        else:
-            resp = err_resp(
-                "Something went wrong. Couldn't start the workflow",
-                "analysis_403",
-                403,
-            )
-            return resp, 403
-
-    @staticmethod
     def create_analysis(user_id, data):
-
         try:
-            name = data["name"]
-            logger.info(f"Creating analysis with name {name}")
-            if Analysis.query.filter_by(name=name).first() is not None:
-                logger.error(f"Analysis with name {name} already exists")
-                return err_resp("name already exists", "name_404", 404)
-
             workflow_id = data.get("workflow_id", None)
             logger.info(f"Analysis uses the following workflow {workflow_id}")
             # workflows are assumed to be accessible by everyone here
@@ -274,16 +250,11 @@ class AnalysisService:
             wf_structure = load_workflow_structure(workflow_structure)
             # checking if short or long analysis
             inline = wf_structure.get("inline", False)
-            if not inline:
-                logger.info(f"Running long workflow {workflow.id}")
-                return AnalysisService.create_long_analysis(
-                    user_id, workflow.id, wf_structure, data
-                )
-            else:
-                logger.info(f"Running inline workflow {workflow.id}")
-                return AnalysisService.create_short_analysis(
-                    user_id, workflow.id, wf_structure, data
-                )
+
+            logger.info(f"Running workflow {workflow.id}")
+            return AnalysisService.create_analysis_(
+                user_id, workflow.id, wf_structure, data, inline
+            )
 
         except Exception as error:
             logger.error(error)
@@ -352,18 +323,20 @@ class AnalysisService:
             return err_resp("analysis not found", "analysis_404", 404)
 
         try:
-            analysis_dir = (
-                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
-            )
-            logging.info(f"checking if meta exists {analysis_dir}/meta.json")
+            # analysis_dir = (
+            #     f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
+            # )
+            analysis_dir = analysis.results_path
 
             if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
+                logging.info(f"checking if meta exists {analysis_dir}/meta.json? True")
                 with current_app.config["FS_OBJ"].open(
                     os.path.relpath(f"{analysis_dir}/meta.json")
                 ) as f:
                     data = f.read()
                 return send_file(BytesIO(data), mimetype="application/json")
             else:
+                logging.info(f"checking if meta exists {analysis_dir}/meta.json? False")
                 return err_resp("no output yet", "analysis_204", 204)
         except Exception as error:
             logger.error(error)
@@ -380,10 +353,10 @@ class AnalysisService:
             return err_resp("analysis not found", "analysis_404", 404)
 
         try:
-            analysis_dir = (
-                f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
-            )
-
+            # analysis_dir = (
+            #     f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
+            # )
+            analysis_dir = analysis.results_path
             full_name = f"{analysis_dir}/{file_name}.{ext}"
             logging.info(f"checking if file exists {full_name}")
             if current_app.config["FS_OBJ"].isfile(full_name):
@@ -412,6 +385,12 @@ class AnalysisService:
                             BytesIO(img),
                             mimetype="image/jpg",
                         )
+                elif ext == "json":
+                    with current_app.config["FS_OBJ"].open(
+                        os.path.relpath(f"{analysis_dir}/{file_name}.{ext}")
+                    ) as f:
+                        data = f.read()
+                    return send_file(BytesIO(data), mimetype="application/json")
                 else:
                     return err_resp("not implemented", "analysis_501", 501)
 
