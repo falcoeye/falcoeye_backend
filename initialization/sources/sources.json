@@ -1,0 +1,35 @@
+[
+    {
+        "name": "New York Times Square",
+        "streaming_type": "StreamingServer",
+        "latitude": 40.75809276090073,
+        "longitude": -73.98789127717704,
+        "url": "https://www.youtube.com/watch?v=1-iS7LArMPA",
+        "thumbnail": "timesquare.jpg"
+    },
+    {
+        "name": "KFCA (KSA Outbound)",
+        "streaming_type": "StreamingServer",
+        "latitude": 26.167395,
+        "longitude": 50.404611,
+        "url": "https://addy.gooick.com/sd/main/output.m3u8",
+        "thumbnail": "kfca.jpeg"
+    },
+    {
+        "name": "LIVE BIRDS from SOUTH AFRICA!",
+        "streaming_type": "StreamingServer",
+        "latitude": -25.734287,
+        "longitude": 28.190950,
+        "url": "https://www.youtube.com/watch?v=9ND2xiRyAgY",
+        "thumbnail": "LIVE BIRDS.jpg"
+    },
+    {
+        "name": "Harbour Village Bonaire Coral Reef",
+        "streaming_type": "StreamingServer",
+        "latitude": 12.163611,
+        "longitude": -68.286420,
+        "url": "https://www.youtube.com/watch?v=seEkN2AFhBw",
+        "thumbnail": "Harbour_Village.jpg"
+    }
+
+]

@@ -14,6 +14,7 @@ streaming_password = os.getenv("STREAMING_PASSWORD")
 workflow_user = os.getenv("WORKFLOW_USER")
 workflow_password = os.getenv("WORKFLOW_PASSWORD")
 
+
 users = [
     (
         streaming_user.strip(),
@@ -22,6 +23,7 @@ users = [
         "streaming account",
     ),
     (workflow_user.strip(), workflow_password.strip(), "workflow", "workflow account"),
+    ("facleye-test@falcoeye.io", "falcoeye-test", "test", "test account"),
 ]
 
 print(os.getenv("FLASK_CONFIG"))

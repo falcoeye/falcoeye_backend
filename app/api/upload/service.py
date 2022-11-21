@@ -80,17 +80,6 @@ class UploadService:
             logging.info(f"generating 15 minutes signed url for {bucket} {blob_path}")
             signed_url = generate_download_signed_url_v4(bucket, blob_path, 15)
             resp["temporary_path"] = signed_url
-            # TODO: clean this // mess
-            video_path = registry_object.capture_path.replace("//", "/")
-            thumbnail_path = f"{os.path.splitext(video_path)[0]}_260.jpg"
-
-            logging.info(
-                f"Generating thumbnail from {signed_url} and store it in {thumbnail_path}"
-            )
-            try:
-                streamer_resp = Streamer.generate_thumbnail(signed_url, thumbnail_path)
-            except Exception as e:
-                pass
 
             logging.info(f'generated link: {resp["temporary_path"]}')
             change_status(str(registry_object.id), "SUCCEEDED")

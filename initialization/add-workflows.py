@@ -48,6 +48,12 @@ if resp.status_code != 204:
     s_workflows = resp.json()["workflow"]
 else:
     s_workflows = []
+
+resp = requests.get(f"{URL}/api/workflow/?per_page=100&inline=true", headers=headers)
+if resp.status_code != 204:
+    s_workflows += resp.json()["workflow"]
+
+
 logging.info(s_workflows)
 
 

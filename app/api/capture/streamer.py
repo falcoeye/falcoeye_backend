@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import requests
@@ -74,6 +75,7 @@ class Streamer:
             "capture_type": "thumbnail",
         }
         capture_file = f"{output_dir}/capture.json"
+        logging.info(f"Saving capture thumbnail file in {capture_file}")
         with open(capture_file, "w") as f:
             f.write(json.dumps(data))
 

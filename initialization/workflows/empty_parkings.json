@@ -262,6 +262,11 @@
                 "prefix": "$prefix"
             },
             {
+                "name": "finalizer",
+				"type": "Finalizer",
+				"prefix": "$prefix"
+            },
+            {
                 "name": "sequence_runner",
                 "type": "SequenceRunner",
                 "frequency": "$frequency",
@@ -269,7 +274,8 @@
                     "falcoeye_detection",
                     "size_filter",
                     "missing_cars",
-                    "csv_outputter"
+                    "csv_outputter",
+                    "finalizer"
                 ]
             }
         ],

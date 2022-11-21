@@ -1,0 +1,56 @@
+[
+    {
+        "tags": "Arabian-Angelfish,fish,kaust",
+        "note": "Multiple videos combined for Arabian Angelfish in KAUST area",
+        "filename":"arabian_angelfish.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "coffeeshop,bar area",
+        "note": "Top view of the bar area in a coffeeshop",
+        "filename":"coffeeshop_brew.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "garbage,waste",
+        "note": "Multiple frames contain waste",
+        "filename":"garbage.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "KFCA,traffic,causway,Bahrain,Dammam",
+        "note": "Shows the traffic of the Saudi inbound at KFCA",
+        "filename":"jesr.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "resturant,tables,dining",
+        "note": "Top view of the dining area in a resturant",
+        "filename":"sketchen.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "lutjanis,fish,kaust",
+        "note": "Short clip shows bunch of Lutjanis fish",
+        "filename":"lutjanis_short.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "parking,cars",
+        "note": "Top-side view of a parking area",
+        "filename":"parking_lot.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "Haram,Mekkah,Holy mosque",
+        "note": "Different views of the holy mosque of Mekkah",
+        "filename":"haram.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "fish,kaust,eagle ray",
+        "note": "Short clip where eagle ray appears in KAUST area",
+        "filename":"eagle_ray.mp4",
+        "camera_id": null
+    }
+]

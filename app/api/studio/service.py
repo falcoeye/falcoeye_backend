@@ -7,6 +7,7 @@ from sqlalchemy import desc
 
 from app import db
 from app.api import registry
+from app.api.capture.streamer import Streamer
 from app.dbmodels.studio import Image as Image
 from app.dbmodels.studio import Media as Media
 from app.dbmodels.studio import Video as Video
@@ -307,12 +308,19 @@ class StudioService:
                     registry_item.capture_path,
                     target_file,
                 )
-                for s in [75, 120, 260, 400]:
-                    thmb_img = registry_item.capture_path.replace(
-                        f".{extension}", f"_{s}.jpg"
+                for s in [260]:
+                    thmb_img = target_file.replace(
+                        f"_original.{extension}", f"_{s}.jpg"
                     )
-                    if exists(thmb_img):
-                        move(thmb_img, f"{video_dir}/video_{s}.jpg")
+                    logging.info(
+                        f"Generating thumbnail from {target_file} and store it in {thmb_img}"
+                    )
+                    try:
+                        streamer_resp = Streamer.generate_thumbnail(
+                            target_file, thmb_img
+                        )
+                    except Exception as e:
+                        pass
 
                 logger.info("Moving video succeeded")
             except Exception as error:
