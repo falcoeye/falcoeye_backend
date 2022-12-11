@@ -23,15 +23,16 @@ users = [
         "streaming account",
     ),
     (workflow_user.strip(), workflow_password.strip(), "workflow", "workflow account"),
-    ("facleye-test@falcoeye.io", "falcoeye-test", "test", "test account"),
+    ("falcoeye-test@falcoeye.io", "falcoeye-test", "falcoeye-test", "test account"),
 ]
 
 print(os.getenv("FLASK_CONFIG"))
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 
 with app.app_context():
-    print("registering service users...")
+
     for user in users:
+        print(f"registering service users... { user[0]}")
         payload = {
             "email": user[0],
             "password": user[1],

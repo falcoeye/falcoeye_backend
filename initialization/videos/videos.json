@@ -52,5 +52,23 @@
         "note": "Short clip where eagle ray appears in KAUST area",
         "filename":"eagle_ray.mp4",
         "camera_id": null
+    },
+    {
+        "tags": "boardwalk,running,walking,pedestrians",
+        "note": "Boardwalk in ocean city 1",
+        "filename":"ocean_city_1.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "boardwalk,running,walking,pedestrians",
+        "note": "Boardwalk in ocean city 2",
+        "filename":"ocean_city_2.mp4",
+        "camera_id": null
+    },
+    {
+        "tags": "boardwalk,running,walking,pedestrians",
+        "note": "Boardwalk in Venice beach",
+        "filename":"venice_beach.mp4",
+        "camera_id": null
     }
 ]

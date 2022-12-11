@@ -45,7 +45,7 @@ headers = {
 }
 
 resp = requests.get(f"{URL}/api/camera/?per_page=100", headers=headers)
-if resp.status_code != 204:
+if resp.status_code != 204 and "camera" in resp.json():
     s_sources = resp.json()["camera"]
 else:
     s_sources = []

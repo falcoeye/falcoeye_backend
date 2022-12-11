@@ -30,6 +30,40 @@
         "longitude": -68.286420,
         "url": "https://www.youtube.com/watch?v=seEkN2AFhBw",
         "thumbnail": "Harbour_Village.jpg"
+    },
+    {
+        "name":"Venice Beach LIVE Los Angeles Stream",
+        "streaming_type": "StreamingServer",
+        "latitude": 33.984865,
+        "longitude": -118.474590,
+        "url": "https://www.youtube.com/watch?v=vvOjJoSEFM0",
+        "thumbnail": "Venice.jpg"
+    },
+    {
+        "name":"Peg Leg Petes",
+        "streaming_type": "StreamingServer",
+        "latitude": 30.327913,
+        "longitude": -87.164424,
+        "url": "https://2-fss-2.streamhoster.com/pl_126/204710-1899958-1/chunklist.m3u8",
+        "thumbnail": "Peg.jpg"
+    },
+    {
+        "name":"Ocean City Inlet Parking Lot Cam",
+        "streaming_type": "StreamingServer",
+        "latitude": 38.321297,
+        "longitude": -75.097219,
+        "url": "https://s48.ipcamlive.com/streams/30aitkrqvtroz6wsk/stream.m3u8",
+        "thumbnail": "oceancity.jpeg"
+    },
+    {
+        "name":"Deerfield Beach",
+        "streaming_type": "StreamingServer",
+        "latitude": 26.289121,
+        "longitude": -80.080681,
+        "url": "https://www.youtube.com/watch?v=-HAi_5IIAYg",
+        "thumbnail": "deerfield.jpeg"
     }
+
+
 
 ]

@@ -63,18 +63,18 @@ with open(f"{basedir}/videos/videos.json") as f:
 
 logging.info("Deleting bad videos")
 for sv in s_videos:
-    # found = False
-    # for vid in videos:
-    #     if sv["note"] == vid["note"]:
-    #         found = True
-    #         break
-    # if not found:
-    #     logging.info(f"Deleting {sv['id']}")
+    found = False
+    for vid in videos:
+        if sv["note"] == vid["note"]:
+            found = True
+            break
+    if not found:
+        logging.info(f"Deleting {sv['id']}")
     resp = requests.delete(f"{URL}/api/media/video/{sv['id']}", headers=headers)
     logging.info(resp.json())
 
 for sv in videos:
-    logging.info(f"Addings {sv['note']}")
+    logging.info(f"Adding {sv['note']}")
     data = {"tags": sv["tags"], "note": sv["note"], "camera_id": sv["camera_id"]}
 
     done = False

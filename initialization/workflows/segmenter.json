@@ -332,7 +332,8 @@
             },
             {
                 "name": "finalizer",
-                "type": "Finalizer"
+                "type": "Finalizer",
+                "prefix": "$prefix"
             },
             {
                 "name": "sequence_runner",
