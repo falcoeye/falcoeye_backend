@@ -1,6 +1,6 @@
 {
-    "name": "Human Pose Estimator (gRPC)",
-    "usedfor": "Estimating human pose in a boardwalk or sporting scenary",
+    "name": "Human Pose Estimator (gRPC) with Tracking",
+    "usedfor": "Estimating human pose in a boardwalk or sporting scenary with tracking",
     "consideration": "- Depending on the interval, a person might not be observed\n- A person must be within close proximity\n- Weather visibility might affect the results ",
     "assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",
     "results_description": "Video with pose estimation",
@@ -90,7 +90,6 @@
                 "ntasks": "$ntasks",
                 "max_send_message_length": 6230000
             },
-
             {
                 "name": "falcoeye_hpe",
                 "type": "FalcoeyeTFOpenPoseNode"
@@ -100,8 +99,20 @@
                 "type": "HPEDrawer"
             },
             {
+                "name": "reid_model",
+                "type": "TorchModel",
+                "model_name": "reid",
+                "version": 1,
+                "protocol": "gRPC"
+            },
+            {
                 "name": "sequence_maintainer",
                 "type": "SortedSequence"
+            },
+            {
+                "name": "deep_sort_tracker",
+                "type": "DeepSortTracker",
+                "feature_extractor_node":"reid_model"
             },
             {
                 "name": "video_writer",
@@ -120,6 +131,7 @@
                 "nodes": [
                     "falcoeye_hpe",
                     "sequence_maintainer",
+                    "deep_sort_tracker",
                     "hpe_drawer",
                     "video_writer",
                     "finalizer"
@@ -130,7 +142,8 @@
             ["stream_source","sequence_runner_resizer"],
             ["resizer","tfpose_model_thread"],
             ["falcoeye_hpe","sequence_maintainer"],
-            ["sequence_maintainer","hpe_drawer"],
+            ["sequence_maintainer","deep_sort_tracker"],
+            ["deep_sort_tracker","hpe_drawer"],
             ["hpe_drawer","video_writer"],
             ["tfpose_model_thread","sequence_runner"]
         ],
