@@ -33,7 +33,7 @@ def get_base64img(imgfile):
     return data.decode("utf-8")
 
 
-URL = "http://localhost:8000"
+URL = "http://localhost:3000"
 
 test_user = "falcoeye-test@falcoeye.io"
 test_password = "falcoeye-test"

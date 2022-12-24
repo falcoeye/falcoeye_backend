@@ -14,7 +14,7 @@ logging.basicConfig(
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-URL = "http://localhost:8000"
+URL = "http://localhost:3000"
 # URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
 
 workflow_user = os.getenv("WORKFLOW_USER").strip()

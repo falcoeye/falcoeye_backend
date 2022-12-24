@@ -15,7 +15,7 @@ logging.basicConfig(
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
-URL = "http://localhost:8000"
+URL = "http://localhost:3000"
 
 user = os.getenv("FALCOEYE_USER").strip()
 password = os.getenv("FALCOEYE_PASSWORD").strip()

@@ -22,4 +22,4 @@
 #echo "Running add-workflow script"
 #python add-workflows.py
 
-gunicorn -b 0.0.0.0:8000 falcoeye:app
+gunicorn -b 0.0.0.0:3000 falcoeye:app

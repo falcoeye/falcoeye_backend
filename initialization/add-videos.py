@@ -38,7 +38,7 @@ def update(vidid, data):
     logging.info(resp.json())
 
 
-URL = "http://localhost:8000"
+URL = "http://localhost:3000"
 
 test_user = "falcoeye-test@falcoeye.io"
 test_password = "falcoeye-test"

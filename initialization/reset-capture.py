@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 
 URL = "https://falcoeye-backend-xbjr6s7buq-uc.a.run.app"
-URL = "http://localhost:8000"
+URL = "http://localhost:3000"
 workflow_user = os.getenv("WORKFLOW_USER").strip()
 workflow_password = os.getenv("WORKFLOW_PASSWORD").strip()
 payload = {"email": workflow_user, "password": workflow_password}
