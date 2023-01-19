@@ -1,5 +1,5 @@
 {
-	"name": "Table occupancy",
+	"name": "Falco Table Monitor",
 	"usedfor": "Monitoring table occupancy over several time intervals to compare the crowd over daytime, days, weeks, months and seasons.",
 	"consideration": "- A single person can be counted more than once\n- Depending on the interval, person might not be observed and counted\n- person must be within close proximity\n- Underwater visibility might affect the results ",
 	"assumption": "For the stream, depending on the interval, the sampling rate is going to be a frame per second or slower.",

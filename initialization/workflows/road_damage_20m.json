@@ -1,0 +1,161 @@
+{
+    "name": "Road Damage Detector (20M)",
+    "usedfor": "Build a map of road cracks",
+    "consideration": "- A single crack can be counted more than once\n- Depending on the interval, crack might not be observed and counted\n- crack must be within close proximity",
+    "assumption": "Videos are captured during the data; GPS info is in the frames",
+    "results_description": "A csv containing GIS information and cracks volume and length",
+    "structure": {
+        "feeds": {
+            "sources": [
+                "video"
+            ],
+            "params":[
+                {
+                    "name": "filename",
+                    "type": "string",
+                    "disc": "filepath for video in case of streaming from video file",
+                    "source": "infered",
+                    "default": null
+                },
+                {
+                    "name": "sample_every",
+                    "type": "int",
+                    "disc": "Sample every (seconds for stream and frame for video)",
+                    "source": "user",
+                    "default": 60
+                },
+                {
+                    "name": "min_score_thresh",
+                    "type": "float",
+                    "disc": "Minimum detection confidance ([0-1])",
+                    "source": "user",
+                    "default": 0.30
+                },
+                {
+                    "name": "max_boxes",
+                    "type": "int",
+                    "disc": "Maximum number of detections ([0-100])",
+                    "source": "user",
+                    "default": 100
+                },
+                {
+                    "name": "length",
+                    "type": "float",
+                    "disc": "Length of streaming (seconds, -1 for entire video)",
+                    "source": "user",
+                    "default": -1
+                },
+                {
+                    "name": "gps_info",
+                    "type": "string",
+                    "disc": "Slice of image containing GPS information",
+                    "source": "user",
+                    "default": "1570,1853,2382,1950"
+                },
+                {
+                    "name": "frequency",
+                    "type": "int",
+                    "disc": "Output frequency (every n frame)",
+                    "source": "user",
+                    "default": 3
+                },
+                {
+                    "name": "ntasks",
+                    "type": "int",
+                    "disc": "Number of tcp process at a time",
+                    "source": "user",
+                    "default": 4
+                }
+            ]
+        },
+        "nodes": [
+            {
+                "name": "stream_source",
+                "type": "VideoFileSource",
+                "filename": "$filename",
+                "length": "$length",
+                "sample_every": "$sample_every"
+            },
+            {
+                "name": "roaddamage_model",
+                "type": "TorchModel",
+                "model_name": "roaddamage-20m",
+                "version": 1,
+                "protocol": "gRPC"
+            },
+            {
+                "name": "roaddamage_thread",
+                "type": "ConcurrentTorchgRPCTasksThreadWrapper",
+                "node": "roaddamage_model",
+                "ntasks": "$ntasks"
+            },
+            {
+                "name": "falcoeye_detection",
+                "type": "FalcoeyeTorchDetectionNode",
+                "labelmap": {
+                    "1": "D0",
+                    "2": "D10",
+                    "3": "D20",
+                    "4": "D40"
+                },
+                "min_score_thresh": "$min_score_thresh",
+                "max_boxes": "$max_boxes"
+            },
+            {
+                "name": "gps_reader",
+                "type": "FalcoeyeOCRNode",
+                "ocr_slice": "$gps_info",
+                "store_in": "gps_info"
+            },
+            {
+                "name": "gps_interpreter",
+                "type": "FalcoeyeGPSInterpreterNode",
+                "get_from": "gps_info"
+            },
+            {
+                "name": "boundingbox_info",
+                "type": "BBoxInfo",
+                "operations": ["diameter","normalized_diameter"],
+                "store_in": ["diameter","normalized_diameter"]
+            },
+            {
+                "name": "csv_outputter",
+                "type": "TableWriter",
+                "columns": ["latitude","longitude","diameter","normalized_diameter"],
+                "prefix": "$prefix"
+            },
+            {
+                "name": "finalizer",
+                "type": "Finalizer",
+                "prefix": "$prefix"
+            },
+            {
+                "name": "sequence_runner",
+                "type": "SequenceRunner",
+                "frequency": "$frequency",
+                "nodes": [
+                    "falcoeye_detection",
+                    "gps_reader",
+                    "gps_interpreter",
+                    "boundingbox_info",
+                    "csv_outputter",
+                    "finalizer"
+                ]
+            }
+        ],
+        "edges": [
+            ["stream_source","roaddamage_thread"],
+            ["falcoeye_detection","gps_reader"],
+            ["gps_reader","gps_interpreter"],
+            ["gps_interpreter","boundingbox_info"],
+            ["boundingbox_info","csv_outputter"],
+            ["roaddamage_thread","sequence_runner"]
+        ],
+        "starters":["stream_source"],
+        "run_order": [
+            "sequence_runner",
+            "roaddamage_thread",
+            "stream_source"
+        ]
+    }
+}

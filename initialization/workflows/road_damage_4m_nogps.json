@@ -1,0 +1,144 @@
+{
+    "name": "Road Damage Detector (4M) No GPS",
+    "usedfor": "Build a map of road cracks",
+    "consideration": "- A single crack can be counted more than once\n- Depending on the interval, crack might not be observed and counted\n- crack must be within close proximity",
+    "assumption": "Videos are captured during the data; GPS info is in the frames",
+    "results_description": "A csv containing GIS information and cracks volume and length",
+    "structure": {
+        "feeds": {
+            "sources": [
+                "video"
+            ],
+            "params":[
+                {
+                    "name": "filename",
+                    "type": "string",
+                    "disc": "filepath for video in case of streaming from video file",
+                    "source": "infered",
+                    "default": null
+                },
+                {
+                    "name": "sample_every",
+                    "type": "int",
+                    "disc": "Sample every (seconds for stream and frame for video)",
+                    "source": "user",
+                    "default": 60
+                },
+                {
+                    "name": "min_score_thresh",
+                    "type": "float",
+                    "disc": "Minimum detection confidance ([0-1])",
+                    "source": "user",
+                    "default": 0.30
+                },
+                {
+                    "name": "max_boxes",
+                    "type": "int",
+                    "disc": "Maximum number of detections ([0-100])",
+                    "source": "user",
+                    "default": 100
+                },
+                {
+                    "name": "length",
+                    "type": "float",
+                    "disc": "Length of streaming (seconds, -1 for entire video)",
+                    "source": "user",
+                    "default": -1
+                },
+                {
+                    "name": "frequency",
+                    "type": "int",
+                    "disc": "Output frequency (every n frame)",
+                    "source": "user",
+                    "default": 3
+                },
+                {
+                    "name": "ntasks",
+                    "type": "int",
+                    "disc": "Number of tcp process at a time",
+                    "source": "user",
+                    "default": 4
+                }
+            ]
+        },
+        "nodes": [
+            {
+                "name": "stream_source",
+                "type": "VideoFileSource",
+                "filename": "$filename",
+                "length": "$length",
+                "sample_every": "$sample_every"
+            },
+            {
+                "name": "roaddamage_model",
+                "type": "TorchModel",
+                "model_name": "roaddamage-4m",
+                "version": 1,
+                "protocol": "gRPC"
+            },
+            {
+                "name": "roaddamage_thread",
+                "type": "ConcurrentTorchgRPCTasksThreadWrapper",
+                "node": "roaddamage_model",
+                "ntasks": "$ntasks"
+            },
+            {
+                "name": "falcoeye_detection",
+                "type": "FalcoeyeTorchDetectionNode",
+                "labelmap": {
+                    "1": "Longitudinal Crack",
+                    "2": "Transverse Crack",
+                    "3": "Alligator Crack",
+                    "4": "Pothole"
+                },
+                "min_score_thresh": "$min_score_thresh",
+                "max_boxes": "$max_boxes",
+                "width_height_box": true
+            },
+            {
+				"name":"boundingbox_drawer",
+				"type": "BoundingBoxDrawer",
+				"cmap": {
+					"Longitudinal Crack": [0,255,255],
+                    "Transverse Crack": [0,0,255],
+                    "Alligator Crack": [255,120,255],
+                    "Pothole": [255,0,255]
+                },
+                "translate": false
+			},
+            {
+                "name": "video_writer",
+                "type": "ActiveVideoWriter",
+                "prefix": "$prefix"
+            },
+            {
+                "name": "finalizer",
+                "type": "Finalizer",
+                "prefix": "$prefix"
+            },
+            {
+                "name": "sequence_runner",
+                "type": "SequenceRunner",
+                "frequency": "$frequency",
+                "nodes": [
+                    "falcoeye_detection",
+                    "boundingbox_drawer",
+                    "video_writer",
+                    "finalizer"
+                ]
+            }
+        ],
+        "edges": [
+            ["stream_source","roaddamage_thread"],
+            ["falcoeye_detection","boundingbox_drawer"],
+            ["boundingbox_drawer","video_writer"],
+            ["roaddamage_thread","sequence_runner"]
+        ],
+        "starters":["stream_source"],
+        "run_order": [
+            "sequence_runner",
+            "roaddamage_thread",
+            "stream_source"
+        ]
+    }
+}
