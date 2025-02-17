@@ -323,20 +323,22 @@ class AnalysisService:
             return err_resp("analysis not found", "analysis_404", 404)
 
         try:
-            # analysis_dir = (
-            #     f'{current_app.config["USER_ASSETS"]}/{user_id}/analysis/{analysis_id}'
-            # )
             analysis_dir = analysis.results_path
-
-            if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
-                logging.info(f"checking if meta exists {analysis_dir}/meta.json? True")
-                with current_app.config["FS_OBJ"].open(
-                    os.path.relpath(f"{analysis_dir}/meta.json")
-                ) as f:
+            # list all meta.json files
+            meta_files = [
+                f
+                for f in current_app.config["FS_OBJ"].ls(analysis_dir)
+                if f.endswith("meta.json")
+            ]
+            # TODO: support multiple meta files handling in the frontend
+            #if current_app.config["FS_OBJ"].isfile(f"{analysis_dir}/meta.json"):
+            if len(meta_files) > 0:
+                meta_files.sort(key=lambda x: current_app.config["FS_OBJ"].info(x)['mtime'], reverse=True)
+                selected_meta = meta_files[0]
+                with current_app.config["FS_OBJ"].open(selected_meta) as f:
                     data = f.read()
                 return send_file(BytesIO(data), mimetype="application/json")
             else:
-                logging.info(f"checking if meta exists {analysis_dir}/meta.json? False")
                 return err_resp("no output yet", "analysis_204", 204)
         except Exception as error:
             logger.error(error)

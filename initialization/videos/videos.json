@@ -72,12 +72,6 @@
         "camera_id": null
     },
     {
-        "tags": "drive,dashcam,riyadh,road",
-        "note": "Drive over Riyadh streat in Aramco",
-        "filename":"riyadh_st.mp4",
-        "camera_id": null
-    },
-    {
         "tags": "drive,dashcam,indestrial road",
         "note": "Drive over bad streat in indestrial city",
         "filename":"roaddamage.mp4",

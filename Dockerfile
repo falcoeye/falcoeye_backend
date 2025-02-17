@@ -9,7 +9,7 @@ COPY requirements.txt ./
 RUN apt-get update && \
     apt-get install -y vim &&\
     apt-get install -y git && \
-    apt-get -y install gcc musl-dev libffi-dev libpq-dev netcat && \
+    apt-get -y install gcc musl-dev libffi-dev libpq-dev netcat-traditional && \
     apt-get clean && \
     pip3 install -U pip && \
     pip3 install --no-cache-dir -r requirements.txt
